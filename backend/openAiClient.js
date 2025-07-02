@@ -144,6 +144,8 @@ CRITICAL INSTRUCTIONS:
 3. DO NOT change styling, colors, or layout
 4. DO NOT add or remove HTML elements
 5. Keep all CDN links and external dependencies exactly as they are
+6. DO NOT wrap the response in markdown code blocks or any other formatting
+7. DO NOT use triple backticks or html code block tags - return ONLY the raw HTML content
 
 Data Integration Requirements:
 - Replace template titles with topic from user data
@@ -153,14 +155,14 @@ Data Integration Requirements:
 - Update source information if provided
 - Ensure data consistency (percentages sum correctly)
 
-Return ONLY the complete HTML document with user data integrated into the existing template structure.`;
+Return ONLY the complete HTML document with user data integrated into the existing template structure. No markdown formatting, no code blocks, just raw HTML.`;
 
         const response = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
                 {
                     role: "system",
-                    content: "You are an expert data integrator. Your ONLY job is to replace data content within the provided HTML template. NEVER modify HTML structure, CSS, or JavaScript. Only update text content, numbers, and data arrays. Preserve the exact template design and functionality."
+                    content: "You are an expert data integrator. Your ONLY job is to replace data content within the provided HTML template. NEVER modify HTML structure, CSS, or JavaScript. Only update text content, numbers, and data arrays. Preserve the exact template design and functionality. CRITICAL: Return ONLY raw HTML content - NO markdown formatting, NO code blocks, NO triple backticks or html tags. Just return the plain HTML document."
                 },
                 {
                     role: "user",
@@ -170,11 +172,30 @@ Return ONLY the complete HTML document with user data integrated into the existi
             temperature: 0.7,
         });
 
-        return response.choices[0].message.content;
+        let htmlContent = response.choices[0].message.content;
+        
+        // Clean up any markdown code blocks that might still appear
+        htmlContent = cleanHtmlContent(htmlContent);
+
+        return htmlContent;
     } catch (error) {
         console.error('Error generating infographic:', error);
         throw error;
     }
+}
+
+// Function to clean up markdown code blocks from HTML content
+function cleanHtmlContent(content) {
+    // Remove markdown code blocks
+    content = content.replace(/```html\s*\n?/gi, '');
+    content = content.replace(/```\s*$/g, '');
+    content = content.replace(/^\s*```html\s*/gi, '');
+    content = content.replace(/\s*```\s*$/g, '');
+    
+    // Ensure content starts with <!DOCTYPE or <html
+    content = content.trim();
+    
+    return content;
 }
 
 module.exports = {
