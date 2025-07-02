@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Gaming Stats</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@300;400;500;600;700;800;900&family=Audiowide:wght@400&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        .infographic {
+            width: 100%; min-height: 1080px;
+            background: linear-gradient(45deg, #1a0033, #330066, #660099, #9900cc, #cc00ff);
+            background-size: 400% 400%; animation: retroGlow 10s ease infinite;
+            position: relative; font-family: 'Orbitron', monospace; overflow: hidden;
+            padding: 60px; display: flex; flex-direction: column; align-items: center;
+        }
+        
+        @keyframes retroGlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .pixel-element {
+            position: absolute; background: #00ff00; animation: pixelBlink 1.5s infinite;
+        }
+        
+        .pixel-element:nth-child(1) { top: 15%; left: 10%; width: 8px; height: 8px; animation-delay: 0s; }
+        .pixel-element:nth-child(2) { top: 25%; right: 15%; width: 6px; height: 6px; animation-delay: 0.3s; }
+        .pixel-element:nth-child(3) { bottom: 30%; left: 20%; width: 10px; height: 10px; animation-delay: 0.6s; }
+        .pixel-element:nth-child(4) { bottom: 15%; right: 25%; width: 8px; height: 8px; animation-delay: 0.9s; }
+        
+        @keyframes pixelBlink {
+            0%, 50% { opacity: 1; box-shadow: 0 0 10px currentColor; }
+            51%, 100% { opacity: 0.3; box-shadow: none; }
+        }
+        
+        .scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;
+            background: linear-gradient(transparent 50%, rgba(0, 255, 0, 0.03) 50%);
+            background-size: 100% 4px; animation: scan 0.1s linear infinite;
+        }
+        
+        @keyframes scan { 0% { transform: translateY(0); } 100% { transform: translateY(4px); } }
+        
+        .header { text-align: center; margin-bottom: 60px; position: relative; z-index: 10; }
+        
+        .main-title {
+            font-size: 54px; font-weight: 400; color: #00ff00; margin-bottom: 20px;
+            font-family: 'Press Start 2P', cursive; text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+            animation: titleGlitch 3s infinite;
+        }
+        
+        @keyframes titleGlitch {
+            0%, 90%, 100% { transform: translate(0); }
+            10% { transform: translate(-2px, 2px); }
+            20% { transform: translate(2px, -2px); }
+            30% { transform: translate(-2px, -2px); }
+        }
+        
+        .subtitle {
+            font-size: 20px; color: #ff00ff; font-weight: 700; font-family: 'Audiowide', cursive;
+            text-shadow: 0 0 8px #ff00ff; text-transform: uppercase; letter-spacing: 4px;
+        }
+        
+        /* Radial Layout */
+        .radial-container {
+            position: relative; width: 600px; height: 600px; margin: 0 auto 60px;
+            z-index: 10;
+        }
+        
+        /* Center Core */
+        .center-core {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 200px; height: 200px; border-radius: 50%;
+            background: linear-gradient(45deg, #00ff00, #ffff00, #ff00ff);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; animation: coreRotate 8s linear infinite;
+        }
+        
+        @keyframes coreRotate { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+        
+        .core-value {
+            font-size: 48px; font-weight: 900; color: #000000; font-family: 'Press Start 2P', cursive;
+            margin-bottom: 10px; line-height: 0.9;
+        }
+        
+        .core-label {
+            font-size: 12px; color: #000000; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; font-family: 'Audiowide', cursive;
+        }
+        
+        /* Orbital Stats */
+        .orbital-stat {
+            position: absolute; width: 120px; height: 120px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; animation: orbit 12s linear infinite;
+        }
+        
+        .orbital-stat:nth-child(2) { top: 0; left: 50%; transform: translateX(-50%); animation-delay: 0s; }
+        .orbital-stat:nth-child(3) { top: 25%; right: 0; animation-delay: -3s; }
+        .orbital-stat:nth-child(4) { bottom: 25%; right: 0; animation-delay: -6s; }
+        .orbital-stat:nth-child(5) { bottom: 0; left: 50%; transform: translateX(-50%); animation-delay: -9s; }
+        .orbital-stat:nth-child(6) { bottom: 25%; left: 0; animation-delay: -1.5s; }
+        .orbital-stat:nth-child(7) { top: 25%; left: 0; animation-delay: -4.5s; }
+        
+        @keyframes orbit {
+            from { transform: rotate(0deg) translateX(240px) rotate(0deg); }
+            to { transform: rotate(360deg) translateX(240px) rotate(-360deg); }
+        }
+        
+        .orbital-icon {
+            font-size: 24px; margin-bottom: 8px; text-shadow: 0 0 8px currentColor;
+        }
+        
+        .orbital-value {
+            font-size: 18px; color: #00ffff; font-weight: 800; margin-bottom: 4px;
+            font-family: 'Press Start 2P', cursive; text-shadow: 0 0 8px #00ffff;
+        }
+        
+        .orbital-label {
+            font-size: 8px; color: #ffff00; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 1px; font-family: 'Audiowide', cursive; text-shadow: 0 0 4px #ffff00;
+        }
+        
+        /* Bottom Progress Bars */
+        .progress-stack {
+            width: 100%; max-width: 800px; margin: 0 auto; z-index: 10; position: relative;
+        }
+        
+        .stack-item {
+            display: flex; align-items: center; margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 25px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .stack-icon {
+            font-size: 36px; color: #ff6600; margin-right: 30px; text-shadow: 0 0 12px #ff6600;
+            animation: stackIconPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes stackIconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .stack-content { flex: 1; }
+        
+        .stack-title {
+            font-size: 20px; color: #00ff00; font-weight: 700; margin-bottom: 8px;
+            font-family: 'Audiowide', cursive; text-shadow: 0 0 8px #00ff00;
+        }
+        
+        .stack-percentage {
+            font-size: 32px; color: #ff00ff; font-weight: 900; font-family: 'Press Start 2P', cursive;
+            text-shadow: 0 0 10px #ff00ff; margin-bottom: 15px;
+        }
+        
+        .stack-track {
+            height: 25px; width: 100%; background: rgba(255, 255, 255, 0.1); border-radius: 12px;
+            position: relative; overflow: hidden; box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .stack-bar {
+            height: 100%; background: linear-gradient(90deg, #00ff00, #ffff00, #ff6600, #ff00ff);
+            width: var(--bar-width); animation: stackFill 3s ease-out; position: relative;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.6); border-radius: 12px;
+        }
+        
+        @keyframes stackFill { from { width: 0; } to { width: var(--bar-width); } }
+        
+        .stack-bar::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+            animation: stackShine 2s linear infinite;
+        }
+        
+        @keyframes stackShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic">
+        <div class="pixel-element"></div>
+        <div class="pixel-element"></div>
+        <div class="pixel-element"></div>
+        <div class="pixel-element"></div>
+        <div class="scanlines"></div>
+        
+        <div class="header">
+            <h1 class="main-title">🕹️ GAME STATS</h1>
+            <p class="subtitle">LEVEL UP ANALYTICS</p>
+        </div>
+        
+        <!-- Radial Stats Layout -->
+        <div class="radial-container">
+            <!-- Center Core -->
+            <div class="center-core">
+                <div class="core-value">LV 99</div>
+                <div class="core-label">Player Level</div>
+            </div>
+            
+            <!-- Orbital Stats -->
+            <div class="orbital-stat">
+                <div class="orbital-icon">🏆</div>
+                <div class="orbital-value">999K</div>
+                <div class="orbital-label">Score</div>
+            </div>
+            
+            <div class="orbital-stat">
+                <div class="orbital-icon">👾</div>
+                <div class="orbital-value">156</div>
+                <div class="orbital-label">Levels</div>
+            </div>
+            
+            <div class="orbital-stat">
+                <div class="orbital-icon">💎</div>
+                <div class="orbital-value">2847</div>
+                <div class="orbital-label">Gems</div>
+            </div>
+            
+            <div class="orbital-stat">
+                <div class="orbital-icon">🌟</div>
+                <div class="orbital-value">47</div>
+                <div class="orbital-label">Stars</div>
+            </div>
+            
+            <div class="orbital-stat">
+                <div class="orbital-icon">⏱️</div>
+                <div class="orbital-value">24:15</div>
+                <div class="orbital-label">Best</div>
+            </div>
+            
+            <div class="orbital-stat">
+                <div class="orbital-icon">🔥</div>
+                <div class="orbital-value">38</div>
+                <div class="orbital-label">Streak</div>
+            </div>
+        </div>
+        
+        <!-- Bottom Progress Stack -->
+        <div class="progress-stack">
+            <div class="stack-item">
+                <div class="stack-icon">⚡</div>
+                <div class="stack-content">
+                    <div class="stack-title">POWER LEVEL</div>
+                    <div class="stack-percentage">89%</div>
+                    <div class="stack-track">
+                        <div class="stack-bar" style="--bar-width: 89%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stack-item">
+                <div class="stack-icon">🎯</div>
+                <div class="stack-content">
+                    <div class="stack-title">ACCURACY</div>
+                    <div class="stack-percentage">94%</div>
+                    <div class="stack-track">
+                        <div class="stack-bar" style="--bar-width: 94%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stack-item">
+                <div class="stack-icon">🚀</div>
+                <div class="stack-content">
+                    <div class="stack-title">SPEED BOOST</div>
+                    <div class="stack-percentage">76%</div>
+                    <div class="stack-track">
+                        <div class="stack-bar" style="--bar-width: 76%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

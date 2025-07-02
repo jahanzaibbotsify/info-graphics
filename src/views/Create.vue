@@ -159,7 +159,7 @@
             <!-- Show image if available, otherwise show HTML thumbnail -->
             <div v-if="infographic.imageUrl" class="w-full h-full flex items-center justify-center">
               <img 
-                :src="`${$options.VUE_APP_BACKEND_URL || 'http://localhost:3000'}${infographic.imageUrl}`" 
+                :src="`${$options.VUE_APP_BACKEND_URL || 'https://infographics.saasbakers.com/api'}${infographic.imageUrl}`" 
                 :alt="infographic.title"
                 class="max-w-full max-h-full object-contain rounded"
                 @error="handleImageError($event, infographic)"

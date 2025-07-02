@@ -10,9 +10,6 @@
       
       <!-- Desktop Navigation -->
       <nav class="hidden md:flex items-center gap-6">
-        <router-link to="/" class="text-sm font-medium hover:text-primary transition-colors">
-          Create
-        </router-link>
         <router-link 
           to="/" 
           class="text-sm font-medium hover:text-primary transition-colors"

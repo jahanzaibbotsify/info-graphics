@@ -92,10 +92,38 @@
         "dataTypes": ["mixed_data", "general_metrics", "business_data"],
         "useCases": ["general_reporting", "business_overview", "mixed_analytics", "dashboard_creation"],
         "priority": 13
+      },
+      
+      "vibrant-social-metrics.html": {
+        "keywords": ["vibrant", "social", "colorful", "lively", "energetic", "dynamic", "bright", "animated", "engaging", "zigzag", "social media post", "instagram", "facebook"],
+        "dataTypes": ["engagement_metrics", "growth_data", "social_stats", "viral_content"],
+        "useCases": ["social_media_posts", "viral_content", "engagement_tracking", "colorful_presentations", "eye_catching_graphics"],
+        "priority": 14
+      },
+      
+      "neon-data-flow.html": {
+        "keywords": ["neon", "cyber", "futuristic", "tech", "digital", "glow", "flowing", "particles", "grid", "cyberpunk", "sci-fi", "technology"],
+        "dataTypes": ["tech_metrics", "digital_performance", "system_stats", "api_data"],
+        "useCases": ["tech_presentations", "system_monitoring", "digital_performance", "futuristic_designs", "tech_startups"],
+        "priority": 15
+      },
+      
+      "gradient-wave-analytics.html": {
+        "keywords": ["gradient", "wave", "flowing", "smooth", "modern", "elegant", "premium", "sophisticated", "professional", "insights"],
+        "dataTypes": ["business_analytics", "performance_insights", "premium_metrics", "executive_data"],
+        "useCases": ["executive_presentations", "premium_reports", "sophisticated_analytics", "high_end_visualizations"],
+        "priority": 16
+      },
+      
+      "retro-gaming-stats.html": {
+        "keywords": ["retro", "gaming", "game", "pixel", "8-bit", "arcade", "vintage", "nostalgic", "levels", "score", "achievements", "gamer"],
+        "dataTypes": ["gaming_stats", "achievement_data", "score_metrics", "level_progression"],
+        "useCases": ["gaming_analytics", "achievement_tracking", "player_statistics", "retro_presentations", "gaming_communities"],
+        "priority": 17
       }
     },
     
-    "mainPrompt": "Analyze the user request and select the most appropriate infographic template:\n\nUSER REQUEST: {user_input}\n\nSELECTION CRITERIA:\n1. MODERN STATS: Clean business insights, quarterly metrics → modern-statistics-overview.html\n2. MINIMAL SHOWCASE: Two-column, large numbers, gradient text → minimal-data-showcase.html\n3. CIRCULAR LAYOUT: Central metric, orbiting data, 360° view → circular-metrics-layout.html\n4. TIMELINE: Quarterly growth, progression, time series → vertical-timeline-stats.html\n5. GEOMETRIC: Hexagonal/triangular shapes, grid layout → geometric-data-grid.html\n6. DIAGONAL SPLIT: Analytics dashboard, department performance → diagonal-split-layout.html\n7. FINANCIAL: Revenue, stocks, investments, financial metrics → financial-analytics.html\n8. SOCIAL MEDIA: Platforms, followers, engagement, social analytics → social-media-comparison.html\n9. CUSTOMER DATA: Customer analytics, satisfaction, demographics → customer-analytics.html\n10. SALES METRICS: Sales performance, revenue tracking, targets → sales-performance-dashboard.html\n11. MARKETING: Marketing campaigns, trends, brand performance → marketing-trends-timeline.html\n12. GLOBAL/ECONOMIC: Countries, economic indicators, international → global-economic-comparison.html\n13. GENERAL ANALYTICS: Dashboard, overview, mixed metrics → data-visualization-report.html\n\nProvide your selection in this format:\nSELECTED_TEMPLATE: [filename.html]\nCONFIDENCE: [High/Medium/Low]\nREASONING: [Brief explanation]\nKEY_FACTORS: [Main factors that influenced selection]"
+    "mainPrompt": "Analyze the user request and select the most appropriate infographic template:\n\nUSER REQUEST: {user_input}\n\nSELECTION CRITERIA:\n1. MODERN STATS: Clean business insights, quarterly metrics → modern-statistics-overview.html\n2. MINIMAL SHOWCASE: Two-column, large numbers, gradient text → minimal-data-showcase.html\n3. CIRCULAR LAYOUT: Central metric, orbiting data, 360° view → circular-metrics-layout.html\n4. TIMELINE: Quarterly growth, progression, time series → vertical-timeline-stats.html\n5. GEOMETRIC: Hexagonal/triangular shapes, grid layout → geometric-data-grid.html\n6. DIAGONAL SPLIT: Analytics dashboard, department performance → diagonal-split-layout.html\n7. FINANCIAL: Revenue, stocks, investments, financial metrics → financial-analytics.html\n8. SOCIAL MEDIA: Platforms, followers, engagement, social analytics → social-media-comparison.html\n9. CUSTOMER DATA: Customer analytics, satisfaction, demographics → customer-analytics.html\n10. SALES METRICS: Sales performance, revenue tracking, targets → sales-performance-dashboard.html\n11. MARKETING: Marketing campaigns, trends, brand performance → marketing-trends-timeline.html\n12. GLOBAL/ECONOMIC: Countries, economic indicators, international → global-economic-comparison.html\n13. GENERAL ANALYTICS: Dashboard, overview, mixed metrics → data-visualization-report.html\n14. VIBRANT SOCIAL: Colorful, lively, social media posts, animated → vibrant-social-metrics.html\n15. NEON CYBER: Futuristic, tech, digital, glowing, cyberpunk → neon-data-flow.html\n16. GRADIENT WAVES: Elegant, flowing, premium, sophisticated → gradient-wave-analytics.html\n17. RETRO GAMING: Gaming stats, pixel art, arcade, achievements → retro-gaming-stats.html\n\nProvide your selection in this format:\nSELECTED_TEMPLATE: [filename.html]\nCONFIDENCE: [High/Medium/Low]\nREASONING: [Brief explanation]\nKEY_FACTORS: [Main factors that influenced selection]"
   },
   
   "dataCustomization": {
@@ -187,6 +215,30 @@
       "input": "Create a business dashboard with various metrics and performance indicators",
       "expected_template": "data-visualization-report.html",
       "reasoning": "General analytics request with mixed data types requiring flexible dashboard"
+    },
+    
+    "vibrant_social_example": {
+      "input": "Create a vibrant and colorful infographic for Instagram showing our app's growth metrics with engaging animations",
+      "expected_template": "vibrant-social-metrics.html",
+      "reasoning": "Specifically mentions vibrant, colorful design for social media (Instagram) with engaging elements"
+    },
+    
+    "neon_cyber_example": {
+      "input": "Show our tech startup's API performance and system metrics with a futuristic cyberpunk design",
+      "expected_template": "neon-data-flow.html", 
+      "reasoning": "Tech/API metrics with futuristic cyberpunk aesthetic requirements"
+    },
+    
+    "gradient_wave_example": {
+      "input": "Create an elegant executive report with flowing design showing premium analytics insights",
+      "expected_template": "gradient-wave-analytics.html",
+      "reasoning": "Executive/premium focus with emphasis on elegant, flowing design elements"
+    },
+    
+    "retro_gaming_example": {
+      "input": "Display gaming statistics with pixel art style showing player levels, achievements, and high scores",
+      "expected_template": "retro-gaming-stats.html",
+      "reasoning": "Gaming data with specific retro/pixel art aesthetic and gaming terminology"
     }
   },
   
