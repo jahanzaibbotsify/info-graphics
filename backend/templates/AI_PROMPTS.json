@@ -45,43 +45,57 @@
         "priority": 6
       },
       
-      "financial-dashboard.html": {
+      "financial-analytics.html": {
         "keywords": ["financial", "finance", "money", "revenue", "profit", "investment", "stock", "portfolio", "trading", "ROI", "P&L", "earnings", "budget", "monetary"],
         "dataTypes": ["currency", "financial_ratios", "stock_prices", "investment_data"],
         "useCases": ["financial_reporting", "investment_analysis", "stock_tracking", "financial_performance"],
         "priority": 7
       },
       
-      "market-comparison.html": {
-        "keywords": ["comparison", "vs", "versus", "competitor", "market share", "competitive", "benchmark", "against", "compared", "leader", "competition"],
-        "dataTypes": ["comparison_data", "market_share", "competitive_metrics"],
-        "useCases": ["competitive_analysis", "market_positioning", "product_comparison", "benchmarking"],
+      "social-media-comparison.html": {
+        "keywords": ["social media", "Instagram", "Facebook", "Twitter", "TikTok", "LinkedIn", "followers", "engagement", "likes", "shares", "comments", "social analytics", "platform comparison"],
+        "dataTypes": ["follower_counts", "engagement_rates", "platform_metrics", "content_performance"],
+        "useCases": ["social_reporting", "content_strategy", "platform_analysis", "engagement_tracking", "social_comparison"],
         "priority": 8
       },
       
-      "social-media-metrics.html": {
-        "keywords": ["social media", "Instagram", "Facebook", "Twitter", "TikTok", "LinkedIn", "followers", "engagement", "likes", "shares", "comments", "social analytics"],
-        "dataTypes": ["follower_counts", "engagement_rates", "platform_metrics", "content_performance"],
-        "useCases": ["social_reporting", "content_strategy", "platform_analysis", "engagement_tracking"],
+      "customer-analytics.html": {
+        "keywords": ["customer", "satisfaction", "demographics", "customer analytics", "behavior", "customer journey", "customer intelligence", "client data"],
+        "dataTypes": ["customer_data", "satisfaction_ratings", "demographic_data", "behavior_metrics"],
+        "useCases": ["customer_analysis", "satisfaction_tracking", "demographic_breakdown", "customer_intelligence"],
         "priority": 9
       },
       
-      "survey-results.html": {
-        "keywords": ["survey", "poll", "questionnaire", "feedback", "responses", "satisfaction", "rating", "research", "demographics", "age groups"],
-        "dataTypes": ["survey_responses", "satisfaction_ratings", "demographic_data", "poll_results"],
-        "useCases": ["market_research", "customer_feedback", "survey_analysis", "poll_visualization"],
+      "sales-performance-dashboard.html": {
+        "keywords": ["sales", "sales performance", "revenue tracking", "sales targets", "conversion", "sales team", "quarterly sales", "sales metrics"],
+        "dataTypes": ["sales_data", "revenue_metrics", "conversion_rates", "target_performance"],
+        "useCases": ["sales_reporting", "revenue_tracking", "performance_monitoring", "sales_analysis"],
         "priority": 10
       },
       
-      "chart-analytics.html": {
+      "marketing-trends-timeline.html": {
+        "keywords": ["marketing", "campaigns", "marketing trends", "brand metrics", "marketing ROI", "advertising", "marketing timeline", "brand performance"],
+        "dataTypes": ["campaign_data", "marketing_metrics", "roi_data", "trend_data"],
+        "useCases": ["marketing_reporting", "campaign_analysis", "trend_tracking", "marketing_performance"],
+        "priority": 11
+      },
+      
+      "global-economic-comparison.html": {
+        "keywords": ["global", "economic", "countries", "international", "worldwide", "economic indicators", "country comparison", "geographic"],
+        "dataTypes": ["country_data", "economic_indicators", "geographic_data", "international_metrics"],
+        "useCases": ["country_comparison", "economic_analysis", "global_reporting", "international_data"],
+        "priority": 12
+      },
+      
+      "data-visualization-report.html": {
         "keywords": ["analytics", "dashboard", "overview", "performance", "metrics", "data visualization", "business intelligence", "reporting", "general"],
         "dataTypes": ["mixed_data", "general_metrics", "business_data"],
         "useCases": ["general_reporting", "business_overview", "mixed_analytics", "dashboard_creation"],
-        "priority": 11
+        "priority": 13
       }
     },
     
-    "mainPrompt": "Analyze the user request and select the most appropriate infographic template:\n\nUSER REQUEST: {user_input}\n\nSELECTION CRITERIA:\n1. MODERN STATS: Clean business insights, quarterly metrics → modern-statistics-overview.html\n2. MINIMAL SHOWCASE: Two-column, large numbers, gradient text → minimal-data-showcase.html\n3. CIRCULAR LAYOUT: Central metric, orbiting data, 360° view → circular-metrics-layout.html\n4. TIMELINE: Quarterly growth, progression, time series → vertical-timeline-stats.html\n5. GEOMETRIC: Hexagonal/triangular shapes, grid layout → geometric-data-grid.html\n6. DIAGONAL SPLIT: Analytics dashboard, department performance → diagonal-split-layout.html\n7. FINANCIAL: Revenue, stocks, investments, financial metrics → financial-dashboard.html\n8. COMPARISON: VS, competitors, market share, benchmarking → market-comparison.html\n9. SOCIAL MEDIA: Platforms, followers, engagement, social analytics → social-media-metrics.html\n10. SURVEY/RESEARCH: Polls, feedback, satisfaction, research results → survey-results.html\n11. GENERAL ANALYTICS: Dashboard, overview, mixed metrics → chart-analytics.html\n\nProvide your selection in this format:\nSELECTED_TEMPLATE: [filename.html]\nCONFIDENCE: [High/Medium/Low]\nREASONING: [Brief explanation]\nKEY_FACTORS: [Main factors that influenced selection]"
+    "mainPrompt": "Analyze the user request and select the most appropriate infographic template:\n\nUSER REQUEST: {user_input}\n\nSELECTION CRITERIA:\n1. MODERN STATS: Clean business insights, quarterly metrics → modern-statistics-overview.html\n2. MINIMAL SHOWCASE: Two-column, large numbers, gradient text → minimal-data-showcase.html\n3. CIRCULAR LAYOUT: Central metric, orbiting data, 360° view → circular-metrics-layout.html\n4. TIMELINE: Quarterly growth, progression, time series → vertical-timeline-stats.html\n5. GEOMETRIC: Hexagonal/triangular shapes, grid layout → geometric-data-grid.html\n6. DIAGONAL SPLIT: Analytics dashboard, department performance → diagonal-split-layout.html\n7. FINANCIAL: Revenue, stocks, investments, financial metrics → financial-analytics.html\n8. SOCIAL MEDIA: Platforms, followers, engagement, social analytics → social-media-comparison.html\n9. CUSTOMER DATA: Customer analytics, satisfaction, demographics → customer-analytics.html\n10. SALES METRICS: Sales performance, revenue tracking, targets → sales-performance-dashboard.html\n11. MARKETING: Marketing campaigns, trends, brand performance → marketing-trends-timeline.html\n12. GLOBAL/ECONOMIC: Countries, economic indicators, international → global-economic-comparison.html\n13. GENERAL ANALYTICS: Dashboard, overview, mixed metrics → data-visualization-report.html\n\nProvide your selection in this format:\nSELECTED_TEMPLATE: [filename.html]\nCONFIDENCE: [High/Medium/Low]\nREASONING: [Brief explanation]\nKEY_FACTORS: [Main factors that influenced selection]"
   },
   
   "dataCustomization": {
@@ -135,31 +149,43 @@
     
     "financial_example": {
       "input": "Create an infographic showing Q4 revenue of $2.4M, portfolio allocation, and stock performance with 15% growth",
-      "expected_template": "financial-dashboard.html",
+      "expected_template": "financial-analytics.html",
       "reasoning": "Contains financial metrics (revenue, portfolio, stocks), currency values, and investment performance data"
     },
     
     "social_example": {
       "input": "Show Instagram engagement rates, TikTok follower growth, and compare platform performance",
-      "expected_template": "social-media-metrics.html", 
+      "expected_template": "social-media-comparison.html", 
       "reasoning": "Focuses on social media platforms, engagement metrics, and platform-specific data"
     },
     
-    "comparison_example": {
-      "input": "Compare our product vs 3 competitors showing market share and performance benchmarks",
-      "expected_template": "market-comparison.html",
-      "reasoning": "Explicit comparison request with competitive analysis and market positioning"
+    "customer_example": {
+      "input": "Display customer satisfaction survey with 85% satisfaction rate and demographic breakdown",
+      "expected_template": "customer-analytics.html",
+      "reasoning": "Customer data with satisfaction ratings and demographic analysis"
     },
     
-    "survey_example": {
-      "input": "Display customer satisfaction survey with 85% satisfaction rate and demographic breakdown",
-      "expected_template": "survey-results.html",
-      "reasoning": "Survey data with satisfaction ratings and demographic analysis"
+    "sales_example": {
+      "input": "Show quarterly sales performance with revenue targets and conversion rates",
+      "expected_template": "sales-performance-dashboard.html",
+      "reasoning": "Sales metrics, revenue tracking, and performance indicators"
+    },
+    
+    "marketing_example": {
+      "input": "Create a marketing campaign timeline showing ROI and brand performance metrics",
+      "expected_template": "marketing-trends-timeline.html",
+      "reasoning": "Marketing campaigns, timeline data, and brand performance metrics"
+    },
+    
+    "global_example": {
+      "input": "Compare economic indicators across different countries and global markets",
+      "expected_template": "global-economic-comparison.html",
+      "reasoning": "Country comparison with economic data and international metrics"
     },
     
     "general_example": {
       "input": "Create a business dashboard with various metrics and performance indicators",
-      "expected_template": "chart-analytics.html",
+      "expected_template": "data-visualization-report.html",
       "reasoning": "General analytics request with mixed data types requiring flexible dashboard"
     }
   },
@@ -183,7 +209,7 @@
     },
     
     "fallback_rules": {
-      "no_clear_match": "Default to chart-analytics.html",
+      "no_clear_match": "Default to data-visualization-report.html",
       "multiple_high_scores": "Use priority ranking to break ties",
       "ambiguous_request": "Ask clarifying questions before selection"
     }

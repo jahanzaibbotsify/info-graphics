@@ -28,20 +28,24 @@ async function generateInfographic(userInfo) {
             basePrompt = 'Edit an HTML document by integrating user data into a predefined HTML template, ensuring only the data is updated while maintaining the original design.';
         }
 
-        // Updated template descriptions for the new templates
+        // Updated template descriptions for ALL available templates
         const templateDescriptions = {
-            'chart-analytics.html': 'Analytics dashboard with mixed chart types - Best for: business analytics, dashboard overviews, performance metrics, mixed data types, general business intelligence reports. Features multiple chart sections and KPI displays.',
-            'tips-infographic.html': 'Tips and educational infographic - Best for: educational content, how-to guides, tips lists, process explanations, instructional materials. Features numbered tips with icons and explanations.',
-            'market-comparison.html': 'Market comparison chart - Best for: competitive analysis, market share comparisons, product vs product, benchmarking data, versus analysis. Features side-by-side comparison visualizations.',
-            'financial-dashboard.html': 'Financial performance dashboard - Best for: financial reporting, investment data, stock performance, revenue metrics, portfolio analysis, financial KPIs. Features financial-specific charts and currency displays.',
-            'social-media-metrics.html': 'Social media analytics - Best for: social platform performance, engagement metrics, follower data, content performance, social media reporting. Features platform-specific visualizations.',
-            'survey-results.html': 'Survey and research results - Best for: poll results, survey data, research findings, satisfaction ratings, demographic analysis, questionnaire responses. Features survey-specific data presentations.',
-            'business-kpi.html': 'Business KPI dashboard - Best for: goal tracking, performance indicators, target vs actual metrics, quarterly reports, business objectives, progress monitoring. Features KPI-focused layouts.',
-            'product-showcase.html': 'Product showcase and features - Best for: product launches, app showcases, feature presentations, product benefits, app store displays, software demos. Features modern card layouts and feature grids.',
-            'pricing-comparison.html': 'Pricing plans and subscription tiers - Best for: subscription plans, pricing tables, plan comparisons, feature breakdowns, SaaS pricing, service packages. Features clean pricing table design.',
-            'event-promotion.html': 'Event promotion and conferences - Best for: conference promotion, festival announcements, event schedules, speaker showcases, workshop details, meetup promotion. Features vibrant event-style design.',
-            'team-structure.html': 'Team and organizational structure - Best for: company hierarchy, team introductions, organizational charts, staff showcases, department structures, corporate profiles. Features person cards and org charts.',
-            'timeline-infographic.html': 'Timeline and process visualization - Best for: project timelines, historical events, process flows, milestones, roadmaps, step-by-step guides. Features chronological layout design.'
+            // New modern templates
+            'modern-statistics-overview.html': 'Modern clean business statistics overview - Best for: professional business insights, quarterly metrics, clean presentations, executive summaries, performance indicators. Features clean modern design with professional styling.',
+            'minimal-data-showcase.html': 'Minimal asymmetric data showcase - Best for: key metrics display, large number highlighting, two-column layouts, gradient text, clean design, executive dashboards. Features minimal design with prominent numbers.',
+            'circular-metrics-layout.html': 'Circular orbital metrics layout - Best for: performance radar, central metrics with surrounding data, 360° visualization, radial charts, futuristic presentations. Features circular/orbital design patterns.',
+            'vertical-timeline-stats.html': 'Vertical timeline statistics - Best for: quarterly progression, growth tracking, time series data, historical analysis, timeline visualization, chronological data. Features vertical timeline layout.',
+            'geometric-data-grid.html': 'Geometric grid data layout - Best for: categorical data, grid layouts, hexagonal/triangular shapes, modern visualization, geometric presentations, angular designs. Features geometric shape patterns.',
+            'diagonal-split-layout.html': 'Diagonal split analytics layout - Best for: analytics dashboards, department performance, large central metrics, split view analysis, performance tracking. Features diagonal split design.',
+            
+            // Existing corrected templates  
+            'data-visualization-report.html': 'Analytics dashboard with mixed chart types - Best for: business analytics, dashboard overviews, performance metrics, mixed data types, general business intelligence reports. Features multiple chart sections and KPI displays.',
+            'financial-analytics.html': 'Financial performance dashboard - Best for: financial reporting, investment data, stock performance, revenue metrics, portfolio analysis, financial KPIs. Features financial-specific charts and currency displays.',
+            'social-media-comparison.html': 'Social media analytics comparison - Best for: social platform performance, engagement metrics, follower data, content performance, social media reporting, platform comparisons. Features platform-specific visualizations.',
+            'customer-analytics.html': 'Customer analytics and insights - Best for: customer data, satisfaction metrics, demographic analysis, customer journey, behavior tracking, customer intelligence. Features customer-focused visualizations.',
+            'sales-performance-dashboard.html': 'Sales performance dashboard - Best for: sales metrics, revenue tracking, sales team performance, quarterly sales, sales targets, conversion rates. Features sales-specific KPI layouts.',
+            'marketing-trends-timeline.html': 'Marketing trends and timeline - Best for: marketing campaigns, trend analysis, campaign performance, marketing timelines, brand metrics, marketing ROI. Features marketing-focused timeline design.',
+            'global-economic-comparison.html': 'Global economic comparison - Best for: country comparisons, economic indicators, global markets, international data, geographic comparisons, economic analysis. Features global/economic data layouts.'
         };
 
         // Step 1: AI selects the best template based on data type using the intelligent selection criteria
@@ -50,18 +54,19 @@ async function generateInfographic(userInfo) {
 USER REQUEST: ${userInfo}
 
 SELECTION CRITERIA:
-1. FINANCIAL: Revenue, stocks, investments, financial metrics → financial-dashboard.html
-2. COMPARISON: VS, competitors, market share, benchmarking → market-comparison.html  
-3. SOCIAL MEDIA: Platforms, followers, engagement, social analytics → social-media-metrics.html
-4. SURVEY/RESEARCH: Polls, feedback, satisfaction, research results → survey-results.html
-5. BUSINESS KPI: Goals, targets, progress, quarterly performance → business-kpi.html
-6. TIPS/EDUCATION: How-to, guides, tips, educational content → tips-infographic.html
-7. GENERAL ANALYTICS: Dashboard, overview, mixed metrics → chart-analytics.html
-8. PRODUCT: Product launch, app showcase, features, benefits, demos → product-showcase.html
-9. PRICING: Subscription plans, pricing tables, plan comparison, SaaS pricing → pricing-comparison.html
-10. EVENTS: Conferences, festivals, workshops, meetups, event promotion → event-promotion.html
-11. TEAM/ORG: Company hierarchy, team structure, staff, organizational charts → team-structure.html
-12. TIMELINE: Project timelines, roadmaps, milestones, process flows, chronological → timeline-infographic.html
+1. MODERN BUSINESS: Clean, professional business insights, quarterly metrics → modern-statistics-overview.html
+2. MINIMAL SHOWCASE: Key metrics, large numbers, minimal design, two-column → minimal-data-showcase.html
+3. CIRCULAR METRICS: Performance radar, central metric, 360° visualization → circular-metrics-layout.html
+4. TIMELINE DATA: Quarterly progression, growth tracking, time series → vertical-timeline-stats.html
+5. GEOMETRIC DESIGN: Grid layouts, hexagonal shapes, modern visualization → geometric-data-grid.html
+6. SPLIT ANALYTICS: Analytics dashboard, department performance, large central metric → diagonal-split-layout.html
+7. FINANCIAL: Revenue, stocks, investments, financial metrics → financial-analytics.html
+8. SOCIAL MEDIA: Platforms, followers, engagement, social analytics → social-media-comparison.html
+9. CUSTOMER DATA: Customer analytics, satisfaction, demographics → customer-analytics.html
+10. SALES METRICS: Sales performance, revenue tracking, sales targets → sales-performance-dashboard.html
+11. MARKETING: Marketing campaigns, trends, campaign performance → marketing-trends-timeline.html
+12. GLOBAL/ECONOMIC: Country comparisons, economic indicators, global markets → global-economic-comparison.html
+13. GENERAL ANALYTICS: Dashboard, overview, mixed metrics (fallback) → data-visualization-report.html
 
 Available Templates:
 ${Object.entries(templateDescriptions).map(([name, desc]) => `- ${name}: ${desc}`).join('\n')}
@@ -95,21 +100,22 @@ Respond with ONLY the template filename (e.g., "chart-analytics.html").`;
 
         // Validate selected template against available templates
         const validTemplates = [
-            'chart-analytics.html',
-            'tips-infographic.html', 
-            'market-comparison.html',
-            'financial-dashboard.html',
-            'social-media-metrics.html',
-            'survey-results.html',
-            'business-kpi.html',
-            'product-showcase.html',
-            'pricing-comparison.html',
-            'event-promotion.html',
-            'team-structure.html',
-            'timeline-infographic.html'
+            'modern-statistics-overview.html',
+            'minimal-data-showcase.html',
+            'circular-metrics-layout.html',
+            'vertical-timeline-stats.html',
+            'geometric-data-grid.html',
+            'diagonal-split-layout.html',
+            'financial-analytics.html',
+            'social-media-comparison.html',
+            'customer-analytics.html',
+            'sales-performance-dashboard.html',
+            'marketing-trends-timeline.html',
+            'global-economic-comparison.html',
+            'data-visualization-report.html'
         ];
         
-        const finalTemplate = validTemplates.includes(selectedTemplate) ? selectedTemplate : 'chart-analytics.html';
+        const finalTemplate = validTemplates.includes(selectedTemplate) ? selectedTemplate : 'data-visualization-report.html';
         
         if (finalTemplate !== selectedTemplate) {
             console.log(`Invalid template selection "${selectedTemplate}", falling back to ${finalTemplate}`);

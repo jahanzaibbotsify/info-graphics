@@ -283,9 +283,9 @@ def demonstrate_selection():
     """Demonstrate the template selection system with examples including new templates"""
     selector = TemplateSelector()
     
-    # Enhanced test cases covering all templates
+    # Enhanced test cases covering all available templates
     test_cases = [
-        # New templates
+        # New modern templates
         "Create a clean business overview showing Q4 2024 performance metrics with professional styling",
         "Show key metrics with large prominent numbers and minimal design",
         "Display performance radar with central score and surrounding department metrics",
@@ -293,11 +293,13 @@ def demonstrate_selection():
         "Create modern data visualization with hexagonal shapes and geometric design",
         "Analytics dashboard with large central metric and department performance charts",
         
-        # Original templates
+        # Existing templates with corrected names
         "Create an infographic showing Q4 revenue of $2.4M, portfolio allocation, and stock performance with 15% growth",
         "Show Instagram engagement rates, TikTok follower growth, and compare platform performance",
-        "Compare our product vs 3 competitors showing market share and performance benchmarks",
         "Display customer satisfaction survey with 85% satisfaction rate and demographic breakdown",
+        "Show quarterly sales performance with revenue targets and conversion rates",
+        "Create a marketing campaign timeline showing ROI and brand performance metrics",
+        "Compare economic indicators across different countries and global markets",
         "Create a business dashboard with various metrics and performance indicators"
     ]
     
