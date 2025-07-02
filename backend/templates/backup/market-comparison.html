@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Battle: Competitive Analysis</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .infographic {
+            width: 1080px;
+            min-height: 1080px;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: 'Space Grotesk', sans-serif;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Cyber Grid Background */
+        .cyber-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 1;
+        }
+        
+        /* Neon Accents */
+        .neon-accent-1 {
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 2;
+        }
+        
+        .neon-accent-2 {
+            position: absolute;
+            bottom: -150px;
+            right: -150px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 0, 128, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 2;
+        }
+        
+        /* Header Battle Zone */
+        .battle-header {
+            position: relative;
+            z-index: 10;
+            padding: 40px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+        }
+        
+        .battle-title {
+            font-size: 36px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(45deg, #00ffff, #ff0080, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% auto;
+            animation: gradientShift 3s ease-in-out infinite alternate;
+            margin-bottom: 10px;
+        }
+        
+        .battle-subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 500;
+        }
+        
+        .versus-symbol {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: 900;
+            color: #00ffff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+            z-index: 15;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 50%;
+            border: 2px solid #00ffff;
+        }
+        
+        /* Split Arena Layout */
+        .battle-arena {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: calc(100vh - 140px);
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Competitor Sides */
+        .competitor {
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .competitor-left {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(0, 255, 255, 0.05) 100%);
+            border-right: 1px solid rgba(0, 255, 255, 0.3);
+        }
+        
+        .competitor-right {
+            background: linear-gradient(135deg, rgba(255, 0, 128, 0.1) 0%, rgba(255, 0, 128, 0.05) 100%);
+            border-left: 1px solid rgba(255, 0, 128, 0.3);
+        }
+        
+        .competitor::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+        
+        .competitor-left::before {
+            right: 0;
+        }
+        
+        .competitor-right::before {
+            left: 0;
+        }
+        
+        /* Competitor Header */
+        .competitor-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .competitor-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 900;
+            border: 2px solid;
+            position: relative;
+        }
+        
+        .competitor-left .competitor-logo {
+            background: linear-gradient(135deg, #00ffff, #0080ff);
+            border-color: #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+        }
+        
+        .competitor-right .competitor-logo {
+            background: linear-gradient(135deg, #ff0080, #ff4080);
+            border-color: #ff0080;
+            box-shadow: 0 0 30px rgba(255, 0, 128, 0.4);
+        }
+        
+        .competitor-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .competitor-left .competitor-name {
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        
+        .competitor-right .competitor-name {
+            color: #ff0080;
+            text-shadow: 0 0 10px rgba(255, 0, 128, 0.5);
+        }
+        
+        .competitor-tagline {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .competitor-left .stat-card::before {
+            background: linear-gradient(90deg, #00ffff, #0080ff);
+        }
+        
+        .competitor-right .stat-card::before {
+            background: linear-gradient(90deg, #ff0080, #ff4080);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 8px;
+        }
+        
+        .competitor-left .stat-value {
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        
+        .competitor-right .stat-value {
+            color: #ff0080;
+            text-shadow: 0 0 10px rgba(255, 0, 128, 0.3);
+        }
+        
+        .stat-trend {
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .trend-up {
+            color: #00ff88;
+        }
+        
+        .trend-down {
+            color: #ff4444;
+        }
+        
+        .trend-neutral {
+            color: #ffaa00;
+        }
+        
+        /* Performance Bars */
+        .performance-section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+        
+        .performance-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .performance-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .performance-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .performance-bar-bg {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .performance-bar {
+            height: 100%;
+            border-radius: 4px;
+            position: relative;
+            animation: fillPerformance 1.5s ease-out;
+        }
+        
+        .competitor-left .performance-bar {
+            background: linear-gradient(90deg, #00ffff, #0080ff);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+        }
+        
+        .competitor-right .performance-bar {
+            background: linear-gradient(90deg, #ff0080, #ff4080);
+            box-shadow: 0 0 10px rgba(255, 0, 128, 0.4);
+        }
+        
+        /* Winner Badge */
+        .winner-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #0a0a0a;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        /* Market Share Indicator */
+        .market-share {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .share-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .competitor-left .share-circle {
+            background: conic-gradient(#00ffff 0deg 140deg, rgba(255, 255, 255, 0.1) 140deg 360deg);
+            color: #00ffff;
+            border: 3px solid #00ffff;
+        }
+        
+        .competitor-right .share-circle {
+            background: conic-gradient(#ff0080 0deg 180deg, rgba(255, 255, 255, 0.1) 180deg 360deg);
+            color: #ff0080;
+            border: 3px solid #ff0080;
+        }
+        
+        .share-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Battle Outcome */
+        .battle-outcome {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 20;
+        }
+        
+        .outcome-title {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        
+        .outcome-result {
+            font-size: 18px;
+            font-weight: 700;
+            color: #00ff88;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Animations */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        
+        @keyframes fillPerformance {
+            from { width: 0%; }
+            to { width: var(--width); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        
+        /* Cyber Glitch Effect */
+        .glitch {
+            position: relative;
+        }
+        
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.8;
+        }
+        
+        .glitch::before {
+            animation: glitch-1 2s infinite;
+            color: #00ffff;
+            z-index: -1;
+        }
+        
+        .glitch::after {
+            animation: glitch-2 2s infinite;
+            color: #ff0080;
+            z-index: -2;
+        }
+        
+        @keyframes glitch-1 {
+            0%, 14%, 15%, 49%, 50%, 99%, 100% { transform: translate(0); }
+            15%, 49% { transform: translate(-2px, 0); }
+        }
+        
+        @keyframes glitch-2 {
+            0%, 20%, 21%, 62%, 63%, 99%, 100% { transform: translate(0); }
+            21%, 62% { transform: translate(2px, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic">
+        <!-- Background Elements -->
+        <div class="cyber-grid"></div>
+        <div class="neon-accent-1"></div>
+        <div class="neon-accent-2"></div>
+        
+        <!-- Battle Header -->
+        <div class="battle-header">
+            <h1 class="battle-title glitch" data-text="Market Battle 2024">Market Battle 2024</h1>
+            <p class="battle-subtitle">Competitive Analysis • Head-to-Head Performance</p>
+        </div>
+        
+        <!-- Battle Arena -->
+        <div class="battle-arena">
+            <!-- VS Symbol -->
+            <div class="versus-symbol">VS</div>
+            
+            <!-- Competitor A (Left) -->
+            <div class="competitor competitor-left">
+                <div class="winner-badge">Market Leader</div>
+                
+                <div class="competitor-header">
+                    <div class="competitor-logo">A</div>
+                    <h2 class="competitor-name">Company Alpha</h2>
+                    <p class="competitor-tagline">Innovation First</p>
+                </div>
+                
+                <div class="market-share">
+                    <div class="share-circle">39%</div>
+                    <div class="share-label">Market Share</div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Revenue (Annual)</div>
+                        <div class="stat-value">$2.8B</div>
+                        <div class="stat-trend trend-up">▲ +12.3% YoY</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Customer Base</div>
+                        <div class="stat-value">15.2M</div>
+                        <div class="stat-trend trend-up">▲ +8.7% Growth</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Employee Count</div>
+                        <div class="stat-value">12,500</div>
+                        <div class="stat-trend trend-up">▲ +15% Expansion</div>
+                    </div>
+                </div>
+                
+                <div class="performance-section">
+                    <h3 class="section-title">Performance Metrics</h3>
+                    <div class="performance-bars">
+                        <div class="performance-item">
+                            <div class="performance-label">
+                                <span>Customer Satisfaction</span>
+                                <span>87%</span>
+                            </div>
+                            <div class="performance-bar-bg">
+                                <div class="performance-bar" style="--width: 87%; width: 87%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="performance-item">
+                            <div class="performance-label">
+                                <span>Innovation Index</span>
+                                <span>92%</span>
+                            </div>
+                            <div class="performance-bar-bg">
+                                <div class="performance-bar" style="--width: 92%; width: 92%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="performance-item">
+                            <div class="performance-label">
+                                <span>Market Presence</span>
+                                <span>78%</span>
+                            </div>
+                            <div class="performance-bar-bg">
+                                <div class="performance-bar" style="--width: 78%; width: 78%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="performance-item">
+                            <div class="performance-label">
+                                <span>Financial Health</span>
+                                <span>94%</span>
+                            </div>
+                            <div class="performance-bar-bg">
+                                <div class="performance-bar" style="--width: 94%; width: 94%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Competitor B (Right) -->
+            <div class="competitor competitor-right">
+                <div class="competitor-header">
+                    <div class="competitor-logo">B</div>
+                    <h2 class="competitor-name">Beta Corp</h2>
+                    <p class="competitor-tagline">Rapid Growth</p>
+                </div>
+                
+                <div class="market-share">
+                    <div class="share-circle">28%</div>
+                    <div class="share-label">Market Share</div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Revenue (Annual)</div>
+                        <div class="stat-value">$1.9B</div>
+                        <div class="stat-trend trend-up">▲ +24.1% YoY</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Customer Base</div>
+                        <div class="stat-value">8.6M</div>
+                        <div class="stat-trend trend-up">▲ +31% Growth</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Employee Count</div>
+                        <div class="stat-value">7,800</div>
+                        <div class="stat-trend trend-up">▲ +28% Expansion</div>
+                    </div>
+                </div>
+                
+                <div class="performance-section">
+                    <h3 class="section-title">Performance Metrics</h3>
+                    <div class="performance-bars">
+                        <div class="performance-item">
+                            <div class="performance-label">
+                                <span>Customer Satisfaction</span>
+                                <span>83%</span>
+                            </div>
+                            <div class="performance-bar-bg">
+                                <div class="performance-bar" style="--width: 83%; width: 83%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="performance-item">
+                            <div class="performance-label">
+                                <span>Innovation Index</span>
+                                <span>76%</span>
+                            </div>
+                            <div class="performance-bar-bg">
+                                <div class="performance-bar" style="--width: 76%; width: 76%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="performance-item">
+                            <div class="performance-label">
+                                <span>Market Presence</span>
+                                <span>68%</span>
+                            </div>
+                            <div class="performance-bar-bg">
+                                <div class="performance-bar" style="--width: 68%; width: 68%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="performance-item">
+                            <div class="performance-label">
+                                <span>Financial Health</span>
+                                <span>88%</span>
+                            </div>
+                            <div class="performance-bar-bg">
+                                <div class="performance-bar" style="--width: 88%; width: 88%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Battle Outcome -->
+        <div class="battle-outcome">
+            <div class="outcome-title">Market Analysis Result</div>
+            <div class="outcome-result">Alpha Leads • Beta Shows Strong Growth Potential</div>
+        </div>
+    </div>
+</body>
+</html> 

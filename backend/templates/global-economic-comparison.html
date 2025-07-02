@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Economic Comparison</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Poppins:wght@200;300;400;600;800&family=Orbitron:wght@400;700;900&family=Lexend:wght@300;400;600;800&family=Fira+Code:wght@400;600&family=Montserrat:wght@300;400;600;800&family=Inter:wght@300;400;500;700;900&family=Bebas+Neue:wght@400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .infographic {
+            width: 1080px;
+            min-height: 1080px;
+            background: linear-gradient(135deg, #0f4c75 0%, #3282b8 100%);
+            position: relative;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            padding: 40px;
+        }
+        
+        .container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .infographic::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 58px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 12px;
+            font-family: 'Bebas Neue', cursive;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            letter-spacing: 4px;
+        }
+        
+        .subtitle {
+            font-size: 22px;
+            color: #bbe1fa;
+            font-weight: 300;
+            font-family: 'Lexend', sans-serif;
+            letter-spacing: 1px;
+        }
+        
+        .gdp-section {
+            margin-bottom: 35px;
+        }
+        
+        .section-title {
+            font-size: 34px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 25px;
+            font-family: 'Montserrat', sans-serif;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .chart-container {
+            height: 220px;
+            display: flex;
+            align-items: end;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 0 20px;
+        }
+        
+        .chart-bar {
+            flex: 1;
+            border-radius: 12px 12px 0 0;
+            position: relative;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .chart-bar:hover {
+            transform: translateY(-8px);
+        }
+        
+        .usa-bar {
+            background: linear-gradient(to top, #1e3a8a, #3b82f6);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .china-bar {
+            background: linear-gradient(to top, #dc2626, #ef4444);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+        
+        .japan-bar {
+            background: linear-gradient(to top, #7c2d12, #ea580c);
+            box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
+        }
+        
+        .germany-bar {
+            background: linear-gradient(to top, #374151, #6b7280);
+            box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+        }
+        
+        .india-bar {
+            background: linear-gradient(to top, #059669, #10b981);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .uk-bar {
+            background: linear-gradient(to top, #7c3aed, #8b5cf6);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        }
+        
+        .bar-value {
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        .flag-icon {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+        
+        .country-name {
+            position: absolute;
+            bottom: -85px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            color: #bbe1fa;
+            font-family: 'Fira Code', monospace;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            white-space: nowrap;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 35px;
+            margin-bottom: 40px;
+        }
+        
+        .kpi-item {
+            text-align: center;
+            color: white;
+        }
+        
+        .kpi-value {
+            font-size: 52px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-family: 'Orbitron', monospace;
+            text-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+            letter-spacing: 1px;
+        }
+        
+        .kpi-label {
+            font-size: 16px;
+            color: #bbe1fa;
+            font-weight: 600;
+            font-family: 'Lexend', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 45px;
+            flex: 1;
+        }
+        
+        .population-section {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .country-ranking {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .country-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 15px 0;
+        }
+        
+        .rank-number {
+            font-size: 32px;
+            font-weight: 900;
+            color: #3b82f6;
+            width: 50px;
+            text-align: center;
+            font-family: 'Orbitron', monospace;
+            text-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+        }
+        
+        .country-flag {
+            font-size: 28px;
+            width: 40px;
+            text-align: center;
+        }
+        
+        .country-info {
+            flex: 1;
+        }
+        
+        .country-name-ranking {
+            font-size: 20px;
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .population-value {
+            font-size: 18px;
+            color: #bbe1fa;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+        }
+        
+        .development-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+        
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 0;
+        }
+        
+        .metric-info {
+            flex: 1;
+        }
+        
+        .metric-name {
+            font-size: 20px;
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .metric-description {
+            font-size: 16px;
+            color: #bbe1fa;
+            font-family: 'Lexend', sans-serif;
+            font-weight: 300;
+            font-style: italic;
+        }
+        
+        .progress-container {
+            width: 220px;
+            margin-left: 25px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+        }
+        
+        .progress-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .summary-section {
+            margin-top: 35px;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .summary-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 25px;
+            font-family: 'Montserrat', sans-serif;
+            text-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        
+        .comparison-item {
+            text-align: center;
+        }
+        
+        .comparison-value {
+            font-size: 40px;
+            font-weight: 800;
+            color: #3b82f6;
+            margin-bottom: 10px;
+            font-family: 'Orbitron', monospace;
+            text-shadow: 0 0 18px rgba(59, 130, 246, 0.6);
+        }
+        
+        .comparison-label {
+            font-size: 16px;
+            color: #bbe1fa;
+            font-weight: 600;
+            font-family: 'Lexend', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .floating-element {
+            position: absolute;
+            pointer-events: none;
+        }
+        
+        .data-point {
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 5s ease-in-out infinite;
+        }
+        
+        .data-point-1 {
+            top: 18%;
+            right: 8%;
+            animation-delay: 0s;
+        }
+        
+        .data-point-2 {
+            top: 65%;
+            left: 4%;
+            animation-delay: 2.5s;
+        }
+        
+        .data-point-3 {
+            bottom: 22%;
+            right: 12%;
+            animation-delay: 1.2s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); opacity: 0.3; }
+            50% { transform: translateY(-20px); opacity: 0.8; }
+        }
+        
+        .highlight-number {
+            color: #60a5fa !important;
+            text-shadow: 0 0 25px rgba(96, 165, 250, 0.8) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic">
+        <div class="floating-element data-point data-point-1"></div>
+        <div class="floating-element data-point data-point-2"></div>
+        <div class="floating-element data-point data-point-3"></div>
+        
+        <div class="container">
+            <div class="header">
+                <div class="title">GLOBAL ECONOMIC COMPARISON</div>
+                <div class="subtitle">Top 6 Economies Performance Analysis 2024</div>
+            </div>
+            
+            <div class="gdp-section">
+                <div class="section-title">GDP Comparison (Trillions USD)</div>
+                <div class="chart-container">
+                    <div class="chart-bar usa-bar" style="height: 100%;">
+                        <div class="bar-value highlight-number">$26.9T</div>
+                        <div class="flag-icon">🇺🇸</div>
+                        <div class="country-name">USA</div>
+                    </div>
+                    <div class="chart-bar china-bar" style="height: 68%;">
+                        <div class="bar-value">$17.7T</div>
+                        <div class="flag-icon">🇨🇳</div>
+                        <div class="country-name">CHINA</div>
+                    </div>
+                    <div class="chart-bar japan-bar" style="height: 18%;">
+                        <div class="bar-value">$4.9T</div>
+                        <div class="flag-icon">🇯🇵</div>
+                        <div class="country-name">JAPAN</div>
+                    </div>
+                    <div class="chart-bar germany-bar" style="height: 15%;">
+                        <div class="bar-value">$4.3T</div>
+                        <div class="flag-icon">🇩🇪</div>
+                        <div class="country-name">GERMANY</div>
+                    </div>
+                    <div class="chart-bar india-bar" style="height: 12%;">
+                        <div class="bar-value">$3.4T</div>
+                        <div class="flag-icon">🇮🇳</div>
+                        <div class="country-name">INDIA</div>
+                    </div>
+                    <div class="chart-bar uk-bar" style="height: 11%;">
+                        <div class="bar-value">$3.1T</div>
+                        <div class="flag-icon">🇬🇧</div>
+                        <div class="country-name">UK</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="kpi-grid">
+                <div class="kpi-item">
+                    <div class="kpi-value highlight-number">$60.2T</div>
+                    <div class="kpi-label">Combined GDP</div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-value">4.1B</div>
+                    <div class="kpi-label">Total Population</div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-value">$14,680</div>
+                    <div class="kpi-label">Avg GDP Per Capita</div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-value">76%</div>
+                    <div class="kpi-label">Global GDP Share</div>
+                </div>
+            </div>
+            
+            <div class="bottom-grid">
+                <div class="population-section">
+                    <div class="section-title">Population Rankings</div>
+                    <div class="country-ranking">
+                        <div class="country-item">
+                            <div class="rank-number">1</div>
+                            <div class="country-flag">🇨🇳</div>
+                            <div class="country-info">
+                                <div class="country-name-ranking">China</div>
+                                <div class="population-value">1.42 Billion</div>
+                            </div>
+                        </div>
+                        <div class="country-item">
+                            <div class="rank-number">2</div>
+                            <div class="country-flag">🇮🇳</div>
+                            <div class="country-info">
+                                <div class="country-name-ranking">India</div>
+                                <div class="population-value">1.38 Billion</div>
+                            </div>
+                        </div>
+                        <div class="country-item">
+                            <div class="rank-number">3</div>
+                            <div class="country-flag">🇺🇸</div>
+                            <div class="country-info">
+                                <div class="country-name-ranking">United States</div>
+                                <div class="population-value">331 Million</div>
+                            </div>
+                        </div>
+                        <div class="country-item">
+                            <div class="rank-number">4</div>
+                            <div class="country-flag">🇯🇵</div>
+                            <div class="country-info">
+                                <div class="country-name-ranking">Japan</div>
+                                <div class="population-value">125 Million</div>
+                            </div>
+                        </div>
+                        <div class="country-item">
+                            <div class="rank-number">5</div>
+                            <div class="country-flag">🇩🇪</div>
+                            <div class="country-info">
+                                <div class="country-name-ranking">Germany</div>
+                                <div class="population-value">83 Million</div>
+                            </div>
+                        </div>
+                        <div class="country-item">
+                            <div class="rank-number">6</div>
+                            <div class="country-flag">🇬🇧</div>
+                            <div class="country-info">
+                                <div class="country-name-ranking">United Kingdom</div>
+                                <div class="population-value">67 Million</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="development-metrics">
+                    <div class="section-title">Development Indicators</div>
+                    
+                    <div class="metric-item">
+                        <div class="metric-info">
+                            <div class="metric-name">Human Development Index</div>
+                            <div class="metric-description">Average HDI score</div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 89%;"></div>
+                            </div>
+                            <div class="progress-value">0.89</div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-item">
+                        <div class="metric-info">
+                            <div class="metric-name">Innovation Index</div>
+                            <div class="metric-description">Global innovation ranking</div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 76%;"></div>
+                            </div>
+                            <div class="progress-value">76/100</div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-item">
+                        <div class="metric-info">
+                            <div class="metric-name">Ease of Business</div>
+                            <div class="metric-description">Business environment score</div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 82%;"></div>
+                            </div>
+                            <div class="progress-value">82/100</div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-item">
+                        <div class="metric-info">
+                            <div class="metric-name">Education Index</div>
+                            <div class="metric-description">Educational attainment</div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 91%;"></div>
+                            </div>
+                            <div class="progress-value">91/100</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="summary-section">
+                <div class="summary-title">Economic Comparison Highlights</div>
+                <div class="comparison-grid">
+                    <div class="comparison-item">
+                        <div class="comparison-value highlight-number">3.2%</div>
+                        <div class="comparison-label">Avg GDP Growth</div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="comparison-value">68.2%</div>
+                        <div class="comparison-label">Trade Volume Share</div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="comparison-value">$47.8T</div>
+                        <div class="comparison-label">Total Trade Value</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

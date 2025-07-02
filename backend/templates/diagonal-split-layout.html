@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagonal Split Layout</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .infographic {
+            width: 1080px;
+            height: 1080px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1e3c72 100%);
+            position: relative;
+            font-family: 'Manrope', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Diagonal Split Background */
+        .diagonal-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .diagonal-section-1 {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            clip-path: polygon(0 0, 80% 0, 60% 100%, 0 100%);
+        }
+        
+        .diagonal-section-2 {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.05));
+            clip-path: polygon(40% 0, 100% 0, 100% 100%, 20% 100%);
+        }
+        
+        /* Header */
+        .header {
+            position: relative;
+            z-index: 10;
+            padding: 60px;
+            text-align: center;
+        }
+        
+        .main-title {
+            font-size: 56px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+            transform: rotate(-2deg);
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+        
+        /* Main Content Split */
+        .content-container {
+            flex: 1;
+            position: relative;
+            z-index: 10;
+            display: flex;
+        }
+        
+        /* Left Section */
+        .left-section {
+            width: 55%;
+            padding: 40px 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .large-metric {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .metric-number {
+            font-size: 120px;
+            font-weight: 900;
+            color: #ffffff;
+            font-family: 'Fira Code', monospace;
+            line-height: 0.8;
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+        
+        .metric-label {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        
+        .metric-description {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 15px;
+            font-weight: 400;
+        }
+        
+        /* Stats List */
+        .stats-list {
+            margin-top: 40px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-name {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            color: #ffffff;
+            font-weight: 700;
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .stat-change {
+            font-size: 12px;
+            margin-left: 15px;
+            font-weight: 600;
+        }
+        
+        .positive {
+            color: #4caf50;
+        }
+        
+        .negative {
+            color: #f44336;
+        }
+        
+        /* Right Section */
+        .right-section {
+            width: 45%;
+            padding: 40px 60px 40px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        /* Chart Grid */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            flex: 1;
+        }
+        
+        .chart-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        /* Radial Progress */
+        .radial-progress {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+        }
+        
+        .radial-progress svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        
+        .radial-progress circle {
+            fill: none;
+            stroke-width: 8;
+        }
+        
+        .radial-bg {
+            stroke: rgba(255, 255, 255, 0.1);
+        }
+        
+        .radial-fill {
+            stroke: var(--progress-color);
+            stroke-linecap: round;
+            stroke-dasharray: var(--circumference);
+            stroke-dashoffset: var(--offset);
+            transition: stroke-dashoffset 0.8s ease-out;
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .chart-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Individual Progress Colors */
+        .chart-item:nth-child(1) .radial-fill {
+            --progress-color: #ff6b6b;
+            --circumference: 351.86;
+            --offset: 87.96;
+        }
+        
+        .chart-item:nth-child(2) .radial-fill {
+            --progress-color: #4ecdc4;
+            --circumference: 351.86;
+            --offset: 105.56;
+        }
+        
+        .chart-item:nth-child(3) .radial-fill {
+            --progress-color: #45b7d1;
+            --circumference: 351.86;
+            --offset: 70.37;
+        }
+        
+        .chart-item:nth-child(4) .radial-fill {
+            --progress-color: #96ceb4;
+            --circumference: 351.86;
+            --offset: 140.74;
+        }
+        
+        /* Floating Elements */
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .floating-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+        }
+        
+        .dot-1 {
+            top: 15%;
+            left: 20%;
+            animation: float1 4s ease-in-out infinite;
+        }
+        
+        .dot-2 {
+            top: 30%;
+            right: 25%;
+            animation: float2 5s ease-in-out infinite;
+        }
+        
+        .dot-3 {
+            bottom: 25%;
+            left: 15%;
+            animation: float3 6s ease-in-out infinite;
+        }
+        
+        .dot-4 {
+            bottom: 40%;
+            right: 30%;
+            animation: float1 4.5s ease-in-out infinite;
+        }
+        
+        /* Connecting Lines */
+        .connection-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+        }
+        
+        .connect-line {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+        
+        .line-diagonal {
+            width: 300px;
+            top: 40%;
+            left: 35%;
+            transform: rotate(35deg);
+        }
+        
+        /* Animations */
+        @keyframes float1 {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(-20px) translateX(10px); }
+        }
+        
+        @keyframes float2 {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(-15px) translateX(-8px); }
+        }
+        
+        @keyframes float3 {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(-25px) translateX(15px); }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .left-section {
+            animation: slideInLeft 0.8s ease-out;
+        }
+        
+        .right-section {
+            animation: slideInRight 0.8s ease-out 0.3s both;
+        }
+        
+        .chart-item {
+            animation: scaleIn 0.6s ease-out;
+        }
+        
+        .chart-item:nth-child(1) { animation-delay: 0.5s; }
+        .chart-item:nth-child(2) { animation-delay: 0.6s; }
+        .chart-item:nth-child(3) { animation-delay: 0.7s; }
+        .chart-item:nth-child(4) { animation-delay: 0.8s; }
+        
+        /* Responsive Design */
+        @media (max-width: 1080px) {
+            .infographic {
+                width: 100vw;
+                height: 100vh;
+            }
+            
+            .content-container {
+                flex-direction: column;
+            }
+            
+            .left-section,
+            .right-section {
+                width: 100%;
+                padding: 30px;
+            }
+            
+            .metric-number {
+                font-size: 80px;
+            }
+            
+            .chart-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic">
+        <!-- Diagonal Background -->
+        <div class="diagonal-bg">
+            <div class="diagonal-section-1"></div>
+            <div class="diagonal-section-2"></div>
+        </div>
+        
+        <!-- Floating Elements -->
+        <div class="floating-elements">
+            <div class="floating-dot dot-1"></div>
+            <div class="floating-dot dot-2"></div>
+            <div class="floating-dot dot-3"></div>
+            <div class="floating-dot dot-4"></div>
+        </div>
+        
+        <!-- Connection Lines -->
+        <div class="connection-lines">
+            <div class="connect-line line-diagonal"></div>
+        </div>
+        
+        <!-- Header -->
+        <div class="header">
+            <h1 class="main-title">Analytics Dashboard</h1>
+            <p class="subtitle">Performance metrics at a glance</p>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="content-container">
+            <!-- Left Section -->
+            <div class="left-section">
+                <div class="large-metric">
+                    <div class="metric-number">2.4M</div>
+                    <div class="metric-label">Total Revenue</div>
+                    <div class="metric-description">Quarterly performance indicator</div>
+                </div>
+                
+                <div class="stats-list">
+                    <div class="stat-item">
+                        <span class="stat-name">Monthly Growth</span>
+                        <div>
+                            <span class="stat-value">15.2%</span>
+                            <span class="stat-change positive">+3.1%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <span class="stat-name">Active Users</span>
+                        <div>
+                            <span class="stat-value">847K</span>
+                            <span class="stat-change positive">+12.8%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <span class="stat-name">Conversion Rate</span>
+                        <div>
+                            <span class="stat-value">24.5%</span>
+                            <span class="stat-change positive">+2.3%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <span class="stat-name">Bounce Rate</span>
+                        <div>
+                            <span class="stat-value">32.1%</span>
+                            <span class="stat-change negative">-1.5%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Section -->
+            <div class="right-section">
+                <h2 class="section-title">Department Performance</h2>
+                
+                <div class="chart-grid">
+                    <div class="chart-item">
+                        <div class="radial-progress">
+                            <svg>
+                                <circle class="radial-bg" cx="60" cy="60" r="56"></circle>
+                                <circle class="radial-fill" cx="60" cy="60" r="56"></circle>
+                            </svg>
+                            <div class="progress-text">75%</div>
+                        </div>
+                        <div class="chart-label">Marketing</div>
+                    </div>
+                    
+                    <div class="chart-item">
+                        <div class="radial-progress">
+                            <svg>
+                                <circle class="radial-bg" cx="60" cy="60" r="56"></circle>
+                                <circle class="radial-fill" cx="60" cy="60" r="56"></circle>
+                            </svg>
+                            <div class="progress-text">70%</div>
+                        </div>
+                        <div class="chart-label">Sales</div>
+                    </div>
+                    
+                    <div class="chart-item">
+                        <div class="radial-progress">
+                            <svg>
+                                <circle class="radial-bg" cx="60" cy="60" r="56"></circle>
+                                <circle class="radial-fill" cx="60" cy="60" r="56"></circle>
+                            </svg>
+                            <div class="progress-text">80%</div>
+                        </div>
+                        <div class="chart-label">Product</div>
+                    </div>
+                    
+                    <div class="chart-item">
+                        <div class="radial-progress">
+                            <svg>
+                                <circle class="radial-bg" cx="60" cy="60" r="56"></circle>
+                                <circle class="radial-fill" cx="60" cy="60" r="56"></circle>
+                            </svg>
+                            <div class="progress-text">60%</div>
+                        </div>
+                        <div class="chart-label">Support</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

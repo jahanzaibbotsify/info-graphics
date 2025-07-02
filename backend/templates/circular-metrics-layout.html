@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circular Metrics Layout</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Orbitron:wght@400;500;600;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .infographic {
+            width: 1080px;
+            height: 1080px;
+            background: radial-gradient(circle at center, #2d1b69 0%, #11052c 80%);
+            position: relative;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Header */
+        .header {
+            position: absolute;
+            top: 60px;
+            text-align: center;
+            z-index: 10;
+        }
+        
+        .main-title {
+            font-size: 42px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+        
+        /* Central Circle */
+        .central-circle {
+            width: 300px;
+            height: 300px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 5;
+        }
+        
+        .central-number {
+            font-size: 64px;
+            font-weight: 900;
+            color: #ffffff;
+            font-family: 'Orbitron', monospace;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .central-label {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+        
+        .central-description {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 8px;
+            text-align: center;
+        }
+        
+        /* Orbiting Elements */
+        .orbit-container {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+        }
+        
+        .orbit-item {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        /* Individual orbit positions */
+        .orbit-item:nth-child(1) {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .orbit-item:nth-child(2) {
+            top: 25%;
+            right: 0;
+            transform: translateY(-50%);
+        }
+        
+        .orbit-item:nth-child(3) {
+            bottom: 25%;
+            right: 0;
+            transform: translateY(50%);
+        }
+        
+        .orbit-item:nth-child(4) {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .orbit-item:nth-child(5) {
+            bottom: 25%;
+            left: 0;
+            transform: translateY(50%);
+        }
+        
+        .orbit-item:nth-child(6) {
+            top: 25%;
+            left: 0;
+            transform: translateY(-50%);
+        }
+        
+        .orbit-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 8px;
+            font-family: 'Orbitron', monospace;
+        }
+        
+        .orbit-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .orbit-trend {
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        .trend-up {
+            color: #4caf50;
+        }
+        
+        .trend-down {
+            color: #f44336;
+        }
+        
+        /* Connecting Lines */
+        .connection-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            z-index: 1;
+        }
+        
+        .line-1 {
+            width: 200px;
+            height: 1px;
+            top: 150px;
+            left: 50%;
+            transform: translateX(-50%) rotate(0deg);
+        }
+        
+        .line-2 {
+            width: 200px;
+            height: 1px;
+            top: 250px;
+            left: 65%;
+            transform: translateX(-50%) rotate(60deg);
+        }
+        
+        .line-3 {
+            width: 200px;
+            height: 1px;
+            top: 350px;
+            left: 65%;
+            transform: translateX(-50%) rotate(120deg);
+        }
+        
+        .line-4 {
+            width: 200px;
+            height: 1px;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%) rotate(180deg);
+        }
+        
+        .line-5 {
+            width: 200px;
+            height: 1px;
+            top: 350px;
+            left: 35%;
+            transform: translateX(-50%) rotate(240deg);
+        }
+        
+        .line-6 {
+            width: 200px;
+            height: 1px;
+            top: 250px;
+            left: 35%;
+            transform: translateX(-50%) rotate(300deg);
+        }
+        
+        /* Bottom Statistics */
+        .bottom-stats {
+            position: absolute;
+            bottom: 80px;
+            display: flex;
+            gap: 60px;
+            align-items: center;
+        }
+        
+        .bottom-stat {
+            text-align: center;
+        }
+        
+        .bottom-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 8px;
+            font-family: 'Orbitron', monospace;
+        }
+        
+        .bottom-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+        
+        /* Decorative Elements */
+        .deco-circle {
+            position: absolute;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .deco-1 {
+            width: 400px;
+            height: 400px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .deco-2 {
+            width: 700px;
+            height: 700px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .deco-3 {
+            width: 900px;
+            height: 900px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Pulse Animation */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .central-circle {
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        .deco-2 {
+            animation: rotate 60s linear infinite;
+        }
+        
+        .orbit-item {
+            animation: fadeInScale 0.8s ease-out;
+        }
+        
+        .orbit-item:nth-child(1) { animation-delay: 0.1s; }
+        .orbit-item:nth-child(2) { animation-delay: 0.2s; }
+        .orbit-item:nth-child(3) { animation-delay: 0.3s; }
+        .orbit-item:nth-child(4) { animation-delay: 0.4s; }
+        .orbit-item:nth-child(5) { animation-delay: 0.5s; }
+        .orbit-item:nth-child(6) { animation-delay: 0.6s; }
+        
+        /* Responsive Design */
+        @media (max-width: 1080px) {
+            .infographic {
+                width: 100vw;
+                height: 100vh;
+            }
+            
+            .orbit-container {
+                width: 500px;
+                height: 500px;
+            }
+            
+            .central-circle {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .central-number {
+                font-size: 48px;
+            }
+            
+            .bottom-stats {
+                gap: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="main-title">Performance Radar</h1>
+            <p class="subtitle">360° Business Metrics Overview</p>
+        </div>
+        
+        <!-- Decorative Circles -->
+        <div class="deco-circle deco-1"></div>
+        <div class="deco-circle deco-2"></div>
+        <div class="deco-circle deco-3"></div>
+        
+        <!-- Connection Lines -->
+        <div class="connection-line line-1"></div>
+        <div class="connection-line line-2"></div>
+        <div class="connection-line line-3"></div>
+        <div class="connection-line line-4"></div>
+        <div class="connection-line line-5"></div>
+        <div class="connection-line line-6"></div>
+        
+        <!-- Central Circle -->
+        <div class="central-circle">
+            <div class="central-number">97%</div>
+            <div class="central-label">Overall Score</div>
+            <div class="central-description">System Performance</div>
+        </div>
+        
+        <!-- Orbiting Metrics -->
+        <div class="orbit-container">
+            <div class="orbit-item">
+                <div class="orbit-number">$2.4M</div>
+                <div class="orbit-label">Revenue</div>
+                <div class="orbit-trend trend-up">+15.2%</div>
+            </div>
+            
+            <div class="orbit-item">
+                <div class="orbit-number">847K</div>
+                <div class="orbit-label">Users</div>
+                <div class="orbit-trend trend-up">+22.1%</div>
+            </div>
+            
+            <div class="orbit-item">
+                <div class="orbit-number">94%</div>
+                <div class="orbit-label">Satisfaction</div>
+                <div class="orbit-trend trend-up">+3.4%</div>
+            </div>
+            
+            <div class="orbit-item">
+                <div class="orbit-number">156</div>
+                <div class="orbit-label">Projects</div>
+                <div class="orbit-trend trend-up">+8.7%</div>
+            </div>
+            
+            <div class="orbit-item">
+                <div class="orbit-number">24.5%</div>
+                <div class="orbit-label">Conversion</div>
+                <div class="orbit-trend trend-up">+2.8%</div>
+            </div>
+            
+            <div class="orbit-item">
+                <div class="orbit-number">89%</div>
+                <div class="orbit-label">Efficiency</div>
+                <div class="orbit-trend trend-up">+5.1%</div>
+            </div>
+        </div>
+        
+        <!-- Bottom Statistics -->
+        <div class="bottom-stats">
+            <div class="bottom-stat">
+                <div class="bottom-number">45</div>
+                <div class="bottom-label">Team Size</div>
+            </div>
+            
+            <div class="bottom-stat">
+                <div class="bottom-number">12</div>
+                <div class="bottom-label">Months</div>
+            </div>
+            
+            <div class="bottom-stat">
+                <div class="bottom-number">3.2M</div>
+                <div class="bottom-label">Data Points</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

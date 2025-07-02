@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Timeline Stats</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;900&family=Roboto+Mono:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .infographic {
+            width: 1080px;
+            height: 1080px;
+            background: linear-gradient(45deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            position: relative;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+        
+        .main-title {
+            font-size: 48px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+            margin-bottom: 30px;
+        }
+        
+        .header-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+        }
+        
+        .header-stat {
+            text-align: center;
+        }
+        
+        .header-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Roboto Mono', monospace;
+        }
+        
+        .header-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+        
+        /* Main Content */
+        .content {
+            display: flex;
+            gap: 80px;
+            flex: 1;
+        }
+        
+        /* Left Timeline */
+        .timeline-section {
+            flex: 1;
+            position: relative;
+        }
+        
+        .timeline-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 50px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -27px;
+            top: 10px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid var(--dot-color);
+        }
+        
+        .timeline-date {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-family: 'Roboto Mono', monospace;
+        }
+        
+        .timeline-metric {
+            font-size: 36px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 5px;
+            font-family: 'Roboto Mono', monospace;
+        }
+        
+        .timeline-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .timeline-change {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .change-positive {
+            color: #4caf50;
+        }
+        
+        .change-negative {
+            color: #f44336;
+        }
+        
+        /* Timeline dot colors */
+        .timeline-item:nth-child(1) {
+            --dot-color: #ff6b6b;
+        }
+        
+        .timeline-item:nth-child(2) {
+            --dot-color: #4ecdc4;
+        }
+        
+        .timeline-item:nth-child(3) {
+            --dot-color: #45b7d1;
+        }
+        
+        .timeline-item:nth-child(4) {
+            --dot-color: #96ceb4;
+        }
+        
+        .timeline-item:nth-child(5) {
+            --dot-color: #feca57;
+        }
+        
+        /* Right Side - Chart Area */
+        .chart-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chart-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            flex: 1;
+        }
+        
+        .chart-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .chart-visual {
+            position: relative;
+            height: 120px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Circular Progress */
+        .circular-progress {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(var(--progress-color) var(--percentage), rgba(255, 255, 255, 0.1) 0deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .circular-progress::before {
+            content: '';
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: inherit;
+            position: absolute;
+        }
+        
+        .progress-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            position: relative;
+            z-index: 1;
+            font-family: 'Roboto Mono', monospace;
+        }
+        
+        /* Bar Chart */
+        .bar-chart {
+            width: 100%;
+            height: 80px;
+            display: flex;
+            align-items: end;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .bar {
+            width: 12px;
+            background: linear-gradient(to top, var(--bar-color), rgba(255, 255, 255, 0.3));
+            border-radius: 6px 6px 0 0;
+            height: var(--bar-height);
+        }
+        
+        .chart-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 5px;
+            font-family: 'Roboto Mono', monospace;
+        }
+        
+        .chart-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Individual chart styling */
+        .chart-item:nth-child(1) .circular-progress {
+            --progress-color: #ff6b6b;
+            --percentage: 85%;
+        }
+        
+        .chart-item:nth-child(2) .bar {
+            --bar-color: #4ecdc4;
+        }
+        
+        .chart-item:nth-child(2) .bar:nth-child(1) { --bar-height: 60%; }
+        .chart-item:nth-child(2) .bar:nth-child(2) { --bar-height: 80%; }
+        .chart-item:nth-child(2) .bar:nth-child(3) { --bar-height: 45%; }
+        .chart-item:nth-child(2) .bar:nth-child(4) { --bar-height: 90%; }
+        .chart-item:nth-child(2) .bar:nth-child(5) { --bar-height: 70%; }
+        
+        .chart-item:nth-child(3) .circular-progress {
+            --progress-color: #45b7d1;
+            --percentage: 72%;
+        }
+        
+        .chart-item:nth-child(4) .bar {
+            --bar-color: #96ceb4;
+        }
+        
+        .chart-item:nth-child(4) .bar:nth-child(1) { --bar-height: 40%; }
+        .chart-item:nth-child(4) .bar:nth-child(2) { --bar-height: 85%; }
+        .chart-item:nth-child(4) .bar:nth-child(3) { --bar-height: 60%; }
+        .chart-item:nth-child(4) .bar:nth-child(4) { --bar-height: 75%; }
+        .chart-item:nth-child(4) .bar:nth-child(5) { --bar-height: 50%; }
+        
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .timeline-item {
+            animation: slideInUp 0.6s ease-out;
+        }
+        
+        .chart-item {
+            animation: slideInRight 0.6s ease-out;
+        }
+        
+        .circular-progress {
+            animation: scaleIn 0.8s ease-out;
+        }
+        
+        .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+        .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+        .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+        .timeline-item:nth-child(4) { animation-delay: 0.4s; }
+        .timeline-item:nth-child(5) { animation-delay: 0.5s; }
+        
+        .chart-item:nth-child(1) { animation-delay: 0.3s; }
+        .chart-item:nth-child(2) { animation-delay: 0.4s; }
+        .chart-item:nth-child(3) { animation-delay: 0.5s; }
+        .chart-item:nth-child(4) { animation-delay: 0.6s; }
+        
+        /* Responsive Design */
+        @media (max-width: 1080px) {
+            .infographic {
+                width: 100vw;
+                height: 100vh;
+                padding: 40px;
+            }
+            
+            .content {
+                flex-direction: column;
+                gap: 40px;
+            }
+            
+            .header-stats {
+                gap: 40px;
+            }
+            
+            .chart-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="main-title">Growth Timeline</h1>
+            <p class="subtitle">Quarterly performance evolution</p>
+            
+            <div class="header-stats">
+                <div class="header-stat">
+                    <div class="header-number">4</div>
+                    <div class="header-label">Quarters</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-number">28%</div>
+                    <div class="header-label">Growth</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-number">$2.4M</div>
+                    <div class="header-label">Revenue</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Timeline Section -->
+            <div class="timeline-section">
+                <h2 class="timeline-title">Performance Timeline</h2>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-date">Q1 2024</div>
+                        <div class="timeline-metric">$480K</div>
+                        <div class="timeline-label">Revenue</div>
+                        <div class="timeline-change change-positive">+12% from Q4</div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-date">Q2 2024</div>
+                        <div class="timeline-metric">$620K</div>
+                        <div class="timeline-label">Revenue</div>
+                        <div class="timeline-change change-positive">+29% from Q1</div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-date">Q3 2024</div>
+                        <div class="timeline-metric">$750K</div>
+                        <div class="timeline-label">Revenue</div>
+                        <div class="timeline-change change-positive">+21% from Q2</div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-date">Q4 2024</div>
+                        <div class="timeline-metric">$870K</div>
+                        <div class="timeline-label">Revenue</div>
+                        <div class="timeline-change change-positive">+16% from Q3</div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-date">Projection</div>
+                        <div class="timeline-metric">$1.1M</div>
+                        <div class="timeline-label">Q1 2025</div>
+                        <div class="timeline-change change-positive">+26% estimated</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chart Section -->
+            <div class="chart-section">
+                <h2 class="chart-title">Key Metrics</h2>
+                
+                <div class="chart-grid">
+                    <div class="chart-item">
+                        <div class="chart-visual">
+                            <div class="circular-progress">
+                                <div class="progress-text">85%</div>
+                            </div>
+                        </div>
+                        <div class="chart-number">Customer</div>
+                        <div class="chart-label">Satisfaction</div>
+                    </div>
+                    
+                    <div class="chart-item">
+                        <div class="chart-visual">
+                            <div class="bar-chart">
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                            </div>
+                        </div>
+                        <div class="chart-number">156K</div>
+                        <div class="chart-label">Monthly Users</div>
+                    </div>
+                    
+                    <div class="chart-item">
+                        <div class="chart-visual">
+                            <div class="circular-progress">
+                                <div class="progress-text">72%</div>
+                            </div>
+                        </div>
+                        <div class="chart-number">Market</div>
+                        <div class="chart-label">Share</div>
+                    </div>
+                    
+                    <div class="chart-item">
+                        <div class="chart-visual">
+                            <div class="bar-chart">
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                            </div>
+                        </div>
+                        <div class="chart-number">94%</div>
+                        <div class="chart-label">Goal Achievement</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

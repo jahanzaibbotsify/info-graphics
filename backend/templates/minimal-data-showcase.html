@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Data Showcase</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .infographic {
+            width: 1080px;
+            height: 1080px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            padding: 80px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 100px;
+        }
+        
+        .main-title {
+            font-size: 56px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -2px;
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+            margin-bottom: 30px;
+        }
+        
+        .divider {
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            margin: 0 auto;
+            border-radius: 2px;
+        }
+        
+        /* Main Content Area */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            flex: 1;
+        }
+        
+        /* Left Column - Large Stats */
+        .large-stats {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .large-stat {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .large-stat:last-child {
+            margin-bottom: 0;
+        }
+        
+        .large-number {
+            font-size: 80px;
+            font-weight: 800;
+            color: #ffffff;
+            font-family: 'Space Grotesk', sans-serif;
+            line-height: 0.9;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .large-label {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .large-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 10px;
+            font-weight: 300;
+        }
+        
+        /* Right Column - Small Stats Grid */
+        .small-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-content: start;
+        }
+        
+        .small-stat {
+            text-align: left;
+            padding: 30px 0;
+        }
+        
+        .small-number {
+            font-size: 40px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .small-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        
+        .small-trend {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 400;
+        }
+        
+        .trend-positive {
+            color: #4caf50;
+        }
+        
+        .trend-negative {
+            color: #f44336;
+        }
+        
+        /* Bottom Section */
+        .bottom-section {
+            margin-top: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .metric-bars {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+        }
+        
+        .metric-bar {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .bar-container {
+            height: 120px;
+            width: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 0 auto 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bar-fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            border-radius: 10px;
+            background: linear-gradient(to top, var(--bar-color), rgba(255, 255, 255, 0.3));
+            height: var(--bar-height);
+            transition: height 1s ease-out;
+        }
+        
+        .bar-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .bar-value {
+            font-size: 16px;
+            color: #ffffff;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        
+        /* Individual bar colors and heights */
+        .metric-bar:nth-child(1) .bar-fill {
+            --bar-color: #ff6b6b;
+            --bar-height: 85%;
+        }
+        
+        .metric-bar:nth-child(2) .bar-fill {
+            --bar-color: #4ecdc4;
+            --bar-height: 72%;
+        }
+        
+        .metric-bar:nth-child(3) .bar-fill {
+            --bar-color: #45b7d1;
+            --bar-height: 94%;
+        }
+        
+        .metric-bar:nth-child(4) .bar-fill {
+            --bar-color: #96ceb4;
+            --bar-height: 68%;
+        }
+        
+        .metric-bar:nth-child(5) .bar-fill {
+            --bar-color: #feca57;
+            --bar-height: 89%;
+        }
+        
+        /* Footer Info */
+        .footer-info {
+            margin-left: 40px;
+            text-align: right;
+        }
+        
+        .footer-title {
+            font-size: 16px;
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .footer-text {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.4;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .large-stats {
+            animation: slideInLeft 0.8s ease-out;
+        }
+        
+        .small-stats-grid {
+            animation: slideInRight 0.8s ease-out 0.3s both;
+        }
+        
+        .bottom-section {
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1080px) {
+            .infographic {
+                width: 100vw;
+                height: 100vh;
+                padding: 40px;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .large-number {
+                font-size: 60px;
+            }
+            
+            .metric-bars {
+                justify-content: center;
+            }
+            
+            .footer-info {
+                margin-left: 0;
+                margin-top: 20px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="main-title">Business Insights</h1>
+            <p class="subtitle">Data-driven performance metrics for Q4 2024</p>
+            <div class="divider"></div>
+        </div>
+        
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Left Column - Large Stats -->
+            <div class="large-stats">
+                <div class="large-stat">
+                    <div class="large-number">2.4M</div>
+                    <div class="large-label">Revenue</div>
+                    <div class="large-description">Total quarterly earnings</div>
+                </div>
+                
+                <div class="large-stat">
+                    <div class="large-number">89%</div>
+                    <div class="large-label">Success Rate</div>
+                    <div class="large-description">Project completion rate</div>
+                </div>
+                
+                <div class="large-stat">
+                    <div class="large-number">156K</div>
+                    <div class="large-label">Users</div>
+                    <div class="large-description">Active monthly users</div>
+                </div>
+            </div>
+            
+            <!-- Right Column - Small Stats Grid -->
+            <div class="small-stats-grid">
+                <div class="small-stat">
+                    <div class="small-label">Conversion</div>
+                    <div class="small-number">24.5%</div>
+                    <div class="small-trend trend-positive">+3.2% vs last month</div>
+                </div>
+                
+                <div class="small-stat">
+                    <div class="small-label">Bounce Rate</div>
+                    <div class="small-number">32.1%</div>
+                    <div class="small-trend trend-negative">-1.8% vs last month</div>
+                </div>
+                
+                <div class="small-stat">
+                    <div class="small-label">Sessions</div>
+                    <div class="small-number">847K</div>
+                    <div class="small-trend trend-positive">+18.4% vs last month</div>
+                </div>
+                
+                <div class="small-stat">
+                    <div class="small-label">Page Views</div>
+                    <div class="small-number">2.1M</div>
+                    <div class="small-trend trend-positive">+12.6% vs last month</div>
+                </div>
+                
+                <div class="small-stat">
+                    <div class="small-label">CTR</div>
+                    <div class="small-number">5.8%</div>
+                    <div class="small-trend trend-positive">+0.9% vs last month</div>
+                </div>
+                
+                <div class="small-stat">
+                    <div class="small-label">ROI</div>
+                    <div class="small-number">342%</div>
+                    <div class="small-trend trend-positive">+28% vs last month</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Section -->
+        <div class="bottom-section">
+            <div class="metric-bars">
+                <div class="metric-bar">
+                    <div class="bar-container">
+                        <div class="bar-fill"></div>
+                    </div>
+                    <div class="bar-label">Sales</div>
+                    <div class="bar-value">85%</div>
+                </div>
+                
+                <div class="metric-bar">
+                    <div class="bar-container">
+                        <div class="bar-fill"></div>
+                    </div>
+                    <div class="bar-label">Marketing</div>
+                    <div class="bar-value">72%</div>
+                </div>
+                
+                <div class="metric-bar">
+                    <div class="bar-container">
+                        <div class="bar-fill"></div>
+                    </div>
+                    <div class="bar-label">Product</div>
+                    <div class="bar-value">94%</div>
+                </div>
+                
+                <div class="metric-bar">
+                    <div class="bar-container">
+                        <div class="bar-fill"></div>
+                    </div>
+                    <div class="bar-label">Support</div>
+                    <div class="bar-value">68%</div>
+                </div>
+                
+                <div class="metric-bar">
+                    <div class="bar-container">
+                        <div class="bar-fill"></div>
+                    </div>
+                    <div class="bar-label">Growth</div>
+                    <div class="bar-value">89%</div>
+                </div>
+            </div>
+            
+            <div class="footer-info">
+                <div class="footer-title">Analytics Report</div>
+                <div class="footer-text">Generated on December 2024<br>company.com/analytics</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

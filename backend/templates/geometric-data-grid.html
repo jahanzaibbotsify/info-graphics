@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometric Data Grid</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Source+Code+Pro:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .infographic {
+            width: 1080px;
+            height: 1080px;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 50%, #2d2d2d 100%);
+            position: relative;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .main-title {
+            font-size: 52px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+            margin-bottom: 40px;
+        }
+        
+        .title-decoration {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .deco-line {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff6b6b, transparent);
+        }
+        
+        .deco-diamond {
+            width: 12px;
+            height: 12px;
+            background: #4ecdc4;
+            transform: rotate(45deg);
+        }
+        
+        /* Main Grid Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 40px;
+            flex: 1;
+        }
+        
+        /* Hexagonal Data Cards */
+        .hex-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .hex-shape {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .hex-number {
+            font-size: 42px;
+            font-weight: 800;
+            color: #ffffff;
+            font-family: 'Source Code Pro', monospace;
+            margin-bottom: 8px;
+        }
+        
+        .hex-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+        
+        .hex-trend {
+            font-size: 12px;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        
+        .trend-up {
+            color: #4caf50;
+        }
+        
+        .trend-down {
+            color: #f44336;
+        }
+        
+        /* Triangle Data Points */
+        .triangle-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .triangle-shape {
+            width: 0;
+            height: 0;
+            border-left: 80px solid transparent;
+            border-right: 80px solid transparent;
+            border-bottom: 140px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .triangle-content {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .triangle-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Source Code Pro', monospace;
+            margin-bottom: 5px;
+        }
+        
+        .triangle-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+        
+        /* Individual shape colors and gradients */
+        .hex-card:nth-child(1) .hex-shape {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 107, 107, 0.05));
+            border-color: #ff6b6b;
+        }
+        
+        .hex-card:nth-child(2) .hex-shape {
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.2), rgba(78, 205, 196, 0.05));
+            border-color: #4ecdc4;
+        }
+        
+        .hex-card:nth-child(3) .triangle-shape {
+            border-bottom-color: rgba(69, 183, 209, 0.3);
+        }
+        
+        .hex-card:nth-child(4) .triangle-shape {
+            border-bottom-color: rgba(150, 206, 180, 0.3);
+        }
+        
+        .hex-card:nth-child(5) .hex-shape {
+            background: linear-gradient(135deg, rgba(254, 202, 87, 0.2), rgba(254, 202, 87, 0.05));
+            border-color: #feca57;
+        }
+        
+        .hex-card:nth-child(6) .hex-shape {
+            background: linear-gradient(135deg, rgba(116, 185, 255, 0.2), rgba(116, 185, 255, 0.05));
+            border-color: #74b9ff;
+        }
+        
+        /* Connecting Lines */
+        .connection-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .connection-line {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+        
+        .line-1 {
+            width: 200px;
+            top: 30%;
+            left: 20%;
+            transform: rotate(30deg);
+        }
+        
+        .line-2 {
+            width: 150px;
+            top: 50%;
+            right: 15%;
+            transform: rotate(-45deg);
+        }
+        
+        .line-3 {
+            width: 180px;
+            bottom: 30%;
+            left: 25%;
+            transform: rotate(15deg);
+        }
+        
+        /* Bottom Info Bar */
+        .info-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 60px;
+            right: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 10;
+        }
+        
+        .info-item {
+            text-align: center;
+        }
+        
+        .info-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Source Code Pro', monospace;
+        }
+        
+        .info-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+        
+        /* Background Geometric Elements */
+        .bg-geometry {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        .bg-hex {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .bg-hex-1 {
+            top: 10%;
+            left: 5%;
+            transform: rotate(15deg);
+        }
+        
+        .bg-hex-2 {
+            top: 20%;
+            right: 8%;
+            transform: rotate(-30deg);
+        }
+        
+        .bg-hex-3 {
+            bottom: 15%;
+            left: 10%;
+            transform: rotate(45deg);
+        }
+        
+        .bg-triangle {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-bottom: 50px solid rgba(255, 255, 255, 0.03);
+        }
+        
+        .bg-triangle-1 {
+            top: 15%;
+            left: 30%;
+            transform: rotate(20deg);
+        }
+        
+        .bg-triangle-2 {
+            bottom: 25%;
+            right: 20%;
+            transform: rotate(-40deg);
+        }
+        
+        /* Animations */
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .hex-card {
+            animation: fadeInScale 0.8s ease-out;
+        }
+        
+        .triangle-card {
+            animation: slideInUp 0.8s ease-out;
+        }
+        
+        .bg-hex {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .hex-card:nth-child(1) { animation-delay: 0.1s; }
+        .hex-card:nth-child(2) { animation-delay: 0.2s; }
+        .hex-card:nth-child(3) { animation-delay: 0.3s; }
+        .hex-card:nth-child(4) { animation-delay: 0.4s; }
+        .hex-card:nth-child(5) { animation-delay: 0.5s; }
+        .hex-card:nth-child(6) { animation-delay: 0.6s; }
+        
+        .bg-hex-1 { animation-delay: 2s; }
+        .bg-hex-2 { animation-delay: 3s; }
+        .bg-hex-3 { animation-delay: 4s; }
+        
+        /* Responsive Design */
+        @media (max-width: 1080px) {
+            .infographic {
+                width: 100vw;
+                height: 100vh;
+                padding: 40px;
+            }
+            
+            .main-grid {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: 1fr 1fr 1fr;
+                gap: 30px;
+            }
+            
+            .hex-shape {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .info-bar {
+                flex-direction: column;
+                height: auto;
+                padding: 20px;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic">
+        <!-- Background Geometry -->
+        <div class="bg-geometry">
+            <div class="bg-hex bg-hex-1"></div>
+            <div class="bg-hex bg-hex-2"></div>
+            <div class="bg-hex bg-hex-3"></div>
+            <div class="bg-triangle bg-triangle-1"></div>
+            <div class="bg-triangle bg-triangle-2"></div>
+        </div>
+        
+        <!-- Connection Lines -->
+        <div class="connection-lines">
+            <div class="connection-line line-1"></div>
+            <div class="connection-line line-2"></div>
+            <div class="connection-line line-3"></div>
+        </div>
+        
+        <!-- Header -->
+        <div class="header">
+            <h1 class="main-title">Data Geometry</h1>
+            <p class="subtitle">Multi-dimensional business analytics</p>
+            <div class="title-decoration">
+                <div class="deco-line"></div>
+                <div class="deco-diamond"></div>
+                <div class="deco-line"></div>
+            </div>
+        </div>
+        
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Hexagonal Cards -->
+            <div class="hex-card">
+                <div class="hex-shape">
+                    <div class="hex-number">$2.4M</div>
+                    <div class="hex-label">Revenue</div>
+                    <div class="hex-trend trend-up">+15.2%</div>
+                </div>
+            </div>
+            
+            <div class="hex-card">
+                <div class="hex-shape">
+                    <div class="hex-number">847K</div>
+                    <div class="hex-label">Users</div>
+                    <div class="hex-trend trend-up">+22.1%</div>
+                </div>
+            </div>
+            
+            <!-- Triangle Cards -->
+            <div class="hex-card triangle-card">
+                <div class="triangle-shape">
+                    <div class="triangle-content">
+                        <div class="triangle-number">94%</div>
+                        <div class="triangle-label">Satisfaction</div>
+                    </div>
+                </div>
+                <div class="hex-trend trend-up">+3.4%</div>
+            </div>
+            
+            <div class="hex-card triangle-card">
+                <div class="triangle-shape">
+                    <div class="triangle-content">
+                        <div class="triangle-number">156</div>
+                        <div class="triangle-label">Projects</div>
+                    </div>
+                </div>
+                <div class="hex-trend trend-up">+8.7%</div>
+            </div>
+            
+            <div class="hex-card">
+                <div class="hex-shape">
+                    <div class="hex-number">24.5%</div>
+                    <div class="hex-label">Conversion</div>
+                    <div class="hex-trend trend-up">+2.8%</div>
+                </div>
+            </div>
+            
+            <div class="hex-card">
+                <div class="hex-shape">
+                    <div class="hex-number">89%</div>
+                    <div class="hex-label">Efficiency</div>
+                    <div class="hex-trend trend-up">+5.1%</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Info Bar -->
+        <div class="info-bar">
+            <div class="info-item">
+                <div class="info-number">Q4 2024</div>
+                <div class="info-label">Reporting Period</div>
+            </div>
+            <div class="info-item">
+                <div class="info-number">6</div>
+                <div class="info-label">Key Metrics</div>
+            </div>
+            <div class="info-item">
+                <div class="info-number">+28%</div>
+                <div class="info-label">Overall Growth</div>
+            </div>
+            <div class="info-item">
+                <div class="info-number">97%</div>
+                <div class="info-label">Data Accuracy</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

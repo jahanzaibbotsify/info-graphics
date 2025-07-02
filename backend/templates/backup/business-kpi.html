@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business KPI Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .infographic {
+            width: 1080px;
+            min-height: 1080px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            font-family: 'Inter', sans-serif;
+            color: #1a202c;
+            position: relative;
+            overflow: hidden;
+            padding: 40px;
+        }
+        
+        /* Subtle background pattern */
+        .background-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            background-image: 
+                radial-gradient(circle at 25% 25%, #4a5568 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, #4a5568 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 1;
+        }
+        
+        /* Header Section */
+        .dashboard-header {
+            position: relative;
+            z-index: 10;
+            margin-bottom: 40px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left {
+            flex: 1;
+        }
+        
+        .main-title {
+            font-size: 36px;
+            font-weight: 800;
+            color: #1a202c;
+            margin-bottom: 8px;
+            font-family: 'DM Sans', sans-serif;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        
+        .period-selector {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .period-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .period-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .header-stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1a202c;
+            display: block;
+            margin-bottom: 4px;
+            font-family: 'DM Sans', sans-serif;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 20px;
+            position: relative;
+            z-index: 10;
+            min-height: calc(100% - 180px);
+        }
+        
+        /* KPI Card Base */
+        .kpi-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 
+                0 1px 3px 0 rgba(0, 0, 0, 0.1),
+                0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 10px 25px -3px rgba(0, 0, 0, 0.1),
+                0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #cbd5e1;
+        }
+        
+        /* Large Cards */
+        .kpi-card.large {
+            grid-column: span 2;
+            grid-row: span 2;
+        }
+        
+        .kpi-card.wide {
+            grid-column: span 2;
+        }
+        
+        .kpi-card.tall {
+            grid-row: span 2;
+        }
+        
+        /* Card Headers */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+        
+        .card-subtitle {
+            font-size: 12px;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+        
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .icon-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .icon-green { background: linear-gradient(135deg, #10b981, #047857); }
+        .icon-purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .icon-orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .icon-red { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .icon-indigo { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+        
+        /* Metric Values */
+        .metric-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1a202c;
+            margin-bottom: 8px;
+            font-family: 'DM Sans', sans-serif;
+        }
+        
+        .metric-unit {
+            font-size: 18px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .metric-change {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        
+        .change-positive {
+            color: #059669;
+        }
+        
+        .change-negative {
+            color: #dc2626;
+        }
+        
+        .change-neutral {
+            color: #6b7280;
+        }
+        
+        /* Chart Elements */
+        .mini-chart {
+            height: 60px;
+            margin: 16px 0;
+            position: relative;
+        }
+        
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            height: 100%;
+            gap: 4px;
+            padding: 0 4px;
+        }
+        
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(to top, #e5e7eb, #9ca3af);
+            border-radius: 2px;
+            min-height: 8px;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .chart-bar:hover {
+            opacity: 1;
+        }
+        
+        .chart-bar.highlight {
+            background: linear-gradient(to top, #3b82f6, #1d4ed8);
+            opacity: 1;
+        }
+        
+        /* Progress Rings */
+        .progress-ring {
+            width: 80px;
+            height: 80px;
+            margin: 16px auto;
+            position: relative;
+        }
+        
+        .progress-ring svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+        
+        .progress-ring-bg {
+            fill: none;
+            stroke: #f3f4f6;
+            stroke-width: 8;
+        }
+        
+        .progress-ring-fill {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+        
+        .progress-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        
+        .progress-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a202c;
+        }
+        
+        .progress-label {
+            font-size: 10px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Trend Lines */
+        .trend-line {
+            height: 40px;
+            margin: 12px 0;
+        }
+        
+        .trend-line svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .trend-path {
+            fill: none;
+            stroke: #3b82f6;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+        
+        .trend-area {
+            fill: url(#trendGradient);
+            opacity: 0.3;
+        }
+        
+        /* Performance Indicators */
+        .performance-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .performance-item {
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .performance-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 4px;
+        }
+        
+        .performance-label {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-good {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-critical {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .kpi-card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .kpi-card:nth-child(1) { animation-delay: 0.1s; }
+        .kpi-card:nth-child(2) { animation-delay: 0.2s; }
+        .kpi-card:nth-child(3) { animation-delay: 0.3s; }
+        .kpi-card:nth-child(4) { animation-delay: 0.4s; }
+        .kpi-card:nth-child(5) { animation-delay: 0.5s; }
+        .kpi-card:nth-child(6) { animation-delay: 0.6s; }
+        .kpi-card:nth-child(7) { animation-delay: 0.7s; }
+        .kpi-card:nth-child(8) { animation-delay: 0.8s; }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1080px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .kpi-card.large,
+            .kpi-card.wide {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic">
+        <div class="background-pattern"></div>
+        
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="main-title">Business KPI Dashboard</h1>
+                    <p class="subtitle">Q1 2024 Performance Overview</p>
+                    <div class="period-selector">
+                        <button class="period-btn">1W</button>
+                        <button class="period-btn">1M</button>
+                        <button class="period-btn active">3M</button>
+                        <button class="period-btn">1Y</button>
+                    </div>
+                </div>
+                <div class="header-stats">
+                    <div class="header-stat">
+                        <span class="stat-value">94.2%</span>
+                        <span class="stat-label">Goal Achievement</span>
+                    </div>
+                    <div class="header-stat">
+                        <span class="stat-value">$2.8M</span>
+                        <span class="stat-label">Total Revenue</span>
+                    </div>
+                    <div class="header-stat">
+                        <span class="stat-value">15.7%</span>
+                        <span class="stat-label">Growth Rate</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- KPI Grid -->
+        <div class="kpi-grid">
+            <!-- Revenue Card (Large) -->
+            <div class="kpi-card large">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Total Revenue</div>
+                        <div class="card-subtitle">Monthly recurring</div>
+                    </div>
+                    <div class="card-icon icon-blue">$</div>
+                </div>
+                <div class="metric-value">$847,230</div>
+                <div class="metric-change change-positive">
+                    ▲ +12.5% vs last month
+                </div>
+                <div class="trend-line">
+                    <svg>
+                        <defs>
+                            <linearGradient id="trendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.8" />
+                                <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0" />
+                            </linearGradient>
+                        </defs>
+                        <path class="trend-area" d="M0,30 Q25,20 50,15 T100,10 L100,40 L0,40 Z" />
+                        <path class="trend-path" d="M0,30 Q25,20 50,15 T100,10" />
+                    </svg>
+                </div>
+                <div class="performance-grid">
+                    <div class="performance-item">
+                        <div class="performance-value">$28.4K</div>
+                        <div class="performance-label">Avg Deal Size</div>
+                    </div>
+                    <div class="performance-item">
+                        <div class="performance-value">87</div>
+                        <div class="performance-label">New Customers</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customer Satisfaction -->
+            <div class="kpi-card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Customer Satisfaction</div>
+                        <div class="card-subtitle">NPS Score</div>
+                    </div>
+                    <div class="card-icon icon-green">😊</div>
+                </div>
+                <div class="progress-ring">
+                    <svg>
+                        <circle class="progress-ring-bg" cx="40" cy="40" r="36" />
+                        <circle class="progress-ring-fill" 
+                                cx="40" cy="40" r="36"
+                                stroke="#10b981"
+                                stroke-dasharray="226"
+                                stroke-dashoffset="45" />
+                    </svg>
+                    <div class="progress-center">
+                        <div class="progress-value">87%</div>
+                        <div class="progress-label">Score</div>
+                    </div>
+                </div>
+                <div class="status-badge status-good">● Excellent</div>
+            </div>
+            
+            <!-- Conversion Rate -->
+            <div class="kpi-card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Conversion Rate</div>
+                        <div class="card-subtitle">Lead to customer</div>
+                    </div>
+                    <div class="card-icon icon-purple">%</div>
+                </div>
+                <div class="metric-value">14.2<span class="metric-unit">%</span></div>
+                <div class="metric-change change-positive">
+                    ▲ +2.1% from target
+                </div>
+                <div class="mini-chart">
+                    <div class="chart-bars">
+                        <div class="chart-bar" style="height: 40%;"></div>
+                        <div class="chart-bar" style="height: 60%;"></div>
+                        <div class="chart-bar" style="height: 80%;"></div>
+                        <div class="chart-bar highlight" style="height: 95%;"></div>
+                        <div class="chart-bar" style="height: 70%;"></div>
+                        <div class="chart-bar" style="height: 85%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Monthly Active Users (Wide) -->
+            <div class="kpi-card wide">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Monthly Active Users</div>
+                        <div class="card-subtitle">Platform engagement</div>
+                    </div>
+                    <div class="card-icon icon-orange">👥</div>
+                </div>
+                <div class="metric-value">24,637</div>
+                <div class="metric-change change-positive">
+                    ▲ +8.3% month over month
+                </div>
+                <div class="mini-chart">
+                    <div class="chart-bars">
+                        <div class="chart-bar" style="height: 30%;"></div>
+                        <div class="chart-bar" style="height: 45%;"></div>
+                        <div class="chart-bar" style="height: 60%;"></div>
+                        <div class="chart-bar" style="height: 55%;"></div>
+                        <div class="chart-bar" style="height: 75%;"></div>
+                        <div class="chart-bar" style="height: 85%;"></div>
+                        <div class="chart-bar highlight" style="height: 95%;"></div>
+                        <div class="chart-bar" style="height: 90%;"></div>
+                        <div class="chart-bar" style="height: 80%;"></div>
+                        <div class="chart-bar" style="height: 88%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cost Per Acquisition -->
+            <div class="kpi-card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Cost Per Acquisition</div>
+                        <div class="card-subtitle">Marketing efficiency</div>
+                    </div>
+                    <div class="card-icon icon-red">💰</div>
+                </div>
+                <div class="metric-value">$127</div>
+                <div class="metric-change change-negative">
+                    ▼ +$23 vs target
+                </div>
+                <div class="status-badge status-warning">● Above Target</div>
+            </div>
+            
+            <!-- Employee Productivity (Tall) -->
+            <div class="kpi-card tall">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Team Productivity</div>
+                        <div class="card-subtitle">Output metrics</div>
+                    </div>
+                    <div class="card-icon icon-indigo">⚡</div>
+                </div>
+                <div class="metric-value">92.4<span class="metric-unit">%</span></div>
+                <div class="metric-change change-positive">
+                    ▲ +4.2% efficiency gain
+                </div>
+                <div class="performance-grid">
+                    <div class="performance-item">
+                        <div class="performance-value">156</div>
+                        <div class="performance-label">Tasks/Week</div>
+                    </div>
+                    <div class="performance-item">
+                        <div class="performance-value">2.3h</div>
+                        <div class="performance-label">Avg Time</div>
+                    </div>
+                    <div class="performance-item">
+                        <div class="performance-value">98.7%</div>
+                        <div class="performance-label">Quality</div>
+                    </div>
+                    <div class="performance-item">
+                        <div class="performance-value">4.8★</div>
+                        <div class="performance-label">Rating</div>
+                    </div>
+                </div>
+                <div class="status-badge status-good">● On Track</div>
+            </div>
+            
+            <!-- Churn Rate -->
+            <div class="kpi-card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Churn Rate</div>
+                        <div class="card-subtitle">Customer retention</div>
+                    </div>
+                    <div class="card-icon icon-red">📉</div>
+                </div>
+                <div class="metric-value">2.8<span class="metric-unit">%</span></div>
+                <div class="metric-change change-positive">
+                    ▼ -0.9% improvement
+                </div>
+                <div class="progress-ring">
+                    <svg>
+                        <circle class="progress-ring-bg" cx="40" cy="40" r="36" />
+                        <circle class="progress-ring-fill" 
+                                cx="40" cy="40" r="36"
+                                stroke="#ef4444"
+                                stroke-dasharray="226"
+                                stroke-dashoffset="189" />
+                    </svg>
+                    <div class="progress-center">
+                        <div class="progress-value">2.8%</div>
+                        <div class="progress-label">Rate</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profit Margin -->
+            <div class="kpi-card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Profit Margin</div>
+                        <div class="card-subtitle">Net profitability</div>
+                    </div>
+                    <div class="card-icon icon-green">📈</div>
+                </div>
+                <div class="metric-value">34.7<span class="metric-unit">%</span></div>
+                <div class="metric-change change-positive">
+                    ▲ +2.3% vs last quarter
+                </div>
+                <div class="status-badge status-good">● Healthy</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

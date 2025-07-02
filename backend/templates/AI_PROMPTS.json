@@ -1,0 +1,191 @@
+{
+  "templateSelection": {
+    "systemPrompt": "You are an intelligent infographic template selector. Analyze user requests and select the most appropriate template from 11 available options based on data type, keywords, and use case. Always provide reasoning for your selection.",
+    
+    "selectionRules": {
+      "modern-statistics-overview.html": {
+        "keywords": ["statistics", "overview", "modern", "clean", "minimal", "professional", "business insights", "performance metrics", "quarterly", "data-driven"],
+        "dataTypes": ["business_metrics", "quarterly_data", "performance_indicators", "statistical_data"],
+        "useCases": ["business_overview", "quarterly_reporting", "executive_summary", "clean_presentation"],
+        "priority": 1
+      },
+      
+      "minimal-data-showcase.html": {
+        "keywords": ["minimal", "showcase", "asymmetric", "two-column", "large numbers", "gradient text", "clean design", "simple"],
+        "dataTypes": ["key_metrics", "highlight_numbers", "trend_data", "comparison_metrics"],
+        "useCases": ["data_highlighting", "key_metrics_display", "executive_dashboard", "minimal_reporting"],
+        "priority": 2
+      },
+      
+      "circular-metrics-layout.html": {
+        "keywords": ["circular", "orbit", "radial", "360", "performance radar", "futuristic", "central metric", "surrounding data"],
+        "dataTypes": ["performance_scores", "multi_dimensional_data", "radar_metrics", "circular_data"],
+        "useCases": ["performance_overview", "multi_metric_analysis", "radar_charts", "circular_visualization"],
+        "priority": 3
+      },
+      
+      "vertical-timeline-stats.html": {
+        "keywords": ["timeline", "vertical", "progression", "growth", "quarterly", "evolution", "time series", "historical"],
+        "dataTypes": ["time_series", "quarterly_data", "progression_metrics", "historical_data"],
+        "useCases": ["growth_tracking", "timeline_visualization", "quarterly_progression", "historical_analysis"],
+        "priority": 4
+      },
+      
+      "geometric-data-grid.html": {
+        "keywords": ["geometric", "hexagonal", "triangular", "shapes", "grid", "modern", "angular", "dimensional"],
+        "dataTypes": ["grid_data", "categorical_metrics", "multi_category_data", "geometric_visualization"],
+        "useCases": ["category_analysis", "geometric_presentation", "modern_visualization", "grid_layout"],
+        "priority": 5
+      },
+      
+      "diagonal-split-layout.html": {
+        "keywords": ["diagonal", "split", "asymmetric", "large metric", "department performance", "analytics dashboard"],
+        "dataTypes": ["mixed_analytics", "department_data", "performance_metrics", "dashboard_data"],
+        "useCases": ["analytics_dashboard", "department_reporting", "split_view_analysis", "performance_tracking"],
+        "priority": 6
+      },
+      
+      "financial-dashboard.html": {
+        "keywords": ["financial", "finance", "money", "revenue", "profit", "investment", "stock", "portfolio", "trading", "ROI", "P&L", "earnings", "budget", "monetary"],
+        "dataTypes": ["currency", "financial_ratios", "stock_prices", "investment_data"],
+        "useCases": ["financial_reporting", "investment_analysis", "stock_tracking", "financial_performance"],
+        "priority": 7
+      },
+      
+      "market-comparison.html": {
+        "keywords": ["comparison", "vs", "versus", "competitor", "market share", "competitive", "benchmark", "against", "compared", "leader", "competition"],
+        "dataTypes": ["comparison_data", "market_share", "competitive_metrics"],
+        "useCases": ["competitive_analysis", "market_positioning", "product_comparison", "benchmarking"],
+        "priority": 8
+      },
+      
+      "social-media-metrics.html": {
+        "keywords": ["social media", "Instagram", "Facebook", "Twitter", "TikTok", "LinkedIn", "followers", "engagement", "likes", "shares", "comments", "social analytics"],
+        "dataTypes": ["follower_counts", "engagement_rates", "platform_metrics", "content_performance"],
+        "useCases": ["social_reporting", "content_strategy", "platform_analysis", "engagement_tracking"],
+        "priority": 9
+      },
+      
+      "survey-results.html": {
+        "keywords": ["survey", "poll", "questionnaire", "feedback", "responses", "satisfaction", "rating", "research", "demographics", "age groups"],
+        "dataTypes": ["survey_responses", "satisfaction_ratings", "demographic_data", "poll_results"],
+        "useCases": ["market_research", "customer_feedback", "survey_analysis", "poll_visualization"],
+        "priority": 10
+      },
+      
+      "chart-analytics.html": {
+        "keywords": ["analytics", "dashboard", "overview", "performance", "metrics", "data visualization", "business intelligence", "reporting", "general"],
+        "dataTypes": ["mixed_data", "general_metrics", "business_data"],
+        "useCases": ["general_reporting", "business_overview", "mixed_analytics", "dashboard_creation"],
+        "priority": 11
+      }
+    },
+    
+    "mainPrompt": "Analyze the user request and select the most appropriate infographic template:\n\nUSER REQUEST: {user_input}\n\nSELECTION CRITERIA:\n1. MODERN STATS: Clean business insights, quarterly metrics → modern-statistics-overview.html\n2. MINIMAL SHOWCASE: Two-column, large numbers, gradient text → minimal-data-showcase.html\n3. CIRCULAR LAYOUT: Central metric, orbiting data, 360° view → circular-metrics-layout.html\n4. TIMELINE: Quarterly growth, progression, time series → vertical-timeline-stats.html\n5. GEOMETRIC: Hexagonal/triangular shapes, grid layout → geometric-data-grid.html\n6. DIAGONAL SPLIT: Analytics dashboard, department performance → diagonal-split-layout.html\n7. FINANCIAL: Revenue, stocks, investments, financial metrics → financial-dashboard.html\n8. COMPARISON: VS, competitors, market share, benchmarking → market-comparison.html\n9. SOCIAL MEDIA: Platforms, followers, engagement, social analytics → social-media-metrics.html\n10. SURVEY/RESEARCH: Polls, feedback, satisfaction, research results → survey-results.html\n11. GENERAL ANALYTICS: Dashboard, overview, mixed metrics → chart-analytics.html\n\nProvide your selection in this format:\nSELECTED_TEMPLATE: [filename.html]\nCONFIDENCE: [High/Medium/Low]\nREASONING: [Brief explanation]\nKEY_FACTORS: [Main factors that influenced selection]"
+  },
+  
+  "dataCustomization": {
+    "systemPrompt": "You are a data customization specialist. Help users map their specific data to the selected infographic template structure. Provide clear, actionable customization instructions.",
+    
+    "customizationPrompt": "TEMPLATE: {selected_template}\nUSER DATA: {user_data}\n\nProvide customization instructions:\n\n1. DATA MAPPING:\n   - Identify key metrics from user data\n   - Map to template chart elements\n   - Suggest data transformations if needed\n\n2. VISUAL ADJUSTMENTS:\n   - Recommend color scheme\n   - Suggest chart modifications\n   - Identify elements to add/remove\n\n3. CUSTOMIZATION STEPS:\n   - Step-by-step modification guide\n   - Specific HTML/CSS changes needed\n   - Data value replacements\n\nFormat response as actionable instructions with specific code examples where applicable."
+  },
+  
+  "qualityAssurance": {
+    "systemPrompt": "You are a quality assurance specialist for infographic template selection. Verify that the chosen template is optimal for the user's needs and suggest improvements.",
+    
+    "qaPrompt": "REVIEW SELECTION:\nTemplate: {selected_template}\nUser Request: {user_request}\nData Type: {data_type}\n\nEVALUATION CHECKLIST:\n✓ Template matches data type\n✓ Chart types are appropriate\n✓ Layout suits the message\n✓ Visual hierarchy is effective\n✓ Target audience alignment\n\nProvide assessment:\nSTATUS: [APPROVED/NEEDS_REVIEW/CHANGE_RECOMMENDED]\nISSUES: [Any concerns or mismatches]\nALTERNATIVE: [If recommending change, suggest better template]\nIMPROVEMENTS: [Specific suggestions for optimization]"
+  },
+  
+  "examples": {
+    "modern_stats_example": {
+      "input": "Create a clean business overview showing Q4 2024 performance metrics with professional styling",
+      "expected_template": "modern-statistics-overview.html",
+      "reasoning": "Clean, professional business metrics presentation with modern styling"
+    },
+    
+    "minimal_showcase_example": {
+      "input": "Show key metrics with large prominent numbers and minimal design",
+      "expected_template": "minimal-data-showcase.html",
+      "reasoning": "Emphasizes large numbers and minimal, clean presentation style"
+    },
+    
+    "circular_metrics_example": {
+      "input": "Display performance radar with central score and surrounding department metrics",
+      "expected_template": "circular-metrics-layout.html",
+      "reasoning": "Central metric with orbiting data points in 360° layout"
+    },
+    
+    "timeline_example": {
+      "input": "Show quarterly revenue growth timeline and progression over time",
+      "expected_template": "vertical-timeline-stats.html",
+      "reasoning": "Time-based progression with quarterly data visualization"
+    },
+    
+    "geometric_example": {
+      "input": "Create modern data visualization with hexagonal shapes and geometric design",
+      "expected_template": "geometric-data-grid.html",
+      "reasoning": "Geometric shapes and modern angular presentation"
+    },
+    
+    "diagonal_example": {
+      "input": "Analytics dashboard with large central metric and department performance charts",
+      "expected_template": "diagonal-split-layout.html",
+      "reasoning": "Split layout with prominent central metric and supporting analytics"
+    },
+    
+    "financial_example": {
+      "input": "Create an infographic showing Q4 revenue of $2.4M, portfolio allocation, and stock performance with 15% growth",
+      "expected_template": "financial-dashboard.html",
+      "reasoning": "Contains financial metrics (revenue, portfolio, stocks), currency values, and investment performance data"
+    },
+    
+    "social_example": {
+      "input": "Show Instagram engagement rates, TikTok follower growth, and compare platform performance",
+      "expected_template": "social-media-metrics.html", 
+      "reasoning": "Focuses on social media platforms, engagement metrics, and platform-specific data"
+    },
+    
+    "comparison_example": {
+      "input": "Compare our product vs 3 competitors showing market share and performance benchmarks",
+      "expected_template": "market-comparison.html",
+      "reasoning": "Explicit comparison request with competitive analysis and market positioning"
+    },
+    
+    "survey_example": {
+      "input": "Display customer satisfaction survey with 85% satisfaction rate and demographic breakdown",
+      "expected_template": "survey-results.html",
+      "reasoning": "Survey data with satisfaction ratings and demographic analysis"
+    },
+    
+    "general_example": {
+      "input": "Create a business dashboard with various metrics and performance indicators",
+      "expected_template": "chart-analytics.html",
+      "reasoning": "General analytics request with mixed data types requiring flexible dashboard"
+    }
+  },
+  
+  "implementation": {
+    "workflow": [
+      "1. Parse user input for keywords and data types",
+      "2. Score each template based on keyword matches",
+      "3. Apply priority rules and context analysis", 
+      "4. Select highest scoring template",
+      "5. Generate customization recommendations",
+      "6. Perform quality assurance check",
+      "7. Provide final template and instructions"
+    ],
+    
+    "scoring_algorithm": {
+      "keyword_match": "2 points per matching keyword",
+      "data_type_match": "3 points per matching data type", 
+      "use_case_match": "4 points per matching use case",
+      "context_bonus": "1-5 additional points for strong contextual fit"
+    },
+    
+    "fallback_rules": {
+      "no_clear_match": "Default to chart-analytics.html",
+      "multiple_high_scores": "Use priority ranking to break ties",
+      "ambiguous_request": "Ask clarifying questions before selection"
+    }
+  }
+} 

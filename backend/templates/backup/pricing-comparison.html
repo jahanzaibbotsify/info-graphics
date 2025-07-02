@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing Comparison Infographic</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .infographic {
+            width: 1080px;
+            min-height: 1080px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            padding: 50px;
+        }
+        
+        .background-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.05;
+            background-image: 
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(180deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .main-title {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #ffffff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            font-weight: 400;
+            margin-bottom: 30px;
+        }
+        
+        .pricing-container {
+            position: relative;
+            z-index: 10;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 40px 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .pricing-card.featured {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #4ecdc4;
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(78, 205, 196, 0.3);
+        }
+        
+        .pricing-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+            color: white;
+            padding: 8px 25px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+        
+        .plan-name {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .plan-description {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .price-section {
+            margin-bottom: 30px;
+        }
+        
+        .price {
+            font-size: 48px;
+            font-weight: 900;
+            font-family: 'Fira Code', monospace;
+            margin-bottom: 5px;
+        }
+        
+        .price-currency {
+            font-size: 24px;
+            vertical-align: super;
+        }
+        
+        .price-period {
+            font-size: 16px;
+            opacity: 0.7;
+            font-weight: 500;
+        }
+        
+        .price-note {
+            font-size: 12px;
+            opacity: 0.6;
+            margin-top: 10px;
+        }
+        
+        .features-list {
+            list-style: none;
+            margin-bottom: 35px;
+            text-align: left;
+        }
+        
+        .features-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        
+        .feature-included .feature-icon {
+            background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+            color: white;
+        }
+        
+        .feature-excluded .feature-icon {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .feature-excluded {
+            opacity: 0.5;
+        }
+        
+        .cta-button {
+            width: 100%;
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-align: center;
+        }
+        
+        .basic-card .cta-button {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .pro-card .cta-button {
+            background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+            color: white;
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        }
+        
+        .enterprise-card .cta-button {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .comparison-table {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        .table-title {
+            font-size: 24px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4ecdc4;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .comparison-header {
+            font-weight: 700;
+            font-size: 16px;
+            padding: 15px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .comparison-row {
+            display: contents;
+        }
+        
+        .feature-name {
+            padding: 15px;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature-value {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Fira Code', monospace;
+            font-weight: 600;
+        }
+        
+        .feature-check {
+            color: #4ecdc4;
+            font-size: 18px;
+        }
+        
+        .feature-cross {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 18px;
+        }
+        
+        .savings-banner {
+            text-align: center;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+        
+        .savings-text {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .savings-detail {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .testimonial {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border-left: 4px solid #4ecdc4;
+        }
+        
+        .testimonial-text {
+            font-size: 16px;
+            font-style: italic;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .testimonial-author {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4ecdc4;
+        }
+        
+        .money-back {
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 20px;
+        }
+        
+        .guarantee-icon {
+            color: #4ecdc4;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic">
+        <div class="background-grid"></div>
+        
+        <div class="header">
+            <h1 class="main-title">Choose Your Plan</h1>
+            <p class="subtitle">Find the perfect plan for your business needs</p>
+        </div>
+        
+        <div class="pricing-container">
+            <div class="savings-banner">
+                <div class="savings-text">Save up to 40% with Annual Billing!</div>
+                <div class="savings-detail">All plans include 14-day free trial • No setup fees • Cancel anytime</div>
+            </div>
+            
+            <div class="pricing-grid">
+                <!-- Basic Plan -->
+                <div class="pricing-card basic-card">
+                    <h3 class="plan-name">Basic</h3>
+                    <p class="plan-description">Perfect for small teams and startups getting started</p>
+                    
+                    <div class="price-section">
+                        <div class="price">
+                            <span class="price-currency">$</span>29
+                        </div>
+                        <div class="price-period">per month</div>
+                        <div class="price-note">$348 billed annually</div>
+                    </div>
+                    
+                    <ul class="features-list">
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            Up to 5 team members
+                        </li>
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            10GB storage space
+                        </li>
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            Basic analytics
+                        </li>
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            Email support
+                        </li>
+                        <li class="feature-excluded">
+                            <span class="feature-icon">✗</span>
+                            Advanced integrations
+                        </li>
+                        <li class="feature-excluded">
+                            <span class="feature-icon">✗</span>
+                            Priority support
+                        </li>
+                    </ul>
+                    
+                    <a href="#" class="cta-button">Start Free Trial</a>
+                </div>
+                
+                <!-- Pro Plan -->
+                <div class="pricing-card pro-card featured">
+                    <h3 class="plan-name">Professional</h3>
+                    <p class="plan-description">Ideal for growing teams that need more power and flexibility</p>
+                    
+                    <div class="price-section">
+                        <div class="price">
+                            <span class="price-currency">$</span>79
+                        </div>
+                        <div class="price-period">per month</div>
+                        <div class="price-note">$948 billed annually</div>
+                    </div>
+                    
+                    <ul class="features-list">
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            Up to 25 team members
+                        </li>
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            100GB storage space
+                        </li>
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            Advanced analytics
+                        </li>
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            Priority email support
+                        </li>
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            50+ integrations
+                        </li>
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            Custom workflows
+                        </li>
+                    </ul>
+                    
+                    <a href="#" class="cta-button">Start Free Trial</a>
+                </div>
+                
+                <!-- Enterprise Plan -->
+                <div class="pricing-card enterprise-card">
+                    <h3 class="plan-name">Enterprise</h3>
+                    <p class="plan-description">For large organizations requiring advanced security and control</p>
+                    
+                    <div class="price-section">
+                        <div class="price">
+                            <span class="price-currency">$</span>199
+                        </div>
+                        <div class="price-period">per month</div>
+                        <div class="price-note">$2388 billed annually</div>
+                    </div>
+                    
+                    <ul class="features-list">
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            Unlimited team members
+                        </li>
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            1TB storage space
+                        </li>
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            Advanced analytics + AI
+                        </li>
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            24/7 phone support
+                        </li>
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            Unlimited integrations
+                        </li>
+                        <li class="feature-included">
+                            <span class="feature-icon">✓</span>
+                            SSO & advanced security
+                        </li>
+                    </ul>
+                    
+                    <a href="#" class="cta-button">Contact Sales</a>
+                </div>
+            </div>
+            
+            <div class="comparison-table">
+                <h3 class="table-title">Feature Comparison</h3>
+                <div class="comparison-grid">
+                    <div class="comparison-header">Features</div>
+                    <div class="comparison-header">Basic</div>
+                    <div class="comparison-header">Professional</div>
+                    <div class="comparison-header">Enterprise</div>
+                    
+                    <div class="comparison-row">
+                        <div class="feature-name">Team Members</div>
+                        <div class="feature-value">5</div>
+                        <div class="feature-value">25</div>
+                        <div class="feature-value">Unlimited</div>
+                    </div>
+                    
+                    <div class="comparison-row">
+                        <div class="feature-name">Storage Space</div>
+                        <div class="feature-value">10GB</div>
+                        <div class="feature-value">100GB</div>
+                        <div class="feature-value">1TB</div>
+                    </div>
+                    
+                    <div class="comparison-row">
+                        <div class="feature-name">API Calls/Month</div>
+                        <div class="feature-value">10K</div>
+                        <div class="feature-value">100K</div>
+                        <div class="feature-value">Unlimited</div>
+                    </div>
+                    
+                    <div class="comparison-row">
+                        <div class="feature-name">Integrations</div>
+                        <div class="feature-value">Basic</div>
+                        <div class="feature-value">50+</div>
+                        <div class="feature-value">Unlimited</div>
+                    </div>
+                    
+                    <div class="comparison-row">
+                        <div class="feature-name">Support</div>
+                        <div class="feature-value">Email</div>
+                        <div class="feature-value">Priority</div>
+                        <div class="feature-value">24/7 Phone</div>
+                    </div>
+                    
+                    <div class="comparison-row">
+                        <div class="feature-name">SLA Guarantee</div>
+                        <div class="feature-value"><span class="feature-cross">✗</span></div>
+                        <div class="feature-value">99.5%</div>
+                        <div class="feature-value">99.9%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial">
+                <p class="testimonial-text">"Switching to the Professional plan increased our team productivity by 300%. The advanced analytics helped us identify bottlenecks we never knew existed."</p>
+                <div class="testimonial-author">— Sarah Chen, CTO at TechFlow</div>
+            </div>
+            
+            <div class="money-back">
+                <span class="guarantee-icon">🛡️</span>
+                30-day money-back guarantee • No questions asked
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
