@@ -86,8 +86,9 @@ class InfographicController {
       const totalInfographics = allInfographics.length;
       const totalPages = Math.ceil(totalInfographics / limit);
       
-      // Manual pagination
-      const infographics = allInfographics.slice(skip, skip + limit);
+      // Sort by created_at descending (newest first) then apply manual pagination
+      const sortedInfographics = allInfographics.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const infographics = sortedInfographics.slice(skip, skip + limit);
       
       const formattedInfographics = infographics.map(infographic => ({
         id: infographic._id,
