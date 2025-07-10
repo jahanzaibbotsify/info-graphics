@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Infographic Background</title>
+    <base href="{base_url}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            /* display: flex;
+            justify-content: center;
+            align-items: center; */
+        }
+
+        .main-container {
+            min-height: 900px;
+            /* Radial gradient: inner circle color, then outer color */
+            background: radial-gradient(circle at center,
+                    #15a6a9 0%,
+                    /* Inner circle color */
+                    #15a6a9 37%,
+                    /* Inner circle radius */
+                    #2dbebe 38%,
+                    /* Outer color starts just after inner */
+                    #2dbebe 100%
+                    /* Outer color fills the rest */
+                );
+            padding: 0;
+            margin: auto;
+        }
+
+        /* .center-circle {
+            position: absolute;
+            margin: auto;
+            width: 800px;
+            height: 800px;
+            background: #18b8bb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+        } */
+
+        .title {
+            position: relative;
+            padding-top: 120px;
+
+        }
+
+        .title>* {
+            font-weight: bolder;
+            color: yellow;
+            text-align: center;
+            line-height: 0.9;
+        }
+
+        .title h1 {
+            font-size: 4rem;
+
+        }
+
+        .title h2 {
+            font-size: 3rem;
+        }
+
+        .girl-image {
+            position: absolute;
+            width: 200px;
+            inset: 0;
+            margin: 0 auto;
+            top: 220px;
+            /* bottom: 30px; */
+        }
+
+
+        .symptom-circle {
+            width: 100;
+            /* Adjust size as needed */
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 9999px;
+            /* Full rounded for circle */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            padding: 10px;
+            z-index: 1;
+        }
+
+        .symptom-icon {
+            font-size: 5rem;
+            margin-bottom: 5px;
+        }
+
+        .symptom-title {
+            width: 150px;
+            color: yellow;
+            font-weight: bolder;
+            text-align: center;
+            position: relative;
+            display: inline-block;
+            /* Ensures the :after is relative to the text width */
+        }
+
+        .symptom-title::after {
+            content: "";
+            display: block;
+            margin: 0 auto;
+            margin-top: 6px;
+            /* space between text and border */
+            width: 70%;
+            /* adjust to be slightly smaller than text width */
+            border-bottom: 5px solid yellow;
+            /* or your desired color/thickness */
+        }
+
+        .weight-symptom-icon {
+            font-size: 10rem;
+            margin-bottom: 5px;
+        }
+
+
+        .top-container {
+            width: 790px;
+            margin: auto;
+            margin-top: 30px;
+        }
+
+        .middle-container {
+            width: 850px;
+            margin: auto;
+            margin-top: 30px;
+        }
+
+        .bottom-container {
+            width: 810px;
+            margin: auto;
+            margin-top: 30px;
+        }
+
+        .line {
+            border-top: 5px solid white;
+            width: 80px;
+        }
+
+
+        .excessive-thirst-container,
+        .fatigue-container,
+        .blood-sugar-container,
+        .wounds-heal-container,
+        .weight-loss-container,
+        .blurry-vision-container {
+            position: relative;
+        }
+
+        .excessive-thirst-container .line {
+            position: absolute;
+            top: 100px;
+            left: 220px;
+            transform: rotate(45deg);
+        }
+
+        .fatigue-container .line {
+            position: absolute;
+            top: 100px;
+            right: 220px;
+            transform: rotate(310deg);
+        }
+
+        .blood-sugar-container .line {
+            position: absolute;
+            left: 250px;
+        }
+
+        .wounds-heal-container .line {
+            position: absolute;
+            right: 250px;
+        }
+
+        .weight-loss-container .line {
+            position: absolute;
+            bottom: 100px;
+            left: 235px;
+            transform: rotate(320deg);
+        }
+
+        .blurry-vision-container .line {
+            position: absolute;
+            bottom: 100px;
+            right: 235px;
+            transform: rotate(210deg);
+        }
+
+        footer {
+            width: 900px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <div class="center-circle"> -->
+    <img class="girl-image" src="/templates/images/diabetes-bg/girl2.png" />
+    <!-- </div> -->
+
+    <div class="container-xxl main-container">
+        <div class="title">
+            <h1 class="m-0 p-0">
+                SYMPTOMS
+                <h2 class="m-0 p-0">OF DIABETES</h2>
+            </h1>
+        </div>
+        <div class="row top-container">
+            <div class="col d-flex align-items-center  excessive-thirst-container">
+                <h4 class="symptom-title">Excessive Thirst</h4>
+                <div class="symptom-circle bg-warning">
+                    <span class="symptom-icon">💧</span>
+                </div>
+                <span class="line"></span>
+            </div>
+
+            <div class="col d-flex align-items-center justify-content-end fatigue-container">
+                <span class="line"></span>
+                <div class="symptom-circle bg-primary">
+                    <span class="symptom-icon" style="transform: rotate(110deg);">🌙</span>
+                </div>
+                <h4 class="symptom-title">Fatigue</h4>
+            </div>
+        </div>
+        <div class="row middle-container">
+            <div class="col d-flex align-items-center blood-sugar-container">
+                <h4 class="symptom-title">High Blood Sugar</h4>
+                <div class="symptom-circle" style="background-color: #56c6c6;">
+                    <span class="symptom-icon" style="margin:5px">📟</span>
+                </div>
+                <span class="line"></span>
+            </div>
+
+            <div class="col d-flex align-items-center justify-content-end wounds-heal-container">
+                <span class="line"></span>
+                <div class="symptom-circle bg-danger">
+                    <span class="symptom-icon" style="margin: 5px;">🩹</span>
+                </div>
+                <h4 class="symptom-title">Wounds Heal Slowly</h4>
+            </div>
+        </div>
+        <div class="row bottom-container">
+            <div class="col d-flex align-items-center  weight-loss-container">
+                <h4 class="symptom-title me-2">Weight Loss</h4>
+                <div class="symptom-circle bg-white">
+                    <span class="weight-symptom-icon">
+                        <svg style="margin-bottom: 20px;" width="82" height="82" viewBox="0 0 32 32" fill="none">
+                            <rect x="4" y="8" width="24" height="16" rx="4" fill="#3ec6c6" stroke="#1b7f7f"
+                                stroke-width="2" />
+                            <rect x="12" y="14" width="8" height="4" rx="2" fill="#fff" />
+                            <circle cx="16" cy="16" r="1" fill="#1b7f7f" />
+                        </svg>
+                    </span>
+                </div>
+                <span class="line"></span>
+            </div>
+
+            <div class="col d-flex align-items-center justify-content-end blurry-vision-container">
+                <span class="line"></span>
+                <div class="symptom-circle " style="background-color: #56c6c6;">
+                    <span class="symptom-icon ">👁️</span>
+                </div>
+                <h4 class="symptom-title ms-2">Blurry Vision</h4>
+            </div>
+        </div>
+
+        <footer class="row justify-content-center align-items-center mt-4 mx-auto">
+            <div class="col-3 rounded-5 text-center" style="background-color: #60d4d4;">
+                <h3 class="text-2xl fw-bold text-uppercase mt-2" style="color: #052b5f;">Treatment</h3>
+                <div class="d-flex justify-content-center gap-0">
+                    <div class="p-0 m-0  h1">
+                        <span class=" mb-2">💊</span>
+                    </div>
+                    <div class="p-0 m-0 ">
+                        <span class=" display-1 mb-2">💉</span>
+                    </div>
+                    <div class="p-0 m-0 mt-4">
+                        <span class=" display-3">🧴</span>
+                    </div>
+                </div>
+            </div>
+            <small class="col-5 p-4 text-center text-white">
+                Laborum debitis molestiae impedit similique tempore id nisi autem, velit culpa, quia quos eligendi quas inventore, ipsa facilis pariatur fuga dolor consequatur.
+            </small>
+            <div class="col-3 rounded-5 text-center" style="background-color: #60d4d4;">
+                <h3 class="text-2xl fw-bold text-uppercase mt-2" style="color: #052b5f;">prevention</h3>
+                <div class="d-flex justify-content-center gap-0">
+                    <div class="p-0 m-0 ">
+                        <span class=" display-3 mb-2">🏋️</span>
+                    </div>
+                    <div class="p-0 m-0 ">
+                        <span class=" display-1 mb-2">🌶️</span>
+                    </div>
+                    <div class="p-0 m-0 mt-4">
+                        <span class=" display-3 mb-2">🍎</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+
+</body>
+
+</html>

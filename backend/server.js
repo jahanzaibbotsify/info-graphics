@@ -5,7 +5,7 @@ const initializeStorage = require('./config/database');
 const app = express();
 const port = process.env.PORT || 3000;
 const infographicRoutes = require('./routes/infographicRoutes');
-const pricingRoutes = require('./routes/pricingRoutes');
+const pricingRoutes = require('./routes/pricingRoutes'); 
 const userRoutes = require('./routes/userRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 
@@ -27,6 +27,7 @@ app.post('/stripe/webhook', express.raw({type: 'application/json'}), require('./
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'temp')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve generated images
 app.use('/generated-images', express.static(path.join(__dirname, 'generated-images')));

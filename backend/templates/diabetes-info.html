@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What You Should Know About Diabetes</title>
+    <base href="{base_url}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #fff;
+            margin: 0;
+            color: #444;
+        }
+
+        .main-container {
+            width: 1320px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #e35f5f;
+            color: #fff;
+            padding: 32px 16px 16px 16px;
+            text-align: left;
+        }
+
+        .header h1.diabetes {
+            font-size: 3rem;
+            margin: 0 0 8px 0;
+            letter-spacing: 2px;
+            font-size: 5rem;
+        }
+
+        
+
+        .header p {
+            font-size: 2rem;
+            margin: 0 0 8px 0;
+            font-weight: 400;
+        }
+
+        .section-title {
+            background: #eee;
+            padding: 8px 0;
+            font-weight: bold;
+            font-size: 1.3rem;
+            text-align: center;
+            letter-spacing: 1px;
+            margin-top: 0;
+        }
+
+        .types {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            padding: 24px 30px;
+            gap: 32px;
+            /* background: #f7f7f7; */
+            justify-content: space-between;
+        }
+
+        .types div{
+            flex: 1 1 0px;
+            /* width: 300px; */
+        }
+
+        .types .type-list{
+            /* border: 2px solid red; */
+            flex-grow: 1.5;
+
+        }
+
+        .types .type-image{
+            /* text-align: end; */
+        }
+
+        .type-list {
+            flex: 2;
+            min-width: 260px;
+        }
+
+        .type-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 18px;
+        }
+
+        .type-icon {
+            font-size: 3.2rem;
+            width: 44px;
+            color: #6ec6a7;
+            text-align: center;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .type-text {
+            font-size: 1rem;
+            margin-left: 10px;
+        }
+
+        .type-stats {
+            flex: 1;
+            min-width: 220px;
+            text-align: center;
+        }
+
+        .type-stats .battery {
+            font-size: 3rem;
+            margin-bottom: 8px;
+        }
+
+        .type-stats .percent {
+            font-size: 8rem;
+            color: #6ec6a7;
+            font-weight: bold;
+        }
+
+        .type-stats .desc {
+            font-size: 1.1rem;
+            margin: 8px 0 12px 0;
+        }
+
+        .type-stats .people {
+            display: flex;
+            justify-content: center;
+            gap: 2px;
+            margin-top: 8px;
+        }
+
+        .type-stats .people span {
+            font-size: 1.5rem;
+            color: #e57373;
+        }
+
+        .type-stats .people span.selected {
+            color: #6ec6a7;
+        }
+
+        .symptoms,
+        .treatment {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            padding: 24px 16px;
+            gap: 24px;
+        }
+
+        .symptom,
+        .treat {
+            flex: 1 1 160px;
+            min-width: 140px;
+            max-width: 180px;
+            text-align: center;
+        }
+
+        .symptom-icon,
+        .treat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .symptom-label,
+        .treat-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+
+        .circle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 70px;         /* or any size you want */
+            height: 70px;
+            border: 5px solid #6ec6a7;
+            border-radius: 50%;
+            background: #fff;    /* optional */
+            box-sizing: border-box;
+        }
+
+
+        /* ---------------- images ------------- */
+        .girl-image{
+            width: 250px;
+            height: 300px;
+        }
+        .people-percent-image{
+            width: 300px
+        }
+        .other-image{
+            width: 200px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <div class="header">
+            <p>WHAT YOU SHOULD KNOW ABOUT</p>
+            <h1 class="diabetes">DIABETES</h1>
+        </div>
+
+        <div class="section-title">TYPES</div>
+        <div class="types">
+            <div class="type-list">
+                <div class="type-item">
+                    <span class="circle">
+                        <span class="type-icon">Ⅰ</span>
+                    </span>
+                    <div class="type-text">
+                        <b class="">TYPE 1 DIABETES</b><br>
+                        Characterized by deficient insulin production and usually requires daily administration of
+                        insulin. Neither its cause nor the means to prevent it are known.
+                    </div>
+                </div>
+                <div class="type-item">
+                    <span class="circle">
+                    <span class="type-icon">Ⅱ</span>
+                    </span>
+                    <div class="type-text">
+                        <b>TYPE 2 DIABETES</b><br>
+                        Results from the body's ineffective use of insulin. This type of diabetes is largely the result
+                        of excess body weight and physical inactivity.
+                    </div>
+                </div>
+                <div class="type-item">
+                    <span class="circle">
+                    <span class="type-icon">👩‍🍼</span>
+                </span>
+                    <div class="type-text">
+                        <b>GESTATIONAL DIABETES</b><br>
+                        Gestational diabetes is hyperglycaemia with blood glucose values above normal but below those
+                        diagnostic of diabetes. Gestational diabetes occurs during pregnancy.
+                    </div>
+                </div>
+            </div>
+            <div class="type-image">
+                <img class="girl-image" src="/templates/images/diabetes-info/girl-battery.png" />
+            </div>
+            <div class="type-stats">
+                <div class="percent">95%</div>
+                <div class="desc">More than 95% of people with diabetes have type 2 diabetes</div>
+                <div class="people-percent-image-container">
+                    <img class="people-percent-image" src="/templates/images/diabetes-info/people-percent.png">
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">SYMPTOMS</div>
+        <div class="symptoms">
+            <div class="symptom">
+                <img class="girl-image girl-battery" style="margin-left: -30px;" src="/templates/images/diabetes-info/girl-urination.png" />
+                <div class="symptom-label">FREQUENT URINATION</div>
+            </div>
+            <div class="symptom">
+                <img class="girl-image" style="margin-left: -50px;" src="/templates/images/diabetes-info/girl-headache.png" />
+                <div class="symptom-label" >HEADACHE</div>
+            </div>
+            <div class="symptom">
+                <img class="girl-image" src="/templates/images/diabetes-info/girl-hunger.png" />
+                <div class="symptom-label">CONSTANT HUNGER</div>
+            </div>
+            <div class="symptom">
+                <img class="girl-image" src="/templates/images/diabetes-info/girl-thirst.png" />
+                <div class="symptom-label" style="text-align: end;">THIRST</div>
+            </div>
+            <div class="symptom">
+                <img class="girl-image" src="/templates/images/diabetes-info/girl-irritability.png" />
+                <div class="symptom-label" style="text-align: end;">IRRITABILITY</div>
+            </div>
+        </div>
+
+        <div class="section-title">TREATMENT</div>
+        <div class="treatment">
+            <div class="treat">
+                <img class="other-image" src="/templates/images/diabetes-info/health-diet.png" />
+                <div class="treat-label">HEALTHY DIET</div>
+            </div>
+            <div class="treat">
+                <img class="other-image" src="/templates/images/diabetes-info/diabetes drugs.png" />
+                <div class="treat-label">DIABETES DRUGS</div>
+            </div>
+            <div class="treat">
+                <img class="other-image" src="/templates/images/diabetes-info/blood sugar control.png" />
+                <div class="treat-label">BLOOD SUGAR CONTROL</div>
+            </div>
+            <div class="treat">
+                <img class="other-image" src="/templates/images/diabetes-info/physical activity.png" />
+                <div class="treat-label">PHYSICAL ACTIVITY</div>
+            </div>
+            <div class="treat">
+                <img class="other-image" src="/templates/images/diabetes-info/prancreas transplantations.png" />
+                <div class="treat-label">PANCREAS TRANSPLANTATION</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
