@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pros and Cons of Online Learning</title>
+    <base href="{base_url}">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for precise control and responsiveness */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            /* Align to top to match image */
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .infographic-container {
+            background-color: #fff;
+            border-radius: 1rem;
+            /* Rounded corners for the main container */
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            /* Max width to resemble the image */
+            width: 100%;
+            overflow: hidden;
+            /* Ensures rounded corners clip content */
+        }
+
+        .header-section {
+            background-color: #fcd34d;
+            /* Yellow color for the top section */
+            padding: 0 1rem;
+            padding-top: 2rem;
+            position: relative;
+            text-align: center;
+        }
+
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: 180px;
+            left: 0;
+            /* Adjust to control the triangle size */
+            /* left: 50%; */
+            transform: rotate(180deg);
+            width: 100%;
+            /* Size of the triangle base */
+            height: 160px;
+            /* Size of the triangle height */
+            background-color: #fcd34d;
+            z-index: 0;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            /* Triangle shape */
+            /* display: none; */
+        }
+
+        .logo-placeholder {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .main-title {
+            font-size: 2.5rem;
+            /* Large font for the main title */
+            font-weight: bold;
+            color: #333;
+            line-height: 1.2;
+            width: 360px;
+            margin: 0 auto;
+        }
+
+        .infographic-label {
+            position: absolute;
+            font-size: 1.25rem;
+            color: #555;
+            /* margin-top: 1rem; */
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            background-color: white;
+            width: min-content;
+            height: min-content;
+            padding: 5px;
+            inset: 0;
+            margin: auto;
+            top: 250px;
+        }
+
+        .content-section {
+            display: flex;
+            flex-wrap: wrap;
+            /* Allow wrapping on smaller screens */
+            /* padding: 2rem; */
+            background-color: #fff;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 300px;
+            /* Minimum width before wrapping */
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .column-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 1rem;
+            padding: 10px;
+            background-color: #fcd34d;
+        }
+
+        .icon-thumb {
+            font-size: 4rem;
+            /* Size for the thumb icons */
+            margin-bottom: 1rem;
+            display: inline-block;
+            /* To allow transform */
+            transform: rotateY(0deg);
+            /* Default for benefits */
+        }
+
+        .icon-thumb.down {
+            transform: rotateY(180deg);
+            /* Flip for downsides */
+        }
+
+        .list-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        .check-icon {
+            margin-bottom: 8px;
+        }
+
+        .cross-icon {
+            color: #ef4444;
+            /* Red for cross */
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+            /* Prevent shrinking */
+        }
+
+        .item-text {
+            color: #555;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="infographic-container">
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="logo-placeholder">Your <span>&#x25A0;</span>&#xAE; LOGO</div>
+            <h1 class="main-title ">Pros and Cons of Online Learning</h1>
+            <p class="infographic-label">Infographic</p>
+        </div>
+
+        <!-- Content Section -->
+        <div class="content-section m-0 ">
+            <!-- Benefits Column -->
+            <div class="column pros pt-28 text-center">
+                <span class="icon-thumb w-24">
+                    <img src="/templates/images/online-learning-infographic/like.png" />
+                </span>
+                <div class="w-52 text-center mx-auto">
+                    <h2 class="column-title">Benefits to Online Learning</h2>
+                    <ul class="list-none p-0 m-0">
+                        <li class="list-item text-center">
+                            <div class="check-icon">
+                                <svg class="mx-auto" width="35" height="35" viewBox="0 0 100 100"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Yellow background circle -->
+                                    <circle cx="50" cy="50" r="45" fill="#FFD700" />
+
+                                    <!-- White tick mark -->
+                                    <path d="M30 50 L45 65 L70 35" stroke="white" stroke-width="8"
+                                        stroke-linecap="round" fill="none" />
+                                </svg>
+                            </div>
+                            <p class="item-text">Possibility of reaching out to a greater number of students</p>
+                        </li>
+                        <li class="list-item text-center">
+                            <div class="check-icon">
+                                <svg class="mx-auto" width="35" height="35" viewBox="0 0 100 100"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Yellow background circle -->
+                                    <circle cx="50" cy="50" r="45" fill="#FFD700" />
+
+                                    <!-- White tick mark -->
+                                    <path d="M30 50 L45 65 L70 35" stroke="white" stroke-width="8"
+                                        stroke-linecap="round" fill="none" />
+                                </svg>
+                            </div>
+                            <p class="item-text">Flexible schedules</p>
+                        </li>
+                        <li class="list-item text-center">
+                            <div class="check-icon">
+                                <svg class="mx-auto" width="35" height="35" viewBox="0 0 100 100"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Yellow background circle -->
+                                    <circle cx="50" cy="50" r="45" fill="#FFD700" />
+
+                                    <!-- White tick mark -->
+                                    <path d="M30 50 L45 65 L70 35" stroke="white" stroke-width="8"
+                                        stroke-linecap="round" fill="none" />
+                                </svg>
+                            </div>
+                            <p class="item-text">Classes are recorded automatically for posterity</p>
+                        </li>
+                        <li class="list-item text-center">
+                            <div class="check-icon">
+                                <svg class="mx-auto" width="35" height="35" viewBox="0 0 100 100"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Yellow background circle -->
+                                    <circle cx="50" cy="50" r="45" fill="#FFD700" />
+
+                                    <!-- White tick mark -->
+                                    <path d="M30 50 L45 65 L70 35" stroke="white" stroke-width="8"
+                                        stroke-linecap="round" fill="none" />
+                                </svg>
+                            </div>
+                            <p class="item-text">Teaching aid tools make it convenient for students and teachers</p>
+                        </li>
+                        <li class="list-item text-center">
+                            <div class="check-icon">
+                                <svg class="mx-auto" width="35" height="35" viewBox="0 0 100 100"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Yellow background circle -->
+                                    <circle cx="50" cy="50" r="45" fill="#FFD700" />
+
+                                    <!-- White tick mark -->
+                                    <path d="M30 50 L45 65 L70 35" stroke="white" stroke-width="8"
+                                        stroke-linecap="round" fill="none" />
+                                </svg>
+                            </div>
+                            <p class="item-text">Class be taken anywhere</p>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+
+            <!-- Downsides Column -->
+            <div class="column bg-[#f5f5f5] pt-28">
+                <span class="icon-thumb down w-24">
+                    <img src="/templates/images/online-learning-infographic/dislike.png" />
+                </span>
+
+                <div class="w-52 text-center mx-auto">
+                    <h2 class="column-title">Downsides To Online Learning</h2>
+                    <ul class="list-none p-0 m-0">
+                        <li class="list-item text-center">
+                            <div class="check-icon">
+                                <svg class="mx-auto" width="35" height="35" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Black background circle -->
+                                    <circle cx="50" cy="50" r="45" fill="#000000" />
+
+                                    <!-- White cross/X mark -->
+                                    <path d="M35 35 L65 65 M65 35 L35 65" stroke="white" stroke-width="8"
+                                        stroke-linecap="round" fill="none" />
+                                </svg>
+                            </div>
+                            <p class="item-text">Not the same as being in the classroom</p>
+                        </li>
+                        <li class="list-item text-center">
+                            <div class="check-icon">
+                                <svg class="mx-auto" class="mx-auto" width="35" height="35" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Black background circle -->
+                                    <circle cx="50" cy="50" r="45" fill="#000000" />
+
+                                    <!-- White cross/X mark -->
+                                    <path d="M35 35 L65 65 M65 35 L35 65" stroke="white" stroke-width="8"
+                                        stroke-linecap="round" fill="none" />
+                                </svg>
+                            </div>
+                            <p class="item-text">Online tools are not always reliable</p>
+                        </li>
+                        <li class="list-item text-center">
+                            <div class="check-icon">
+                                <svg class="mx-auto" width="35" height="35" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Black background circle -->
+                                    <circle cx="50" cy="50" r="45" fill="#000000" />
+
+                                    <!-- White cross/X mark -->
+                                    <path d="M35 35 L65 65 M65 35 L35 65" stroke="white" stroke-width="8"
+                                        stroke-linecap="round" fill="none" />
+                                </svg>
+                            </div>
+                            <p class="item-text">Hands on exercises are difficult to monitor</p>
+                        </li>
+                        <li class="list-item text-center">
+                            <div class="check-icon">
+                                <svg class="mx-auto" width="35" height="35" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Black background circle -->
+                                    <circle cx="50" cy="50" r="45" fill="#000000" />
+
+                                    <!-- White cross/X mark -->
+                                    <path d="M35 35 L65 65 M65 35 L35 65" stroke="white" stroke-width="8"
+                                        stroke-linecap="round" fill="none" />
+                                </svg>
+                            </div>
+                            <p class="item-text">Online teaching is ineffective in teaching kindergarteners and toddlers</p>
+                        </li>
+                        <li class="list-item text-center">
+                            <div class="check-icon">
+                                <svg class="mx-auto" width="35" height="35" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Black background circle -->
+                                    <circle cx="50" cy="50" r="45" fill="#000000" />
+
+                                    <!-- White cross/X mark -->
+                                    <path d="M35 35 L65 65 M65 35 L35 65" stroke="white" stroke-width="8"
+                                        stroke-linecap="round" fill="none" />
+                                </svg>
+                            </div>
+                            <p class="item-text">Flexible scheduling can be great for teachers but not for students</p>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

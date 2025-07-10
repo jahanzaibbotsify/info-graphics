@@ -120,10 +120,68 @@
         "dataTypes": ["gaming_stats", "achievement_data", "score_metrics", "level_progression"],
         "useCases": ["gaming_analytics", "achievement_tracking", "player_statistics", "retro_presentations", "gaming_communities"],
         "priority": 17
+      },
+
+      "online-learning-infographic.html": {
+        "keywords": ["study", "online", "learning", "info", "graphic", "pros", "cons", "benefits", "downsides"],
+        "dataTypes": ["online_learning_benifits", "online_learning_downsides"],
+        "useCases": ["online_learning", "online_learning_benifits", "online_learning_downsides"],
+        "priority": 18
+      },
+
+      "diabetes-info.html": {
+        "keywords": [
+          "diabetes", "blood sugar", "insulin", "type 1", "type 2", "gestational", "symptoms", "treatment", "health", "disease", "medical", "chronic", "glucose"
+        ],
+        "dataTypes": [
+          "diabetes_types", "diabetes_symptoms", "diabetes_treatments", "health_statistics"
+        ],
+        "useCases": [
+          "health_education", "disease_awareness", "medical_info", "chronic_disease_info", "diabetes_overview"
+        ],
+        "priority": 19
+      },
+
+      "diabetes-bg.html": {
+        "keywords": [
+          "diabetes", "background", "symptoms", "treatment", "prevention", "health", "disease", "medical", "chronic", "infographic", "visual", "blurry vision", "weight loss", "fatigue", "excessive thirst", "high blood sugar", "wounds heal slowly"
+        ],
+        "dataTypes": [
+          "diabetes_symptoms", "diabetes_treatments", "diabetes_prevention", "health_statistics"
+        ],
+        "useCases": [
+          "health_education", "disease_awareness", "medical_info", "chronic_disease_info", "diabetes_symptoms_overview"
+        ],
+        "priority": 20
+      },
+
+      "Infographics-Stock-Illustrations.html": {
+        "keywords": [
+          "infographic", "stock", "illustration", "step", "process", "workflow", "guide", "business", "visual", "circle", "icon", "multi-step", "explanation"
+        ],
+        "dataTypes": [
+          "step_by_step", "process_flow", "workflow_data", "visual_guide"
+        ],
+        "useCases": [
+          "process_explanation", "business_workflow", "step_guide", "visual_instruction", "general_infographic"
+        ],
+        "priority": 21
+      },
+      "the-time-spend-on-internet.html": {
+        "keywords": [
+          "internet", "time spent", "work week", "workplace stress", "digital habits", "online", "statistics", "pie chart", "emails", "youtube", "commute", "work-life balance", "burnout", "heart attack", "entrepreneur", "calendar", "stopwatch"
+        ],
+        "dataTypes": [
+          "internet_usage", "work_life_stats", "stress_data", "digital_habits"
+        ],
+        "useCases": [
+          "internet_statistics", "work_life_balance", "digital_habits_overview", "workplace_stress_analysis", "time_spent_visualization"
+        ],
+        "priority": 22
       }
     },
     
-    "mainPrompt": "Analyze the user request and select the most appropriate infographic template:\n\nUSER REQUEST: {user_input}\n\nSELECTION CRITERIA:\n1. MODERN STATS: Clean business insights, quarterly metrics → modern-statistics-overview.html\n2. MINIMAL SHOWCASE: Two-column, large numbers, gradient text → minimal-data-showcase.html\n3. CIRCULAR LAYOUT: Central metric, orbiting data, 360° view → circular-metrics-layout.html\n4. TIMELINE: Quarterly growth, progression, time series → vertical-timeline-stats.html\n5. GEOMETRIC: Hexagonal/triangular shapes, grid layout → geometric-data-grid.html\n6. DIAGONAL SPLIT: Analytics dashboard, department performance → diagonal-split-layout.html\n7. FINANCIAL: Revenue, stocks, investments, financial metrics → financial-analytics.html\n8. SOCIAL MEDIA: Platforms, followers, engagement, social analytics → social-media-comparison.html\n9. CUSTOMER DATA: Customer analytics, satisfaction, demographics → customer-analytics.html\n10. SALES METRICS: Sales performance, revenue tracking, targets → sales-performance-dashboard.html\n11. MARKETING: Marketing campaigns, trends, brand performance → marketing-trends-timeline.html\n12. GLOBAL/ECONOMIC: Countries, economic indicators, international → global-economic-comparison.html\n13. GENERAL ANALYTICS: Dashboard, overview, mixed metrics → data-visualization-report.html\n14. VIBRANT SOCIAL: Colorful, lively, social media posts, animated → vibrant-social-metrics.html\n15. NEON CYBER: Futuristic, tech, digital, glowing, cyberpunk → neon-data-flow.html\n16. GRADIENT WAVES: Elegant, flowing, premium, sophisticated → gradient-wave-analytics.html\n17. RETRO GAMING: Gaming stats, pixel art, arcade, achievements → retro-gaming-stats.html\n\nProvide your selection in this format:\nSELECTED_TEMPLATE: [filename.html]\nCONFIDENCE: [High/Medium/Low]\nREASONING: [Brief explanation]\nKEY_FACTORS: [Main factors that influenced selection]"
+    "mainPrompt": "Analyze the user request and select the most appropriate infographic template:\n\nUSER REQUEST: {user_input}\n\nSELECTION CRITERIA:\n1. MODERN STATS: Clean business insights, quarterly metrics → modern-statistics-overview.html\n2. MINIMAL SHOWCASE: Two-column, large numbers, gradient text → minimal-data-showcase.html\n3. CIRCULAR LAYOUT: Central metric, orbiting data, 360° view → circular-metrics-layout.html\n4. TIMELINE: Quarterly growth, progression, time series → vertical-timeline-stats.html\n5. GEOMETRIC: Hexagonal/triangular shapes, grid layout → geometric-data-grid.html\n6. DIAGONAL SPLIT: Analytics dashboard, department performance → diagonal-split-layout.html\n7. FINANCIAL: Revenue, stocks, investments, financial metrics → financial-analytics.html\n8. SOCIAL MEDIA: Platforms, followers, engagement, social analytics → social-media-comparison.html\n9. CUSTOMER DATA: Customer analytics, satisfaction, demographics → customer-analytics.html\n10. SALES METRICS: Sales performance, revenue tracking, targets → sales-performance-dashboard.html\n11. MARKETING: Marketing campaigns, trends, brand performance → marketing-trends-timeline.html\n12. GLOBAL/ECONOMIC: Countries, economic indicators, international → global-economic-comparison.html\n13. GENERAL ANALYTICS: Dashboard, overview, mixed metrics → data-visualization-report.html\n14. VIBRANT SOCIAL: Colorful, lively, social media posts, animated → vibrant-social-metrics.html\n15. NEON CYBER: Futuristic, tech, digital, glowing, cyberpunk → neon-data-flow.html\n16. GRADIENT WAVES: Elegant, flowing, premium, sophisticated → gradient-wave-analytics.html\n17. RETRO GAMING: Gaming stats, pixel art, arcade, achievements → retro-gaming-stats.html\n18. ONLINE LEARNING: online study, online learning, pros, cons → online-learning-infographic.html\n19. DIABETES INFO: Diabetes types, symptoms, treatments, health education → diabetes-info.html\n20. DIABETES BG: Diabetes symptoms, treatment, prevention, health education → diabetes-bg.html\n21. INFOGRAPHICS STOCK ILLUSTRATIONS: Step-by-step processes, business workflows, multi-step guides, visual explanations → Infographics-Stock-Illustrations.html\n22. TIME SPENT ON INTERNET: Internet usage, work-life balance, workplace stress, digital habits, time statistics → the-time-spend-on-internet.html\n\nProvide your selection in this format:\nSELECTED_TEMPLATE: [filename.html]\nCONFIDENCE: [High/Medium/Low]\nREASONING: [Brief explanation]\nKEY_FACTORS: [Main factors that influenced selection]"
   },
   
   "dataCustomization": {
@@ -239,6 +297,35 @@
       "input": "Display gaming statistics with pixel art style showing player levels, achievements, and high scores",
       "expected_template": "retro-gaming-stats.html",
       "reasoning": "Gaming data with specific retro/pixel art aesthetic and gaming terminology"
+    },
+
+    "online_learning_example": {
+      "input": "Show me online learning benefits and downsides",
+      "expected_template": "online-learning-infographic.html",
+      "reasoning": "Online study/learning pros and cons."
+    },
+
+    "diabetes_info_example": {
+      "input": "Show an infographic about diabetes types, symptoms, and treatments for health education",
+      "expected_template": "diabetes-info.html",
+      "reasoning": "Request is about diabetes, including types, symptoms, and treatments, which matches the diabetes-info.html template."
+    },
+
+    "diabetes_bg_example": {
+      "input": "Create an infographic showing diabetes symptoms, treatment, and prevention tips with a strong visual background",
+      "expected_template": "diabetes-bg.html",
+      "reasoning": "Request is for a diabetes infographic focused on symptoms, treatment, and prevention, matching the diabetes-bg.html template's design and content."
+    },
+
+    "infographics_stock_illustrations_example": {
+      "input": "Show a step-by-step business process with icons and a central info circle",
+      "expected_template": "Infographics-Stock-Illustrations.html",
+      "reasoning": "Request is for a step-by-step or process infographic with a central info circle and icon-based steps, matching the Infographics Stock Illustrations.html template."
+    },
+    "the_time_spent_on_internet_example": {
+      "input": "Show an infographic about time spent online, workplace stress, and work week statistics",
+      "expected_template": "the-time-spend-on-internet.html",
+      "reasoning": "Request is for an infographic about internet usage, work-life balance, and digital habits, matching the the-time-spend-on-internet.html template."
     }
   },
   

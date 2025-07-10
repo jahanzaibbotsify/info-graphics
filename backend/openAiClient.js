@@ -37,7 +37,12 @@ async function generateInfographic(userInfo) {
             'vertical-timeline-stats.html': 'Vertical timeline statistics - Best for: quarterly progression, growth tracking, time series data, historical analysis, timeline visualization, chronological data. Features vertical timeline layout.',
             'geometric-data-grid.html': 'Geometric grid data layout - Best for: categorical data, grid layouts, hexagonal/triangular shapes, modern visualization, geometric presentations, angular designs. Features geometric shape patterns.',
             'diagonal-split-layout.html': 'Diagonal split analytics layout - Best for: analytics dashboards, department performance, large central metrics, split view analysis, performance tracking. Features diagonal split design.',
-            
+            'online-learning-infographic.html': 'Pros and cons of online learning - Best for: educational insights, e-learning presentations, student and teacher resources, remote education analysis. Features a balanced, modern layout with clear benefits and drawbacks, engaging visuals, and professional styling.',
+            'diabetes-info.html': 'Diabetes information infographic - Best for: health education, disease awareness, medical info, diabetes types, symptoms, and treatments. Features clear sections for types, symptoms, and treatments with engaging visuals and health-focused design.',
+            'diabetes-bg.html': 'Diabetes background infographic - Best for: health education, disease awareness, diabetes symptoms, treatment, and prevention. Features a visually engaging background, clear symptom icons, and sections for treatment and prevention tips.',
+            'Infographics-Stock-Illustrations.html': 'Stock illustrations infographic - Best for: step-by-step processes, business workflows, multi-step guides, visual explanations, and general infographics. Features a central info circle, surrounding process steps, and colorful icon-based design.',
+            'the-time-spend-on-internet.html': 'Internet usage and work-life infographic - Best for: visualizing time spent online, workplace stress, work week statistics, and digital habits. Features large headline stats, pie charts, and engaging layouts for internet and work-life data.',
+
             // Existing corrected templates  
             'data-visualization-report.html': 'Analytics dashboard with mixed chart types - Best for: business analytics, dashboard overviews, performance metrics, mixed data types, general business intelligence reports. Features multiple chart sections and KPI displays.',
             'financial-analytics.html': 'Financial performance dashboard - Best for: financial reporting, investment data, stock performance, revenue metrics, portfolio analysis, financial KPIs. Features financial-specific charts and currency displays.',
@@ -67,6 +72,11 @@ SELECTION CRITERIA:
 11. MARKETING: Marketing campaigns, trends, campaign performance → marketing-trends-timeline.html
 12. GLOBAL/ECONOMIC: Country comparisons, economic indicators, global markets → global-economic-comparison.html
 13. GENERAL ANALYTICS: Dashboard, overview, mixed metrics (fallback) → data-visualization-report.html
+14. ONLINE LEARNING: Educational insights, e-learning, student/teacher resources, remote education analysis → online-learning-infographic.html
+15. DIABETES INFO: Diabetes types, symptoms, treatments, health education → diabetes-info.html
+16. DIABETES BG: Diabetes symptoms, treatment, prevention, health education → diabetes-bg.html
+17. INFOGRAPHICS STOCK ILLUSTRATIONS: Step-by-step processes, business workflows, multi-step guides, visual explanations → Infographics-Stock-Illustrations.html
+18. TIME SPENT ON INTERNET: Internet usage, work-life balance, workplace stress, digital habits, time statistics → the-time-spend-on-internet.html
 
 Available Templates:
 ${Object.entries(templateDescriptions).map(([name, desc]) => `- ${name}: ${desc}`).join('\n')}
@@ -112,7 +122,12 @@ Respond with ONLY the template filename (e.g., "chart-analytics.html").`;
             'sales-performance-dashboard.html',
             'marketing-trends-timeline.html',
             'global-economic-comparison.html',
-            'data-visualization-report.html'
+            'data-visualization-report.html',
+            'online-learning-infographic.html',
+            'diabetes-info.html',
+            'diabetes-bg.html',
+            'Infographics-Stock-Illustrations.html',
+            'the-time-spend-on-internet.html'
         ];
         
         const finalTemplate = validTemplates.includes(selectedTemplate) ? selectedTemplate : 'data-visualization-report.html';
@@ -126,6 +141,7 @@ Respond with ONLY the template filename (e.g., "chart-analytics.html").`;
         let templateHtml;
         try {
             templateHtml = fs.readFileSync(templatePath, 'utf8');
+            templateHtml = templateHtml.replace('{base_url}', process.env.SERVER_URL ?? '');            
         } catch (error) {
             throw new Error(`Template ${finalTemplate} not found. Please ensure all template files are present in the backend/templates directory.`);
         }
