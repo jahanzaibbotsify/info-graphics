@@ -2,6 +2,7 @@ const Infographic = require('../models/Infographic');
 const { generateInfographic } = require('../openAiClient');
 const htmlToImageService = require('../services/htmlToImageService');
 const path = require('path');
+const fs = require('fs'); // Added fs module for file deletion
 
 class InfographicController {
   static async generateInfographic(req, res) {
@@ -187,6 +188,94 @@ class InfographicController {
     } catch (error) {
       console.error('Error fetching infographic:', error);
       res.status(500).json({ error: 'Failed to fetch infographic' });
+    }
+  }
+
+  static async updateInfographic(req, res) {
+    try {
+      const { id } = req.params;
+      const { updatePrompt, imageOptions } = req.body;
+      
+      if (!updatePrompt) {
+        return res.status(400).json({ error: 'Update prompt is required' });
+      }
+
+      // Find the existing infographic
+      const existingInfographic = await Infographic.findById(id);
+      if (!existingInfographic) {
+        return res.status(404).json({ error: 'Infographic not found' });
+      }
+
+      // Generate updated infographic using OpenAI with existing HTML and update prompt
+      const updatedHtmlContent = await generateInfographic(updatePrompt, existingInfographic.htmlContent);
+      
+      // Convert updated HTML to image
+      const timestamp = Date.now();
+      const imageFilename = `infographic_${timestamp}.png`;
+      
+      // Get template-specific options and merge with custom options if provided
+      const templateOptions = htmlToImageService.getTemplateOptions(existingInfographic.template || 'default');
+      const finalImageOptions = imageOptions ? { ...templateOptions, ...imageOptions } : templateOptions;
+      
+      const imageResult = await htmlToImageService.convertAndSave(
+        updatedHtmlContent, 
+        imageFilename, 
+        finalImageOptions
+      );
+
+      if (!imageResult.success) {
+        console.error('Image generation failed:', imageResult.error);
+        // Continue without image if generation fails
+      }
+
+      // Delete old image if it exists
+      if (existingInfographic.imageFilename) {
+        const oldImagePath = path.join(__dirname, '..', 'generated-images', existingInfographic.imageFilename);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+
+      // Update the infographic in database using findByIdAndUpdate
+      const updatedInfographic = await Infographic.findByIdAndUpdate(
+        id,
+        {
+          htmlContent: updatedHtmlContent,
+          imageFilename: imageResult.success ? imageFilename : existingInfographic.imageFilename,
+          imagePath: imageResult.success ? imageResult.imagePath : existingInfographic.imagePath,
+          updated_at: new Date()
+        },
+        { new: true } // Return the updated document
+      );
+
+      if (!updatedInfographic) {
+        throw new Error('Failed to update infographic in database');
+      }
+
+      const response = {
+        message: 'Infographic updated successfully',
+        data: {
+          id: updatedInfographic._id,
+          htmlContent: updatedInfographic.htmlContent,
+          title: updatedInfographic.title,
+          userInfo: updatedInfographic.userInfo,
+          updatedAt: updatedInfographic.updated_at,
+          imageGenerated: imageResult.success
+        }
+      };
+
+      // Add image data if generation was successful
+      if (imageResult.success) {
+        response.data.imageFilename = imageFilename;
+        response.data.imageUrl = `/images/${imageFilename}`;
+      }
+
+      res.status(200).json(response);
+    } catch (error) {
+      console.error('Error updating infographic:', error);
+      res.status(500).json({ 
+        error: error.message || 'Failed to update infographic' 
+      });
     }
   }
 

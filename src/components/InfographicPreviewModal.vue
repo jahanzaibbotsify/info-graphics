@@ -41,6 +41,33 @@
               No content available
             </div>
           </div>
+
+          <!-- Update Prompt Area -->
+          <div class="mt-4 space-y-3">
+            <div class="flex items-center gap-2">
+              <h4 class="text-sm font-medium">Update Infographic</h4>
+              <div v-if="isUpdating" class="text-sm text-gray-500">
+                <span class="animate-pulse">Updating...</span>
+              </div>
+            </div>
+            <textarea
+              v-model="updatePrompt"
+              placeholder="Describe what you want to update in this infographic (e.g., 'Make the title larger and change the main chart color to blue')"
+              class="w-full h-24 px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              :disabled="isUpdating"
+            ></textarea>
+            <div class="flex justify-end gap-3">
+              <button
+                @click="handleUpdate"
+                class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="!updatePrompt.trim() || isUpdating"
+              >
+                <refresh-cw-icon v-if="isUpdating" class="h-4 w-4 animate-spin" />
+                <wand-icon v-else class="h-4 w-4" />
+                {{ isUpdating ? 'Updating...' : 'Update Infographic' }}
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Actions -->
@@ -67,13 +94,22 @@
 </template>
 
 <script>
-import { XIcon, DownloadIcon } from 'lucide-vue'
+import { XIcon, DownloadIcon, RefreshCwIcon, WandIcon } from 'lucide-vue'
+import axios from 'axios'
 
 export default {
   name: 'InfographicPreviewModal',
   components: {
     XIcon,
-    DownloadIcon
+    DownloadIcon,
+    RefreshCwIcon,
+    WandIcon
+  },
+  data() {
+    return {
+      updatePrompt: '',
+      isUpdating: false
+    }
   },
   props: {
     show: {
@@ -87,26 +123,6 @@ export default {
   },
   methods: {
     handleDownload() {
-      try {
-        if (!this.infographic?.htmlContent) {
-          throw new Error('No content to download')
-        }
-
-        const blob = new Blob([this.infographic.htmlContent], { type: 'text/html' })
-        const url = URL.createObjectURL(blob)
-        
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `infographic-${this.infographic.title?.replace(/[^a-zA-Z0-9]/g, '-') || Date.now()}.html`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        URL.revokeObjectURL(url)
-      } catch (error) {
-        console.error('Error downloading infographic:', error)
-      }
-    },
-    handleImageDownload() {
       try {
         if (!this.infographic?.imageUrl) {
           throw new Error('No image to download')
@@ -123,6 +139,39 @@ export default {
         document.body.removeChild(link)
       } catch (error) {
         console.error('Error downloading image:', error)
+      }
+    },
+    async handleUpdate() {
+      if (!this.updatePrompt.trim() || this.isUpdating) return;
+      
+      this.isUpdating = true;
+      try {
+        const response = await axios.put(
+          `${process.env.VUE_APP_BACKEND_URL || 'https://infographics.saasbakers.com/api'}/infographics/${this.infographic._id}`,
+          {
+            updatePrompt: this.updatePrompt.trim()
+          }
+        );
+
+        if (response.data?.data) {
+          // Update the local infographic data
+          this.$emit('infographic-updated', response.data.data);
+          this.updatePrompt = ''; // Clear the prompt
+          
+          // Show success message
+          this.$emit('show-notification', {
+            type: 'success',
+            message: 'Infographic updated successfully!'
+          });
+        }
+      } catch (error) {
+        console.error('Error updating infographic:', error);
+        this.$emit('show-notification', {
+          type: 'error',
+          message: error.response?.data?.error || 'Failed to update infographic'
+        });
+      } finally {
+        this.isUpdating = false;
       }
     },
     handleImageError(event) {
@@ -152,5 +201,25 @@ export default {
   margin: 0;
   box-shadow: none;
   border-radius: 0;
+}
+
+/* Add styles for the update prompt area */
+textarea {
+  resize: vertical;
+  min-height: 6rem;
+  max-height: 12rem;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style> 

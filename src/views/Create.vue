@@ -93,6 +93,36 @@
             </div>
             <div v-else-if="infographicHtml" v-html="infographicHtml" class="infographic-preview"></div>
           </div>
+
+          <!-- Update Prompt Area -->
+          <div v-if="currentInfographicImage || infographicHtml" class="mt-6 space-y-4">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-medium">Update Infographic</h4>
+              <div v-if="isUpdating" class="text-sm text-gray-500">
+                <span class="animate-pulse">Updating...</span>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <textarea
+                v-model="updatePrompt"
+                placeholder="Describe what you want to update in this infographic (e.g., 'Make the title larger and change the main chart color to blue')"
+                class="w-full px-4 py-3 text-sm border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary resize-vertical"
+                :disabled="isUpdating"
+                rows="3"
+              ></textarea>
+              <div class="flex justify-end">
+                <button
+                  @click="handleUpdate"
+                  class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  :disabled="!updatePrompt.trim() || isUpdating"
+                >
+                  <refresh-cw-icon v-if="isUpdating" class="h-4 w-4 animate-spin" />
+                  <wand-icon v-else class="h-4 w-4" />
+                  {{ isUpdating ? 'Updating...' : 'Update Infographic' }}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Error State -->
@@ -247,7 +277,16 @@
 </template>
 
 <script>
-import { WandIcon, LoaderIcon, XCircleIcon, DownloadIcon, SearchIcon, SearchXIcon, EyeIcon } from 'lucide-vue'
+import {
+  WandIcon,
+  LoaderIcon,
+  XCircleIcon,
+  DownloadIcon,
+  SearchIcon,
+  SearchXIcon,
+  EyeIcon,
+  RefreshCwIcon
+} from 'lucide-vue'
 import axios from 'axios'
 import PricingModal from '@/components/PricingModal.vue'
 import InfographicPreviewModal from '@/components/InfographicPreviewModal.vue'
@@ -263,6 +302,7 @@ export default {
     SearchIcon,
     SearchXIcon,
     EyeIcon,
+    RefreshCwIcon,
     PricingModal,
     InfographicPreviewModal,
     AuthModal
@@ -290,7 +330,10 @@ export default {
         'Health and wellness statistics for modern lifestyle'
       ],
       currentInfographicImage: null,
-      currentInfographicImageFilename: null
+      currentInfographicImageFilename: null,
+      isUpdating: false,
+      updatePrompt: '',
+      currentInfographicId: null
     }
   },
   mounted() {
@@ -307,6 +350,7 @@ export default {
       this.infographicHtml = null
       this.currentInfographicImage = null
       this.currentInfographicImageFilename = null
+      this.currentInfographicId = null
 
       try {
         // Make the API call to generate the infographic
@@ -317,6 +361,7 @@ export default {
         // Store the HTML content
         console.log('response from generate infographic: ', response.data);
         this.infographicHtml = response.data.data.htmlContent;
+        this.currentInfographicId = response.data.data.id;
 
         // If image was generated, display the image instead of HTML
         if (response.data.data.imageGenerated && response.data.data.imageUrl) {
@@ -338,6 +383,49 @@ export default {
         }
       } finally {
         this.isGenerating = false
+      }
+    },
+
+    async handleUpdate() {
+      if (!this.updatePrompt.trim() || this.isUpdating || !this.currentInfographicId) return;
+      
+      this.isUpdating = true;
+      try {
+        const response = await axios.put(
+          `${process.env.VUE_APP_BACKEND_URL || 'https://infographics.saasbakers.com/api'}/infographics/${this.currentInfographicId}`,
+          {
+            updatePrompt: this.updatePrompt.trim()
+          }
+        );
+
+        if (response.data?.data) {
+          // Update the current infographic
+          this.infographicHtml = response.data.data.htmlContent;
+          this.currentInfographicImage = response.data.data.imageUrl ? 
+            `${process.env.VUE_APP_BACKEND_URL || 'https://infographics.saasbakers.com/api'}${response.data.data.imageUrl}` : 
+            null;
+          this.updatePrompt = ''; // Clear the prompt
+
+          // Show success message
+          if (this.$toast) {
+            this.$toast.success('Infographic updated successfully!');
+          } else {
+            console.log('Infographic updated successfully!');
+          }
+          
+          // Refresh the stored infographics list
+          await this.fetchStoredInfographics();
+        }
+      } catch (error) {
+        console.error('Error updating infographic:', error);
+        const errorMessage = error.response?.data?.error || 'Failed to update infographic';
+        if (this.$toast) {
+          this.$toast.error(errorMessage);
+        } else {
+          console.error(errorMessage);
+        }
+      } finally {
+        this.isUpdating = false;
       }
     },
 
@@ -509,5 +597,31 @@ export default {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
 }
 </style> 

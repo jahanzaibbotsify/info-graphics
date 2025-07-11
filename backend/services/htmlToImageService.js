@@ -142,33 +142,121 @@ class HTMLToImageService {
   // Get template-specific options
   getTemplateOptions(templateName) {
     const templateOptions = {
-      'one.html': {
-        width: 1000,
+      'modern-statistics-overview.html': {
+        width: 1200,
         height: 800,
-        fullPage: true
+        fullPage: true,
+        deviceScaleFactor: 2,
+        quality: 95
       },
-      'two.html': {
+      'minimal-data-showcase.html': {
+        width: 1000,
+        height: 1000,
+        fullPage: true,
+        deviceScaleFactor: 2,
+        quality: 95
+      },
+      'circular-metrics-layout.html': {
+        width: 1200,
+        height: 1200,
+        fullPage: true,
+        deviceScaleFactor: 2,
+        quality: 95
+      },
+      'vertical-timeline-stats.html': {
+        width: 800,
+        height: 1600,
+        fullPage: true,
+        deviceScaleFactor: 2,
+        quality: 95
+      },
+      'geometric-data-grid.html': {
+        width: 1200,
+        height: 800,
+        fullPage: true,
+        deviceScaleFactor: 2,
+        quality: 95
+      },
+      'diagonal-split-layout.html': {
+        width: 1200,
+        height: 800,
+        fullPage: true,
+        deviceScaleFactor: 2,
+        quality: 95
+      },
+      'financial-analytics.html': {
+        width: 1400,
+        height: 900,
+        fullPage: true,
+        deviceScaleFactor: 2,
+        quality: 95
+      },
+      'social-media-comparison.html': {
         width: 1200,
         height: 1000,
-        fullPage: true
+        fullPage: true,
+        deviceScaleFactor: 2,
+        quality: 95
       },
-      'three.html': {
-        width: 500,
-        height: 1200,
-        fullPage: true
+      'customer-analytics.html': {
+        width: 1200,
+        height: 900,
+        fullPage: true,
+        deviceScaleFactor: 2,
+        quality: 95
       },
-      'four.html': {
+      'sales-performance-dashboard.html': {
+        width: 1400,
+        height: 900,
+        fullPage: true,
+        deviceScaleFactor: 2,
+        quality: 95
+      },
+      'marketing-trends-timeline.html': {
         width: 1000,
-        height: 700,
-        fullPage: true
+        height: 1400,
+        fullPage: true,
+        deviceScaleFactor: 2,
+        quality: 95
+      },
+      'global-economic-comparison.html': {
+        width: 1400,
+        height: 900,
+        fullPage: true,
+        deviceScaleFactor: 2,
+        quality: 95
+      },
+      'data-visualization-report.html': {
+        width: 1200,
+        height: 900,
+        fullPage: true,
+        deviceScaleFactor: 2,
+        quality: 95
+      },
+      'default': {
+        width: 1200,
+        height: 800,
+        fullPage: true,
+        deviceScaleFactor: 2,
+        quality: 95
       }
     };
 
-    return templateOptions[templateName] || {
-      width: 1200,
-      height: 800,
-      fullPage: true
-    };
+    return templateOptions[templateName] || templateOptions['default'];
+  }
+
+  // Add method to handle custom image options
+  async convertWithCustomOptions(htmlContent, customOptions = {}) {
+    const defaultOptions = this.getTemplateOptions('default');
+    const options = { ...defaultOptions, ...customOptions };
+    
+    try {
+      const imageBuffer = await this.convertHtmlToImage(htmlContent, options);
+      return imageBuffer;
+    } catch (error) {
+      console.error('Error in convertWithCustomOptions:', error);
+      throw error;
+    }
   }
 }
 

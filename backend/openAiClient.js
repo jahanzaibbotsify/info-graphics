@@ -11,13 +11,56 @@ try {
     console.log('OpenAI not configured');
 }
 
-async function generateInfographic(userInfo) {
+async function generateInfographic(userInfo, existingHtml = null) {
     try {
         // Check if OpenAI is configured
         if (!openai || !process.env.OPENAI_API_KEY) {
             throw new Error('OpenAI API key is required for infographic generation. Please configure OPENAI_API_KEY in your environment variables.');
         }
 
+        // If we're updating an existing infographic
+        if (existingHtml) {
+            const updatePrompt = `Update the following HTML infographic based on this request: ${userInfo}
+
+HTML to Update:
+${existingHtml}
+
+CRITICAL INSTRUCTIONS:
+1. ONLY modify the content that needs to be updated based on the user's request
+2. DO NOT change any HTML structure, CSS classes, or JavaScript code that isn't explicitly mentioned in the update request
+3. Preserve all styling, colors, and layout unless specifically asked to change
+4. Keep all existing elements that aren't mentioned in the update request
+5. Maintain all CDN links and external dependencies exactly as they are
+6. Return ONLY the raw HTML content - no markdown or code blocks
+
+Update Requirements:
+- Only change the specific elements mentioned in the update request
+- Keep all other content and structure exactly the same
+- Ensure data consistency if modifying numbers or percentages
+- Preserve all existing functionality
+
+Return ONLY the complete HTML document with the requested updates integrated. No formatting, no code blocks, just raw HTML.`;
+
+            const response = await openai.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                    {
+                        role: "system",
+                        content: "You are an expert at precise HTML updates. Your job is to modify ONLY the specific content requested while preserving everything else exactly as is. Never change structure or styling unless explicitly asked. Return only raw HTML."
+                    },
+                    {
+                        role: "user",
+                        content: updatePrompt
+                    }
+                ],
+                temperature: 0.3,
+            });
+
+            let htmlContent = response.choices[0].message.content;
+            return cleanHtmlContent(htmlContent);
+        }
+
+        // If generating a new infographic, use existing logic
         // Read the prompt from the text file
         const promptPath = path.join(__dirname, '..', 'public', 'files', 'prompt.txt');
         let basePrompt;
