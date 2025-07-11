@@ -190,12 +190,12 @@
             <div v-if="infographic.imageUrl" class="w-full h-full flex items-center justify-center">
               <img 
                 :src="`${$options.VUE_APP_BACKEND_URL || 'https://infographics.saasbakers.com/api'}${infographic.imageUrl}`" 
-                :alt="infographic.title"
+                :alt="infographic.title" 
                 class="max-w-full max-h-full object-contain rounded"
                 @error="handleImageError($event, infographic)"
               />
             </div>
-            <div v-else v-html="infographic.htmlContent" class="infographic-thumbnail"></div>
+            <!-- <div v-else v-html="infographic.htmlContent" class="infographic-thumbnail"></div> -->
           </div>
           <div class="space-y-2">
             <h4 class="font-medium text-sm truncate">{{ infographic.title }}</h4>
@@ -468,6 +468,7 @@ export default {
         
         const response = await axios.get(url);
         this.storedInfographics = response.data.infographics;
+        console.log('storedInfographics: ', this.storedInfographics);
         this.totalPages = response.data.pagination.totalPages;
         this.totalInfographics = response.data.pagination.totalInfographics;
       } catch (error) {

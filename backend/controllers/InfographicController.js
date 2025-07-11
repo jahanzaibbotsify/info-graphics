@@ -65,7 +65,7 @@ class InfographicController {
       // Add image data if generation was successful
       if (imageResult.success) {
         response.data.imageFilename = imageFilename;
-        response.data.imageUrl = `/images/${imageFilename}`;
+        response.data.imageUrl = `/generated-images/${imageFilename}`;
       }
 
       res.status(200).json(response);
@@ -95,10 +95,10 @@ class InfographicController {
         id: infographic._id,
         title: infographic.title,
         userInfo: infographic.userInfo,
-        htmlContent: infographic.htmlContent,
+        // htmlContent: infographic.htmlContent,
         createdAt: infographic.created_at,
         imageFilename: infographic.imageFilename,
-        imageUrl: infographic.imageFilename ? `/images/${infographic.imageFilename}` : null
+        imageUrl: infographic.imageFilename ? `/generated-images/${infographic.imageFilename}` : null
       }));
       
       res.json({
@@ -148,7 +148,7 @@ class InfographicController {
         htmlContent: infographic.htmlContent,
         createdAt: infographic.created_at,
         imageFilename: infographic.imageFilename,
-        imageUrl: infographic.imageFilename ? `/images/${infographic.imageFilename}` : null
+        imageUrl: infographic.imageFilename ? `/generated-images/${infographic.imageFilename}` : null
       }));
       
       res.json({
@@ -183,7 +183,7 @@ class InfographicController {
         htmlContent: infographic.htmlContent,
         createdAt: infographic.created_at,
         imageFilename: infographic.imageFilename,
-        imageUrl: infographic.imageFilename ? `/images/${infographic.imageFilename}` : null
+        imageUrl: infographic.imageFilename ? `/generated-images/${infographic.imageFilename}` : null
       });
     } catch (error) {
       console.error('Error fetching infographic:', error);
@@ -267,7 +267,7 @@ class InfographicController {
       // Add image data if generation was successful
       if (imageResult.success) {
         response.data.imageFilename = imageFilename;
-        response.data.imageUrl = `/images/${imageFilename}`;
+        response.data.imageUrl = `/generated-images/${imageFilename}`;
       }
 
       res.status(200).json(response);

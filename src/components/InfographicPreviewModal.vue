@@ -4,7 +4,7 @@
     <div class="absolute inset-0 bg-black/50" @click="$emit('close')"></div>
 
     <!-- Modal -->
-    <div class="relative bg-white rounded-xl p-6 w-full max-w-4xl max-h-[90vh] mx-4 overflow-hidden">
+    <div class="relative bg-white rounded-xl p-6 w-full max-w-4xl max-h-[90vh] mx-4 overflow-auto">
       <!-- Close button -->
       <button
         @click="$emit('close')"
