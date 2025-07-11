@@ -30,7 +30,7 @@
             <!-- Show image if available, otherwise show HTML -->
             <div v-if="infographic?.imageUrl" class="w-full h-full flex items-center justify-center p-4">
               <img 
-                :src="`${$options.VUE_APP_BACKEND_URL || 'https://infographics.saasbakers.com/api'}${infographic.imageUrl}`" 
+                :src="`${$options.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}${infographic.imageUrl}`" 
                 :alt="infographic.title"
                 class="max-w-full max-h-full object-contain rounded shadow-sm"
                 @error="handleImageError"
@@ -128,11 +128,11 @@ export default {
           throw new Error('No image to download')
         }
 
-        const imageUrl = `${process.env.VUE_APP_BACKEND_URL || 'https://infographics.saasbakers.com/api'}${this.infographic.imageUrl}`;
+        const imageUrl = `${process.env.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}${this.infographic.imageUrl}`;
         
         // Use the download endpoint instead of direct image URL
         const link = document.createElement('a')
-        link.href = `${process.env.VUE_APP_BACKEND_URL || 'https://infographics.saasbakers.com/api'}/download/${this.infographic.imageFilename || 'infographic.png'}`
+        link.href = `${process.env.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}/download/${this.infographic.imageFilename || 'infographic.png'}`
         link.download = `${this.infographic.title?.replace(/[^a-zA-Z0-9]/g, '-') || 'infographic'}-${Date.now()}.png`
         document.body.appendChild(link)
         link.click()
@@ -147,7 +147,7 @@ export default {
       this.isUpdating = true;
       try {
         const response = await axios.put(
-          `${process.env.VUE_APP_BACKEND_URL || 'https://infographics.saasbakers.com/api'}/infographics/${this.infographic._id}`,
+          `${process.env.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}/infographics/${this.infographic._id}`,
           {
             updatePrompt: this.updatePrompt.trim()
           }

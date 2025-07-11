@@ -189,7 +189,7 @@
             <!-- Show image if available, otherwise show HTML thumbnail -->
             <div v-if="infographic.imageUrl" class="w-full h-full flex items-center justify-center">
               <img 
-                :src="`${$options.VUE_APP_BACKEND_URL || 'https://infographics.saasbakers.com/api'}${infographic.imageUrl}`" 
+                :src="`${$options.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}${infographic.imageUrl}`" 
                 :alt="infographic.title" 
                 class="max-w-full max-h-full object-contain rounded"
                 @error="handleImageError($event, infographic)"
@@ -392,7 +392,7 @@ export default {
       this.isUpdating = true;
       try {
         const response = await axios.put(
-          `${process.env.VUE_APP_BACKEND_URL || 'https://infographics.saasbakers.com/api'}/infographics/${this.currentInfographicId}`,
+          `${process.env.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}/infographics/${this.currentInfographicId}`,
           {
             updatePrompt: this.updatePrompt.trim()
           }
@@ -402,7 +402,7 @@ export default {
           // Update the current infographic
           this.infographicHtml = response.data.data.htmlContent;
           this.currentInfographicImage = response.data.data.imageUrl ? 
-            `${process.env.VUE_APP_BACKEND_URL || 'https://infographics.saasbakers.com/api'}${response.data.data.imageUrl}` : 
+            `${process.env.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}${response.data.data.imageUrl}` : 
             null;
           this.updatePrompt = ''; // Clear the prompt
 

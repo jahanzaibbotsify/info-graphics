@@ -67,7 +67,7 @@
         >
           <img
             v-if="infographic.imageUrl"
-            :src="`${$options.VUE_APP_BACKEND_URL || 'https://infographics.saasbakers.com/api'}${infographic.imageUrl}`"
+            :src="`${$options.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}${infographic.imageUrl}`"
             :alt="infographic.title"
             class="w-full h-full object-contain p-4"
           />
@@ -168,7 +168,7 @@ export default {
       this.error = null
       try {
         const response = await axios.get(
-          `${process.env.VUE_APP_BACKEND_URL || 'https://infographics.saasbakers.com/api'}/infographics`,
+          `${process.env.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}/infographics`,
           {
             params: {
               page: this.currentPage,
