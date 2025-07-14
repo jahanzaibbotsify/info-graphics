@@ -6,138 +6,173 @@
       <p class="text-xl text-muted-foreground">Transform your ideas into beautiful infographics with AI</p>
     </div>
 
-    <!-- Input Section -->
-    <div class="max-w-4xl mx-auto mb-12">
-      <div class="space-y-4">
-        <div class="space-y-3">
-          <label class="block text-sm font-medium text-foreground">
-            Infographic Information
-          </label>
-          <textarea
-            v-model="infographicInfo"
-            placeholder="Describe the topic and data for your infographic. Include any statistics, key points, or information you want to visualize. For example: 'Climate change statistics showing temperature rise over the last 50 years, renewable energy adoption rates, and key environmental impacts.'"
-            class="w-full h-32 px-4 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-            :disabled="isGenerating"
-          ></textarea>
+    <!-- Chat Interface Section -->
+    <div class="max-w-4xl mx-auto">
+      <div class="bg-white border rounded-xl shadow-sm overflow-hidden">
+        <!-- Chat Header -->
+        <div class="bg-gradient-to-r from-primary to-primary/80 text-white p-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <wand-icon class="w-5 h-5" />
+            </div>
+            <div>
+              <h3 class="font-semibold">AI Infographic Creator</h3>
+              <p class="text-white/80 text-sm">Chat with AI to create stunning infographics</p>
+            </div>
+          </div>
         </div>
-      <div class="flex gap-3">
-        <button
-          type="button"
-            @click.prevent="generateInfographic"
-            :disabled="!infographicInfo || isGenerating"
-            class="w-full h-12 rounded-lg bg-primary text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          <loader-icon v-if="isGenerating" class="animate-spin h-5 w-5" />
-          <wand-icon v-else class="h-5 w-5" />
-          {{ isGenerating ? 'Generating...' : 'Generate' }}
-        </button>
+
+        <!-- Chat Messages -->
+        <div class="h-96 overflow-y-auto p-4 space-y-4 bg-gray-50" ref="chatContainer">
+          <!-- Welcome Message -->
+          <div v-if="chatMessages.length === 0" class="flex gap-3">
+            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+              <wand-icon class="w-4 h-4 text-white" />
       </div>
-        <!-- Infographic Suggestions -->
-        <div class="flex flex-wrap gap-2">
-        <span class="text-sm text-muted-foreground">Try:</span>
+            <div class="bg-white rounded-lg rounded-tl-none p-4 shadow-sm max-w-md">
+              <p class="text-gray-800 mb-2">
+                👋 Hi! I'm your AI assistant. I can help you create beautiful infographics. Just tell me what you'd like to visualize!
+              </p>
+              <div class="mt-3 space-y-2">
+                <p class="text-xs text-gray-500 font-medium">Try saying:</p>
+                <div class="flex flex-wrap gap-1">
         <button
             v-for="suggestion in infographicSuggestions"
           :key="suggestion"
-            @click="infographicInfo = suggestion"
-          class="text-sm px-3 py-1 rounded-full bg-muted hover:bg-primary/10 transition-colors"
+                    @click="sendSuggestion(suggestion)"
+                    class="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition-colors"
         >
           {{ suggestion }}
         </button>
         </div>
+        </div>
       </div>
     </div>
 
-    <!-- Preview Section -->
-    <div class="max-w-4xl mx-auto">
-      <div class="border rounded-xl p-8 bg-card">
-        <!-- Loading State -->
-        <div v-if="isGenerating" class="flex flex-col items-center justify-center py-12">
-          <div class="animate-spin h-16 w-16 border-4 border-primary border-t-transparent rounded-full mb-4"></div>
-          <p class="text-muted-foreground">Creating your infographic...</p>
+          <!-- Chat Messages -->
+          <div v-for="message in chatMessages" :key="message.id" class="flex gap-3" :class="message.role === 'user' ? 'justify-end' : ''">
+            <!-- AI Avatar -->
+            <div v-if="message.role === 'assistant'" class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+              <wand-icon class="w-4 h-4 text-white" />
         </div>
 
-        <!-- Infographic Preview -->
-        <div v-else-if="infographicHtml || currentInfographicImage" class="space-y-6">
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg font-medium">Your Generated Infographic</h3>
-            <div class="flex gap-3">
-              <button
-                v-if="currentInfographicImage"
-                @click="downloadCurrentImage"
-                class="p-2 rounded-lg hover:bg-muted flex items-center gap-2 transition-colors"
-                title="Download Image"
+            <!-- Message Content -->
+            <div class="max-w-[80%]" :class="message.role === 'user' ? 'order-first' : ''">
+              <div 
+                class="rounded-lg p-3 shadow-sm"
+                :class="{
+                  'bg-primary text-white rounded-br-none': message.role === 'user',
+                  'bg-white rounded-tl-none': message.role === 'assistant' && !message.isError && !message.isSuggestion,
+                  'bg-red-50 border border-red-200 rounded-tl-none': message.role === 'assistant' && message.isError,
+                  'bg-blue-50 border border-blue-200 rounded-tl-none': message.role === 'assistant' && message.isSuggestion
+                }"
               >
-                <download-icon class="h-5 w-5" />
-                <span class="text-sm">Image</span>
-              </button>
-              <!-- <button
-                @click="downloadInfographic"
-                class="p-2 rounded-lg hover:bg-muted flex items-center gap-2 transition-colors"
-                title="Download HTML"
-              >
-                <download-icon class="h-5 w-5" />
-                <span class="text-sm">HTML</span>
-              </button> -->
+                <!-- Loading indicator for generating messages -->
+                <div v-if="message.isGenerating" class="flex items-center gap-2 text-gray-600">
+                  <loader-icon class="w-4 h-4 animate-spin" />
+                  <span class="text-sm">{{ message.content }}</span>
+                </div>
+                
+                <!-- Regular message content -->
+                <div v-else>
+                  <!-- Error message styling -->
+                  <div v-if="message.isError" class="text-red-700">
+                    {{ message.content }}
+                  </div>
+                  
+                  <!-- Suggestion message styling -->
+                  <div v-else-if="message.isSuggestion" class="text-blue-700">
+                    <div v-html="message.content.replace(/\n/g, '<br>')"></div>
+                  </div>
+                  
+                  <!-- Regular message -->
+                  <span v-else>{{ message.content }}</span>
             </div>
           </div>
 
-          <div class="w-full border rounded-lg overflow-hidden bg-white">
-            <!-- Show image if available, otherwise show HTML -->
-            <div v-if="currentInfographicImage" class="flex justify-center p-4">
+              <!-- AI Message with Infographic -->
+              <div v-if="message.infographic" class="mt-3">
+                <div class="bg-gray-50 rounded-lg p-3 border">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-medium text-gray-600">{{ message.infographic.title }}</span>
+                    <div class="flex items-center gap-2">
+                      <!-- Update Badge -->
+                      <span 
+                        v-if="message.isUpdate || isUpdatedInfographic(message.infographic.id)"
+                        class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium"
+                      >
+                        Updated
+                      </span>
+                      <button
+                        @click="downloadInfographicFromMessage(message.infographic)"
+                        class="text-xs px-2 py-1 bg-primary text-white rounded hover:bg-primary/90 transition-colors flex items-center gap-1"
+                      >
+                        <download-icon class="w-3 h-3" />
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                  <div class="rounded-md overflow-hidden bg-gray-50 flex justify-center">
               <img 
-                :src="currentInfographicImage" 
-                alt="Generated Infographic" 
-                class="max-w-full h-auto rounded-lg shadow-sm"
-                style="max-height: 600px;"
+                      :src="message.infographic.imageUrl" 
+                      :alt="message.infographic.title"
+                      class="max-w-full h-auto rounded transition-all duration-300"
+                      style="max-height: 300px;"
+                      @error="handleImageError"
               />
             </div>
-            <div v-else-if="infographicHtml" v-html="infographicHtml" class="infographic-preview"></div>
+                </div>
           </div>
 
-          <!-- Update Prompt Area -->
-          <div v-if="currentInfographicImage || infographicHtml" class="mt-6 space-y-4">
-            <div class="flex items-center justify-between">
-              <h4 class="text-sm font-medium">Update Infographic</h4>
-              <div v-if="isUpdating" class="text-sm text-gray-500">
-                <span class="animate-pulse">Updating...</span>
+              <div class="text-xs text-gray-500 mt-1" :class="message.role === 'user' ? 'text-right' : ''">
+                {{ formatTime(message.timestamp) }}
               </div>
             </div>
-            <div class="space-y-3">
-              <textarea
-                v-model="updatePrompt"
-                placeholder="Describe what you want to update in this infographic (e.g., 'Make the title larger and change the main chart color to blue')"
-                class="w-full px-4 py-3 text-sm border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary resize-vertical"
-                :disabled="isUpdating"
-                rows="3"
-              ></textarea>
-              <div class="flex justify-end">
-                <button
-                  @click="handleUpdate"
-                  class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                  :disabled="!updatePrompt.trim() || isUpdating"
-                >
-                  <refresh-cw-icon v-if="isUpdating" class="h-4 w-4 animate-spin" />
-                  <wand-icon v-else class="h-4 w-4" />
-                  {{ isUpdating ? 'Updating...' : 'Update Infographic' }}
-                </button>
+
+            <!-- User Avatar -->
+            <div v-if="message.role === 'user'" class="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <user-icon class="w-4 h-4 text-white" />
+            </div>
+          </div>
+
+          <!-- Typing Indicator -->
+          <div v-if="isTyping" class="flex gap-3">
+            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+              <wand-icon class="w-4 h-4 text-white" />
+            </div>
+            <div class="bg-white rounded-lg rounded-tl-none p-3 shadow-sm">
+              <div class="flex items-center gap-1">
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Error State -->
-        <div v-else-if="error" class="flex flex-col items-center justify-center py-12">
-          <div class="text-red-500 mb-4">
-            <x-circle-icon class="h-16 w-16" />
+        <!-- Chat Input -->
+        <div class="p-4 border-t bg-white">
+          <div class="flex gap-3">
+            <textarea
+              v-model="currentMessage"
+              @keydown.enter.prevent="handleSendMessage"
+              placeholder="Describe the infographic you want to create..."
+              class="flex-1 resize-none border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              rows="2"
+              :disabled="isTyping || isGenerating"
+            ></textarea>
+            <button
+              @click="handleSendMessage"
+              :disabled="!currentMessage.trim() || isTyping || isGenerating"
+              class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <send-icon class="w-4 h-4" />
+            </button>
           </div>
-          <p class="text-muted-foreground">{{ error }}</p>
+          <div v-if="isGenerating" class="mt-2 flex items-center gap-2 text-xs text-gray-500">
+            <loader-icon class="w-3 h-3 animate-spin" />
+            <span>Processing your request...</span>
         </div>
-
-        <!-- Initial State -->
-        <div v-else class="flex flex-col items-center justify-center py-12">
-          <p class="text-muted-foreground">
-            Describe your topic to create an infographic
-          </p>
         </div>
       </div>
     </div>
@@ -285,7 +320,9 @@ import {
   SearchIcon,
   SearchXIcon,
   EyeIcon,
-  RefreshCwIcon
+  RefreshCwIcon,
+  UserIcon,
+  SendIcon
 } from 'lucide-vue'
 import axios from 'axios'
 import PricingModal from '@/components/PricingModal.vue'
@@ -303,155 +340,280 @@ export default {
     SearchXIcon,
     EyeIcon,
     RefreshCwIcon,
+    UserIcon,
+    SendIcon,
     PricingModal,
     InfographicPreviewModal,
     AuthModal
   },
   data() {
     return {
-      infographicInfo: '',
+      // Chat interface data
+      chatMessages: [],
+      currentMessage: '',
+      isTyping: false,
       isGenerating: false,
-      error: null,
-      infographicHtml: null,
+      messageId: 0,
+      
+      // Existing infographics data
       storedInfographics: [],
       isLoadingContent: false,
       currentPage: 1,
       totalPages: 1,
       totalInfographics: 0,
       searchQuery: '',
+      
+      // Modal states
       showPricingModal: false,
       showInfographicPreviewModal: false,
       selectedInfographic: null,
       showAuthModal: false,
+      
+      // Error handling
+      error: null,
+      
+      // Suggestions for chat
       infographicSuggestions: [
-        'Climate change statistics and environmental impact data',
-        'Social media usage trends and demographics',
-        'Technology adoption rates and digital transformation',
-        'Health and wellness statistics for modern lifestyle'
-      ],
-      currentInfographicImage: null,
-      currentInfographicImageFilename: null,
-      isUpdating: false,
-      updatePrompt: '',
-      currentInfographicId: null
+        "Technology adoption rates and digital transformation",
+        "Climate change statistics and environmental data",
+        "Social media usage trends and demographics",
+        "Health and wellness statistics for modern lifestyle",
+        "Global economic indicators and market trends",
+        "Renewable energy adoption and sustainability metrics",
+        "Remote work statistics and productivity data",
+        "AI and machine learning industry growth",
+        "E-commerce sales trends and consumer behavior",
+        "Education technology usage and learning outcomes"
+      ]
     }
   },
   mounted() {
     this.fetchStoredInfographics()
+    
+    // Auto-focus the chat input when component mounts
+    this.$nextTick(() => {
+      const textarea = this.$el.querySelector('textarea')
+      if (textarea) {
+        textarea.focus()
+      }
+    })
   },
   methods: {
-    async generateInfographic() {
-      if (!this.infographicInfo || this.isGenerating) {
-        return
+    async handleSendMessage() {
+      if (!this.currentMessage.trim() || this.isTyping || this.isGenerating) return
+
+      const userMessage = {
+        id: this.messageId++,
+        role: 'user',
+        content: this.currentMessage.trim(),
+        timestamp: new Date()
       }
 
-      this.isGenerating = true
-      this.error = null
-      this.infographicHtml = null
-      this.currentInfographicImage = null
-      this.currentInfographicImageFilename = null
-      this.currentInfographicId = null
+      this.chatMessages.push(userMessage)
+      const userPrompt = this.currentMessage.trim()
+      this.currentMessage = ''
+      this.isTyping = true
+
+      // Scroll to bottom
+      this.$nextTick(() => {
+        this.scrollToBottom()
+      })
 
       try {
-        // Make the API call to generate the infographic
-        const response = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/generate-infographic`, {
-          userInfo: this.infographicInfo
+        // Check if this might be an update to existing image
+        const hasExistingImages = this.chatMessages.some(msg => msg.infographic && msg.infographic.id)
+        const modificationKeywords = [
+          'change', 'modify', 'update', 'edit', 'alter', 'adjust', 'revise',
+          'make it', 'turn it', 'convert', 'transform', 'switch',
+          'different color', 'new color', 'other color', 'another style',
+          'more', 'less', 'bigger', 'smaller', 'brighter', 'darker',
+          'add', 'remove', 'replace', 'include', 'exclude',
+          'instead of', 'rather than', 'better', 'improve',
+          'fix', 'correct', 'enhance', 'upgrade'
+        ]
+        const isLikelyUpdate = hasExistingImages && modificationKeywords.some(keyword => 
+          userPrompt.toLowerCase().includes(keyword)
+        )
+
+        // Create AI response message first
+        const aiMessage = {
+          id: this.messageId++,
+          role: 'assistant',
+          content: isLikelyUpdate 
+            ? "I'll update your infographic based on your request. Let me process the changes..." 
+            : "I'll create an infographic for you. Let me process your request...",
+          timestamp: new Date(),
+          isGenerating: true,
+          infographic: null
+        }
+
+        this.chatMessages.push(aiMessage)
+        this.isTyping = false
+        this.isGenerating = true
+
+        // Scroll to bottom after adding AI message
+        this.$nextTick(() => {
+          this.scrollToBottom()
+        })
+
+        // Generate the infographic with chat context
+        const response = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/chat/generate-infographic`, {
+          userInfo: userPrompt,
+          chatHistory: this.chatMessages.slice(0, -1) // Pass previous messages for context
         })
         
-        // Store the HTML content
-        console.log('response from generate infographic: ', response.data);
-        this.infographicHtml = response.data.data.htmlContent;
-        this.currentInfographicId = response.data.data.id;
-
-        // If image was generated, display the image instead of HTML
+        // Update the AI message with results
+        aiMessage.isGenerating = false
+        
+        if (response.data.isUpdate) {
+          aiMessage.content = "I've updated your infographic! Here's the improved version:"
+          aiMessage.isUpdate = true
+          
+          // Find and update the existing infographic in previous messages
+          for (let i = this.chatMessages.length - 2; i >= 0; i--) {
+            if (this.chatMessages[i].infographic && this.chatMessages[i].infographic.id === response.data.data.id) {
+              // Update the existing message's infographic
+              this.chatMessages[i].infographic = {
+                id: response.data.data.id,
+                title: response.data.data.title,
+                imageUrl: `${process.env.VUE_APP_BACKEND_URL}${response.data.data.imageUrl}`,
+                imageFilename: response.data.data.imageFilename
+              }
+              // Add timestamp to track when it was updated
+              this.chatMessages[i].updatedAt = new Date()
+              break
+            }
+          }
+          
+          // Also add the updated infographic to the current AI message for convenience
+          aiMessage.infographic = {
+            id: response.data.data.id,
+            title: response.data.data.title,
+            imageUrl: `${process.env.VUE_APP_BACKEND_URL}${response.data.data.imageUrl}`,
+            imageFilename: response.data.data.imageFilename
+          }
+        } else {
+          aiMessage.content = "I've created your infographic! Here it is:"
+          aiMessage.isUpdate = false
+        }
+        
         if (response.data.data.imageGenerated && response.data.data.imageUrl) {
-          this.currentInfographicImage = `${process.env.VUE_APP_BACKEND_URL}${response.data.data.imageUrl}`;
-          this.currentInfographicImageFilename = response.data.data.imageFilename;
+          aiMessage.infographic = {
+            id: response.data.data.id,
+            title: response.data.data.title,
+            imageUrl: `${process.env.VUE_APP_BACKEND_URL}${response.data.data.imageUrl}`,
+            imageFilename: response.data.data.imageFilename
+          }
         }
 
         // Refresh the stored infographics list
-        await this.fetchStoredInfographics();
+        await this.fetchStoredInfographics()
 
       } catch (error) {
-        console.error('Error:', error)
-        if (error.response?.status === 429) {
-          // Rate limit exceeded
-          this.showPricingModal = true;
-          this.error = error.response.data.message;
+        console.error('Error generating infographic:', error)
+        this.isTyping = false
+        
+        // Update the AI message with error
+        const lastMessage = this.chatMessages[this.chatMessages.length - 1]
+        if (lastMessage.role === 'assistant') {
+          lastMessage.isGenerating = false
+          
+          // Handle different types of errors
+          if (error.response?.status === 400 && error.response?.data?.type === 'invalid_request') {
+            // Invalid request (like "make pizza")
+            lastMessage.content = `❌ ${error.response.data.error}`
+            lastMessage.isError = true
+            
+            // Add helpful suggestions
+            setTimeout(() => {
+              const suggestionMessage = {
+                id: this.messageId++,
+                role: 'assistant',
+                content: `💡 **Try these instead:**\n\n• "Create a technology adoption statistics infographic"\n• "Show social media usage trends for 2025"\n• "Generate health and wellness data visualization"\n• "Climate change statistics and environmental data"\n• "Business analytics dashboard with KPIs"`,
+                timestamp: new Date(),
+                isSuggestion: true
+              }
+              this.chatMessages.push(suggestionMessage)
+              this.$nextTick(() => {
+                this.scrollToBottom()
+              })
+            }, 1000)
+            
+          } else if (error.response?.status === 429) {
+            // Rate limit error
+            lastMessage.content = 'I\'ve reached the rate limit. Please upgrade for unlimited generations.'
+            this.showPricingModal = true
         } else {
-          this.error = error.message || 'Failed to generate infographic'
+            // Generic error
+            lastMessage.content = 'Sorry, I encountered an error creating your infographic. Please try again with a data visualization request.'
+          }
         }
       } finally {
         this.isGenerating = false
+        this.$nextTick(() => {
+          this.scrollToBottom()
+        })
       }
     },
 
-    async handleUpdate() {
-      if (!this.updatePrompt.trim() || this.isUpdating || !this.currentInfographicId) return;
-      
-      this.isUpdating = true;
-      try {
-        const response = await axios.put(
-          `${process.env.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}/infographics/${this.currentInfographicId}`,
-          {
-            updatePrompt: this.updatePrompt.trim()
-          }
-        );
+    sendSuggestion(suggestion) {
+      this.currentMessage = suggestion
+      this.handleSendMessage()
+    },
 
-        if (response.data?.data) {
-          // Update the current infographic
-          this.infographicHtml = response.data.data.htmlContent;
-          this.currentInfographicImage = response.data.data.imageUrl ? 
-            `${process.env.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}${response.data.data.imageUrl}` : 
-            null;
-          this.updatePrompt = ''; // Clear the prompt
-
-          // Show success message
-          if (this.$toast) {
-            this.$toast.success('Infographic updated successfully!');
-          } else {
-            console.log('Infographic updated successfully!');
-          }
-          
-          // Refresh the stored infographics list
-          await this.fetchStoredInfographics();
-        }
-      } catch (error) {
-        console.error('Error updating infographic:', error);
-        const errorMessage = error.response?.data?.error || 'Failed to update infographic';
-        if (this.$toast) {
-          this.$toast.error(errorMessage);
-        } else {
-          console.error(errorMessage);
-        }
-      } finally {
-        this.isUpdating = false;
+    scrollToBottom() {
+      const container = this.$refs.chatContainer
+      if (container) {
+        container.scrollTop = container.scrollHeight
       }
     },
 
-    async downloadInfographic() {
-      try {
-        if (!this.infographicHtml) {
-          throw new Error('Infographic not loaded')
-        }
+    formatTime(timestamp) {
+      return new Date(timestamp).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    },
 
-        // Create blob and download
-        const blob = new Blob([this.infographicHtml], { type: 'text/html' })
-        const url = URL.createObjectURL(blob)
-        
-        // Create and trigger download
+    downloadInfographicFromMessage(infographic) {
+      try {
         const link = document.createElement('a')
-        link.href = url
-        link.download = `infographic-${Date.now()}.html`
+        link.href = `${process.env.VUE_APP_BACKEND_URL}/download/${infographic.imageFilename}`
+        link.download = `${infographic.title.replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}.png`
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-        URL.revokeObjectURL(url)
       } catch (error) {
-        console.error('Error downloading HTML:', error)
-        this.error = 'Failed to download infographic'
+        console.error('Error downloading infographic:', error)
       }
     },
+
+    handleImageError(event) {
+      console.error('Failed to load image:', event.target.src)
+      event.target.style.display = 'none'
+    },
+
+    // handleImageLoad(event) {
+    //   // Add a subtle animation effect when images load
+    //   if (event && event.target) {
+    //     event.target.style.opacity = '0'
+    //     setTimeout(() => {
+    //       if (event.target) {
+    //         event.target.style.opacity = '1'
+    //       }
+    //     }, 100)
+    //   }
+    // },
+
+    isUpdatedInfographic(infographicId) {
+      // Check if this infographic ID appears multiple times in chat history
+      // indicating it has been updated
+      const messagesWithThisId = this.chatMessages.filter(msg => 
+        msg.infographic && msg.infographic.id === infographicId
+      )
+      return messagesWithThisId.length > 1
+    },
+
 
     async handleSearch() {
       this.currentPage = 1;
@@ -527,33 +689,7 @@ export default {
       this.showAuthModal = false
     },
 
-    async downloadCurrentImage() {
-      try {
-        if (!this.currentInfographicImageFilename) {
-          throw new Error('Current infographic image not available')
-        }
 
-        // Use the download endpoint
-        const link = document.createElement('a')
-        link.href = `${process.env.VUE_APP_BACKEND_URL}/download/${this.currentInfographicImageFilename}`
-        link.download = `infographic-${Date.now()}.png`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-      } catch (error) {
-        console.error('Error downloading current image:', error)
-        this.error = 'Failed to download current image'
-      }
-    },
-
-    handleImageError(event, infographic) {
-      // Hide the broken image and show HTML thumbnail as fallback
-      event.target.style.display = 'none';
-      const parent = event.target.parentElement;
-      if (parent) {
-        parent.innerHTML = `<div class="infographic-thumbnail">${infographic.htmlContent}</div>`;
-      }
-    },
 
     async downloadInfographicImage(infographic) {
       try {

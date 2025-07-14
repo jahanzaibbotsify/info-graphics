@@ -4,7 +4,7 @@
     <div class="absolute inset-0 bg-black/50" @click="$emit('close')"></div>
 
     <!-- Modal -->
-    <div class="relative bg-white rounded-xl p-6 w-full max-w-4xl max-h-[90vh] mx-4 overflow-auto">
+    <div class="relative bg-white rounded-xl p-6 w-full max-w-6xl max-h-[90vh] mx-4 overflow-auto">
       <!-- Close button -->
       <button
         @click="$emit('close')"
@@ -24,9 +24,42 @@
           </div>
         </div>
 
-        <!-- Infographic Content -->
+        <!-- Tab Navigation -->
+        <div class="flex space-x-1 border-b border-gray-200">
+          <button
+            @click="activeTab = 'preview'"
+            :class="[
+              'px-4 py-2 text-sm font-medium rounded-t-lg transition-colors',
+              activeTab === 'preview' 
+                ? 'bg-primary text-white' 
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+            ]"
+          >
+            <div class="flex items-center gap-2">
+              <eye-icon class="w-4 h-4" />
+              Preview
+            </div>
+          </button>
+          <button
+            @click="activeTab = 'chat'"
+            :class="[
+              'px-4 py-2 text-sm font-medium rounded-t-lg transition-colors',
+              activeTab === 'chat' 
+                ? 'bg-primary text-white' 
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+            ]"
+          >
+            <div class="flex items-center gap-2">
+              <message-circle-icon class="w-4 h-4" />
+              Chat with AI
+            </div>
+          </button>
+        </div>
+
+        <!-- Tab Content -->
         <div class="flex-1 overflow-hidden">
-          <div class="w-full h-[60vh] border rounded-lg overflow-auto bg-gray-50">
+          <!-- Preview Tab -->
+          <div v-if="activeTab === 'preview'" class="w-full h-[60vh] border rounded-lg overflow-auto bg-gray-50">
             <!-- Show image if available, otherwise show HTML -->
             <div v-if="infographic?.imageUrl" class="w-full h-full flex items-center justify-center p-4">
               <img 
@@ -42,31 +75,12 @@
             </div>
           </div>
 
-          <!-- Update Prompt Area -->
-          <div class="mt-4 space-y-3">
-            <div class="flex items-center gap-2">
-              <h4 class="text-sm font-medium">Update Infographic</h4>
-              <div v-if="isUpdating" class="text-sm text-gray-500">
-                <span class="animate-pulse">Updating...</span>
-              </div>
-            </div>
-            <textarea
-              v-model="updatePrompt"
-              placeholder="Describe what you want to update in this infographic (e.g., 'Make the title larger and change the main chart color to blue')"
-              class="w-full h-24 px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              :disabled="isUpdating"
-            ></textarea>
-            <div class="flex justify-end gap-3">
-              <button
-                @click="handleUpdate"
-                class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                :disabled="!updatePrompt.trim() || isUpdating"
-              >
-                <refresh-cw-icon v-if="isUpdating" class="h-4 w-4 animate-spin" />
-                <wand-icon v-else class="h-4 w-4" />
-                {{ isUpdating ? 'Updating...' : 'Update Infographic' }}
-              </button>
-            </div>
+          <!-- Chat Tab -->
+          <div v-else-if="activeTab === 'chat'" class="h-[60vh]">
+            <chat-interface 
+              :infographic="infographic" 
+              @infographic-updated="handleInfographicUpdated"
+            />
           </div>
         </div>
 
@@ -80,13 +94,6 @@
             <download-icon class="h-4 w-4" />
             Download Image
           </button>
-          <!-- <button
-            @click="handleDownload"
-            class="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm"
-          >
-            <download-icon class="h-4 w-4" />
-            Download HTML
-          </button> -->
         </div>
       </div>
     </div>
@@ -94,8 +101,9 @@
 </template>
 
 <script>
-import { XIcon, DownloadIcon, RefreshCwIcon, WandIcon } from 'lucide-vue'
+import { XIcon, DownloadIcon, RefreshCwIcon, WandIcon, EyeIcon, MessageCircleIcon } from 'lucide-vue'
 import axios from 'axios'
+import ChatInterface from './ChatInterface.vue'
 
 export default {
   name: 'InfographicPreviewModal',
@@ -103,12 +111,16 @@ export default {
     XIcon,
     DownloadIcon,
     RefreshCwIcon,
-    WandIcon
+    WandIcon,
+    EyeIcon,
+    MessageCircleIcon,
+    ChatInterface
   },
   data() {
     return {
       updatePrompt: '',
-      isUpdating: false
+      isUpdating: false,
+      activeTab: 'preview'
     }
   },
   props: {
@@ -179,6 +191,32 @@ export default {
       const parent = event.target.closest('.w-full.h-full');
       if (parent && this.infographic?.htmlContent) {
         parent.innerHTML = `<div class="infographic-content p-4">${this.infographic.htmlContent}</div>`;
+      }
+    },
+
+    handleInfographicUpdated(updatedInfographic) {
+      // Update the infographic data and refresh the preview
+      this.$emit('infographic-updated', updatedInfographic);
+      
+      // Switch to preview tab to show the updated infographic
+      this.activeTab = 'preview';
+    },
+
+    handleImageDownload() {
+      try {
+        if (!this.infographic?.imageUrl) {
+          throw new Error('No image to download')
+        }
+
+        // Use the download endpoint instead of direct image URL
+        const link = document.createElement('a')
+        link.href = `${process.env.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}/download/${this.infographic.imageFilename || 'infographic.png'}`
+        link.download = `${this.infographic.title?.replace(/[^a-zA-Z0-9]/g, '-') || 'infographic'}-${Date.now()}.png`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      } catch (error) {
+        console.error('Error downloading image:', error)
       }
     }
   }

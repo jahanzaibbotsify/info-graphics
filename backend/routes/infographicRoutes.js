@@ -4,12 +4,29 @@ const InfographicController = require('../controllers/InfographicController');
 const { rateLimiter } = require('../rateLimiter');
 const auth = require('../middleware/auth');
 
+// Generate infographic route
+router.post('/generate-infographic', InfographicController.generateInfographic);
+
+// Get all infographics
 router.get('/infographics', InfographicController.getAllInfographics);
-router.get('/infographics/search', InfographicController.searchInfographics);
+
+// Get infographic by ID
 router.get('/infographics/:id', InfographicController.getInfographicById);
-router.post('/generate-infographic', rateLimiter, InfographicController.generateInfographic);
+
+// Update infographic
 router.put('/infographics/:id', InfographicController.updateInfographic);
+
+// Delete infographic
 router.delete('/infographics/:id', InfographicController.deleteInfographic);
+
+// Search infographics
+router.get('/infographics/search', InfographicController.searchInfographics);
+
+// Chat endpoint for infographic modifications
+router.post('/infographics/:id/chat', InfographicController.chatWithInfographic);
+
+// Chat-style infographic generation
+router.post('/chat/generate-infographic', InfographicController.chatGenerateInfographic);
 
 // Image routes
 router.get('/images/:filename', InfographicController.getImage);
