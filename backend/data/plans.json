@@ -1,9 +1,9 @@
 [
   {
     "name": "Free",
-    "description": "Free plan with limited infographics",
+    "description": "Free plan with 2 lifetime infographics",
     "pricing_id": "free",
-    "animations_allowed": 5,
+    "animations_allowed": 2,
     "amount": 0,
     "is_unlimited": false,
     "_id": "178df7b158d4fc4cc419174a",

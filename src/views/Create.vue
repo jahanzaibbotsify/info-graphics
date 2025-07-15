@@ -31,7 +31,7 @@
       </div>
             <div class="bg-white rounded-lg rounded-tl-none p-4 shadow-sm max-w-md">
               <p class="text-gray-800 mb-2">
-                👋 Hi! I'm your AI assistant. I can help you create beautiful infographics. Just tell me what you'd like to visualize!
+                👋 Hi! I'm your AI assistant. I can help you create beautiful infographics. You get 2 free infographics to start - just tell me what data you'd like to visualize!
               </p>
               <div class="mt-3 space-y-2">
                 <p class="text-xs text-gray-500 font-medium">Try saying:</p>
@@ -563,17 +563,12 @@ export default {
           } else if (error.response?.status === 429) {
             // Rate limit error
             const errorData = error.response.data
-            if (errorData.code === 'RATE_LIMIT_EXCEEDED') {
-              lastMessage.content = `⏰ **Generation Limit Reached**\n\nYou've used ${errorData.used}/${errorData.limit} infographics today. ${
-                errorData.limit === 5 
-                  ? 'Upgrade to Pro for unlimited generations!' 
-                  : `Your limit resets in ${errorData.resetIn} hours.`
-              }`
-              if (errorData.limit === 5) {
-                this.showPricingModal = true
-              }
+            if (errorData.code === 'LIFETIME_LIMIT_EXCEEDED') {
+              lastMessage.content = `🚫 **Lifetime Limit Reached**\n\nYou've used all ${errorData.used}/${errorData.limit} of your free infographics. Upgrade to Pro for unlimited infographics and advanced AI features!`
+              lastMessage.isError = true
+              this.showPricingModal = true
             } else {
-              lastMessage.content = 'I\'ve reached the rate limit. Please upgrade for unlimited generations.'
+              lastMessage.content = 'You\'ve reached your generation limit. Please upgrade to Pro for unlimited infographics!'
               this.showPricingModal = true
             }
             

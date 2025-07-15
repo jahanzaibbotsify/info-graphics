@@ -1,20 +1,20 @@
 const storage = require('./utils/localStorage');
 
-// Store user generation counts with timestamps
+// Store user generation counts (lifetime totals for free users)
 const userGenerationCounts = new Map();
 
-// Reset counts every 24 hours for free users
+// Clean up very old entries to prevent memory leaks (keep entries for 30 days)
 setInterval(() => {
   const now = Date.now();
-  const twentyFourHoursAgo = now - (24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
   
-  // Clean up old entries for free users
+  // Only remove very old entries to prevent memory leaks
   for (const [userId, data] of userGenerationCounts.entries()) {
-    if (data.resetTime && data.resetTime < twentyFourHoursAgo && !data.isPaid) {
+    if (data.lastActivity && data.lastActivity < thirtyDaysAgo) {
       userGenerationCounts.delete(userId);
     }
   }
-}, 60 * 60 * 1000); // Check every hour
+}, 24 * 60 * 60 * 1000); // Check every 24 hours
 
 const rateLimiter = async (req, res, next) => {
   try {
@@ -34,40 +34,28 @@ const rateLimiter = async (req, res, next) => {
       return next();
     }
 
-    // Get current count and reset time for this user
+    // Get current count for this user (lifetime total for free users)
     const userData = userGenerationCounts.get(userId) || { 
       count: 0, 
-      resetTime: Date.now(),
+      lastActivity: Date.now(),
       isPaid: false 
     };
 
-    // Check if we need to reset the count (24 hours have passed)
-    const now = Date.now();
-    const twentyFourHoursAgo = now - (24 * 60 * 60 * 1000);
-    
-    if (userData.resetTime < twentyFourHoursAgo) {
-      userData.count = 0;
-      userData.resetTime = now;
-    }
+    // Update last activity
+    userData.lastActivity = Date.now();
 
-    // Get the user's plan limit (default to 5 for free users)
-    const limit = req.user.subscription?.plan?.animations_allowed || 5;
+    // Get the user's plan limit (default to 2 for free users)
+    const limit = req.user.subscription?.plan?.animations_allowed || 2;
 
-    // Check if user has exceeded their plan limit
+    // Check if user has exceeded their lifetime limit
     if (userData.count >= limit) {
-      const timeUntilReset = Math.ceil((userData.resetTime + (24 * 60 * 60 * 1000) - now) / (60 * 60 * 1000));
-      
       return res.status(429).json({
         error: 'Generation limit reached',
-        message: `You have reached your limit of ${limit} infographics per day. ${
-          limit === 5 
-            ? 'Upgrade to Pro for unlimited infographics!' 
-            : `Your limit will reset in ${timeUntilReset} hours.`
-        }`,
-        code: 'RATE_LIMIT_EXCEEDED',
+        message: `You have reached your lifetime limit of ${limit} infographics. Upgrade to Pro for unlimited infographics and advanced features!`,
+        code: 'LIFETIME_LIMIT_EXCEEDED',
         limit: limit,
         used: userData.count,
-        resetIn: timeUntilReset
+        isLifetimeLimit: true
       });
     }
 
@@ -79,7 +67,7 @@ const rateLimiter = async (req, res, next) => {
     res.set({
       'X-RateLimit-Limit': limit,
       'X-RateLimit-Remaining': Math.max(0, limit - userData.count),
-      'X-RateLimit-Reset': userData.resetTime + (24 * 60 * 60 * 1000)
+      'X-RateLimit-Type': 'lifetime'
     });
 
     next();
