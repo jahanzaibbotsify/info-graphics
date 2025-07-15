@@ -90,6 +90,17 @@
                     <div v-html="message.content.replace(/\n/g, '<br>')"></div>
                   </div>
                   
+                  <!-- Welcome message styling -->
+                  <div v-else-if="message.isWelcome" class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-blue-800">
+                    <div v-html="message.content.replace(/\n/g, '<br>')"></div>
+                  </div>
+                  
+                  <!-- Resetting message styling -->
+                  <div v-else-if="message.isResetting" class="bg-gray-50 border border-gray-200 rounded-lg p-3 text-gray-600 flex items-center gap-2">
+                    <div class="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                    <div>{{ message.content }}</div>
+                  </div>
+                  
                   <!-- Regular message -->
                   <span v-else>{{ message.content }}</span>
             </div>
@@ -566,7 +577,7 @@ export default {
             // Rate limit error
             const errorData = error.response.data
             if (errorData.code === 'LIFETIME_LIMIT_EXCEEDED') {
-              lastMessage.content = `🚫 **Lifetime Limit Reached**\n\nYou've used all ${errorData.used}/${errorData.limit} of your free infographics. Upgrade to Pro for unlimited infographics and advanced AI features!`
+              lastMessage.content = `🚫 **Lifetime Limit Reached**\n\nYou've used 1/1 of your free infographics. Upgrade to Pro for unlimited infographics and advanced AI features!`
               lastMessage.isError = true
               this.showPricingModal = true
             } else {
@@ -652,6 +663,11 @@ export default {
           // Refresh the stored infographics list to show finalized items
           await this.fetchStoredInfographics()
           
+          // Reset the page to a fresh state after successful finalization (with slight delay)
+          setTimeout(() => {
+            this.resetToNewState()
+          }, 3500) // Reset after success message is visible for a moment
+          
           console.log('Infographic finalized and downloaded successfully')
         }
       } catch (error) {
@@ -736,17 +752,79 @@ export default {
       
       this.chatMessages.push(successMessage)
       
-      // Auto-remove success message after 5 seconds
+      // Auto-remove success message after 3 seconds (shorter since we're resetting)
       setTimeout(() => {
         const index = this.chatMessages.findIndex(msg => msg.id === successMessage.id)
         if (index > -1) {
           this.chatMessages.splice(index, 1)
         }
-      }, 5000)
+      }, 3000)
       
       // Scroll to bottom to show success message
       this.$nextTick(() => {
         this.scrollToBottom()
+      })
+    },
+
+    resetToNewState() {
+      // Show a brief "preparing new session" message
+      const resetMessage = {
+        id: 'reset-indicator',
+        role: 'assistant',
+        content: '🔄 Preparing new session...',
+        timestamp: new Date(),
+        isResetting: true
+      }
+      this.chatMessages.push(resetMessage)
+      
+      // Clear all chat messages after a brief moment
+      setTimeout(() => {
+        this.chatMessages = []
+        
+        // Reset message input
+        this.currentMessage = ''
+        
+        // Reset any loading states
+        this.isTyping = false
+        this.isGenerating = false
+        this.isProcessing = false
+        
+        // Clear any error states
+        this.error = null
+        
+        // Reset message ID counter for new session
+        this.messageId = 1
+        
+        // Close any open modals
+        this.showInfographicPreviewModal = false
+        this.showPricingModal = false
+        this.showAuthModal = false
+        this.selectedInfographic = null
+        
+        // Add a fresh welcome message
+        const welcomeMessage = {
+          id: this.messageId++,
+          role: 'assistant',
+          content: '🎉 **Great work!** Your infographic has been finalized.\n\nReady to create another amazing visualization? Just tell me what data you\'d like to work with!',
+          timestamp: new Date(),
+          isWelcome: true
+        }
+        this.chatMessages.push(welcomeMessage)
+        
+        // Scroll to show the new message
+        this.$nextTick(() => {
+          this.scrollToBottom()
+        })
+        
+        console.log('🔄 Chat interface reset to fresh state')
+      }, 800)
+      
+      // Focus back on the chat input for immediate use
+      this.$nextTick(() => {
+        const textarea = this.$el.querySelector('textarea')
+        if (textarea) {
+          textarea.focus()
+        }
       })
     },
 
