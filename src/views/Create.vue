@@ -467,9 +467,14 @@ export default {
         })
 
         // Generate the infographic with chat context
+        const token = localStorage.getItem('jwt')
         const response = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/chat/generate-infographic`, {
           userInfo: userPrompt,
           chatHistory: this.chatMessages.slice(0, -1) // Pass previous messages for context
+        }, {
+          headers: token ? {
+            'Authorization': `Bearer ${token}`
+          } : {}
         })
         
         // Update the AI message with results
@@ -549,11 +554,30 @@ export default {
               })
             }, 1000)
             
+          } else if (error.response?.status === 401) {
+            // Authentication required error
+            lastMessage.content = '🔒 **Authentication Required**\n\nYou must be logged in to create infographics. Please sign up or log in to continue creating amazing data visualizations!'
+            lastMessage.isError = true
+            this.showAuthModal = true
+            
           } else if (error.response?.status === 429) {
             // Rate limit error
-            lastMessage.content = 'I\'ve reached the rate limit. Please upgrade for unlimited generations.'
-            this.showPricingModal = true
-        } else {
+            const errorData = error.response.data
+            if (errorData.code === 'RATE_LIMIT_EXCEEDED') {
+              lastMessage.content = `⏰ **Generation Limit Reached**\n\nYou've used ${errorData.used}/${errorData.limit} infographics today. ${
+                errorData.limit === 5 
+                  ? 'Upgrade to Pro for unlimited generations!' 
+                  : `Your limit resets in ${errorData.resetIn} hours.`
+              }`
+              if (errorData.limit === 5) {
+                this.showPricingModal = true
+              }
+            } else {
+              lastMessage.content = 'I\'ve reached the rate limit. Please upgrade for unlimited generations.'
+              this.showPricingModal = true
+            }
+            
+          } else {
             // Generic error
             lastMessage.content = 'Sorry, I encountered an error creating your infographic. Please try again with a data visualization request.'
           }
@@ -604,7 +628,12 @@ export default {
         this.showInfographicPreviewModal = true
         
         // Call the finalize API
-        const response = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/infographics/${infographic.id}/finalize`)
+        const token = localStorage.getItem('jwt')
+        const response = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/infographics/${infographic.id}/finalize`, {}, {
+          headers: token ? {
+            'Authorization': `Bearer ${token}`
+          } : {}
+        })
         
         if (response.data.data) {
           // Update the infographic in chat messages to show as finalized
@@ -666,7 +695,12 @@ export default {
           ? `${process.env.VUE_APP_BACKEND_URL}/infographics/search?page=${this.currentPage}${searchParam}`
           : `${process.env.VUE_APP_BACKEND_URL}/infographics?page=${this.currentPage}`;
         
-        const response = await axios.get(url);
+        const token = localStorage.getItem('jwt')
+        const response = await axios.get(url, {
+          headers: token ? {
+            'Authorization': `Bearer ${token}`
+          } : {}
+        });
         this.storedInfographics = response.data.infographics;
         console.log('storedInfographics: ', this.storedInfographics);
         this.totalPages = response.data.pagination.totalPages;

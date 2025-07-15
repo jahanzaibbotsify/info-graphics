@@ -1,35 +1,35 @@
 const express = require('express');
 const router = express.Router();
 const InfographicController = require('../controllers/InfographicController');
-const { rateLimiter } = require('../rateLimiter');
-const auth = require('../middleware/auth');
+const rateLimiter = require('../rateLimiter');
+const { requireAuth, optionalAuth } = require('../middleware/auth');
 
-// Generate infographic route
-router.post('/generate-infographic', InfographicController.generateInfographic);
+// Create a new infographic (requires auth and rate limiting)
+router.post('/generate-infographic', requireAuth, rateLimiter, InfographicController.generateInfographic);
 
-// Get all infographics
-router.get('/infographics', InfographicController.getAllInfographics);
+// Chat-based infographic generation (requires auth and rate limiting)
+router.post('/chat/generate-infographic', requireAuth, rateLimiter, InfographicController.chatGenerateInfographic);
 
-// Get infographic by ID
-router.get('/infographics/:id', InfographicController.getInfographicById);
+// Update an existing infographic (requires auth)
+router.put('/infographics/:id', requireAuth, InfographicController.updateInfographic);
 
-// Update infographic
-router.put('/infographics/:id', InfographicController.updateInfographic);
+// Chat with an infographic (requires auth)
+router.post('/infographics/:id/chat', requireAuth, InfographicController.chatWithInfographic);
 
-// Finalize infographic
-router.post('/infographics/:id/finalize', InfographicController.finalizeInfographic);
+// Finalize an infographic (requires auth)
+router.post('/infographics/:id/finalize', requireAuth, InfographicController.finalizeInfographic);
 
-// Delete infographic
-router.delete('/infographics/:id', InfographicController.deleteInfographic);
+// Get all infographics (optional auth for filtering user's own)
+router.get('/infographics', optionalAuth, InfographicController.getAllInfographics);
 
-// Search infographics
-router.get('/infographics/search', InfographicController.searchInfographics);
+// Search infographics (optional auth)
+router.get('/infographics/search', optionalAuth, InfographicController.searchInfographics);
 
-// Chat endpoint for infographic modifications
-router.post('/infographics/:id/chat', InfographicController.chatWithInfographic);
+// Get a specific infographic (optional auth)
+router.get('/infographics/:id', optionalAuth, InfographicController.getInfographicById);
 
-// Chat-style infographic generation
-router.post('/chat/generate-infographic', InfographicController.chatGenerateInfographic);
+// Delete an infographic (requires auth)
+router.delete('/infographics/:id', requireAuth, InfographicController.deleteInfographic);
 
 // Image routes
 router.get('/images/:filename', InfographicController.getImage);
