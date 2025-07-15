@@ -72,7 +72,9 @@ Return ONLY the complete HTML document with the requested updates and visual enh
         }
 
         // Step 0: Validate that the request is appropriate for factual data visualizations
-        const validationPrompt = `You are a content validator for a data visualization AI system. Your job is to determine if a user request is appropriate for creating factual data visualizations and infographics.
+        // Skip validation when updating existing HTML content
+        if (!existingHtml) {
+            const validationPrompt = `You are a content validator for a data visualization AI system. Your job is to determine if a user request is appropriate for creating factual data visualizations and infographics.
 
 ACCEPTABLE REQUESTS:
 - Statistics and data analysis
@@ -110,26 +112,27 @@ Analyze the request and respond with ONLY one word:
 
 Response:`;
 
-        const validationResponse = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are a strict content validator for data visualization requests. Only approve requests that involve factual data, statistics, analytics, or quantifiable information that can be visualized. Reject requests for recipes, entertainment, creative content, or anything not related to data visualization."
-                },
-                {
-                    role: "user",
-                    content: validationPrompt
-                }
-            ],
-            temperature: 0.1,
-            max_tokens: 10
-        });
+            const validationResponse = await openai.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                    {
+                        role: "system",
+                        content: "You are a strict content validator for data visualization requests. Only approve requests that involve factual data, statistics, analytics, or quantifiable information that can be visualized. Reject requests for recipes, entertainment, creative content, or anything not related to data visualization."
+                    },
+                    {
+                        role: "user",
+                        content: validationPrompt
+                    }
+                ],
+                temperature: 0.1,
+                max_tokens: 10
+            });
 
-        const validationResult = validationResponse.choices[0].message.content.trim().toUpperCase();
-        
-        if (validationResult === "INVALID") {
-            throw new Error('I specialize in creating factual data visualizations and infographics. Please provide requests related to statistics, data analysis, business metrics, health data, technology trends, or other factual information that can be visualized. Generic requests like recipes, entertainment, or unrelated topics are outside my expertise.');
+            const validationResult = validationResponse.choices[0].message.content.trim().toUpperCase();
+            
+            if (validationResult === "INVALID") {
+                throw new Error('I specialize in creating factual data visualizations and infographics. Please provide requests related to statistics, data analysis, business metrics, health data, technology trends, or other factual information that can be visualized. Generic requests like recipes, entertainment, or unrelated topics are outside my expertise.');
+            }
         }
 
         // If validation passes, continue with existing logic
@@ -308,8 +311,29 @@ function cleanHtmlContent(content) {
 // Function to analyze if a message is requesting modification to an infographic
 async function analyzeMessageForModification(message, chatContext) {
     try {
-        // First validate that the message is appropriate for data visualization context
-        const validationPrompt = `You are validating a user message in the context of data visualization and infographic modification.
+        // For HTML updates, be more permissive since we're modifying existing approved content
+        // Only check for basic modification intent rather than strict data validation
+        const modificationKeywords = [
+            'change', 'modify', 'update', 'edit', 'alter', 'adjust', 'revise',
+            'make it', 'turn it', 'convert', 'transform', 'switch',
+            'different color', 'new color', 'other color', 'another style',
+            'more', 'less', 'bigger', 'smaller', 'brighter', 'darker',
+            'add', 'remove', 'replace', 'include', 'exclude',
+            'instead of', 'rather than', 'better', 'improve',
+            'fix', 'correct', 'enhance', 'upgrade'
+        ];
+        
+        const isModificationRequest = modificationKeywords.some(keyword => 
+            message.toLowerCase().includes(keyword)
+        );
+        
+        // If it's clearly a modification request, skip strict validation
+        if (isModificationRequest) {
+            return 'modify';
+        }
+        
+        // For non-modification requests, apply lighter validation
+        const validationPrompt = `You are validating a user message in the context of infographic modification and updates.
 
 ACCEPTABLE REQUESTS:
 - Questions about the infographic data or statistics
@@ -318,20 +342,17 @@ ACCEPTABLE REQUESTS:
 - Questions about data interpretation or insights
 - Requests to change chart types or visualization styles
 - Technical questions about the infographic content
+- Any requests to change, update, or modify existing visual elements
 
 UNACCEPTABLE REQUESTS:
-- Recipes and cooking instructions
-- Entertainment content discussions
-- Personal stories unrelated to data
-- Generic creative content requests
-- Travel, fashion, or lifestyle advice
-- Content completely unrelated to data visualization
+- Completely unrelated topics (weather, sports, personal life)
+- Requests that have nothing to do with the infographic at all
 
 USER MESSAGE: "${message}"
 
 Respond with ONLY one word:
-- "VALID" if the message is related to data visualization, infographic modification, or factual data discussion
-- "INVALID" if the message is completely unrelated to data visualization or infographics
+- "VALID" if the message is related to the infographic in any way
+- "INVALID" if the message is completely unrelated to the infographic
 
 Response:`;
 
@@ -340,7 +361,7 @@ Response:`;
             messages: [
                 {
                     role: "system",
-                    content: "You are a validator for infographic-related conversations. Only approve messages that relate to data visualization, infographic modification, or factual data discussions."
+                    content: "You are a validator for infographic conversations. Be permissive and approve most requests that relate to modifying, updating, or discussing the infographic in any way."
                 },
                 {
                     role: "user",

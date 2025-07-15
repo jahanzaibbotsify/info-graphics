@@ -429,18 +429,18 @@ class InfographicController {
             existingInfographic = await Infographic.findById(chatHistory[i].infographic.id);
             if (existingInfographic) {
               // Check if the user's message is requesting a modification
-              const modificationKeywords = [
-                'change', 'modify', 'update', 'edit', 'alter', 'adjust', 'revise',
-                'make it', 'turn it', 'convert', 'transform', 'switch',
-                'different color', 'new color', 'other color', 'another style',
-                'more', 'less', 'bigger', 'smaller', 'brighter', 'darker',
-                'add', 'remove', 'replace', 'include', 'exclude',
-                'instead of', 'rather than', 'better', 'improve',
-                'fix', 'correct', 'enhance', 'upgrade'
-              ];
+              // const modificationKeywords = [
+              //   'change', 'modify', 'update', 'edit', 'alter', 'adjust', 'revise',
+              //   'make it', 'turn it', 'convert', 'transform', 'switch',
+              //   'different color', 'new color', 'other color', 'another style',
+              //   'more', 'less', 'bigger', 'smaller', 'brighter', 'darker',
+              //   'add', 'remove', 'replace', 'include', 'exclude',
+              //   'instead of', 'rather than', 'better', 'improve',
+              //   'fix', 'correct', 'enhance', 'upgrade'
+              // ];
               
-              const userMessage = userInfo.toLowerCase();
-              isUpdate = modificationKeywords.some(keyword => userMessage.includes(keyword));
+              // const userMessage = userInfo.toLowerCase();
+              isUpdate = true;
               break;
             }
           }
