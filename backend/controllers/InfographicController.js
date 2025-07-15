@@ -440,6 +440,7 @@ class InfographicController {
               // ];
               
               // const userMessage = userInfo.toLowerCase();
+              // isUpdate = modificationKeywords.some(keyword => userMessage.includes(keyword));
               isUpdate = true;
               break;
             }
