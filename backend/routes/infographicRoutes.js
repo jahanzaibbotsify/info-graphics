@@ -16,6 +16,9 @@ router.get('/infographics/:id', InfographicController.getInfographicById);
 // Update infographic
 router.put('/infographics/:id', InfographicController.updateInfographic);
 
+// Finalize infographic
+router.post('/infographics/:id/finalize', InfographicController.finalizeInfographic);
+
 // Delete infographic
 router.delete('/infographics/:id', InfographicController.deleteInfographic);
 

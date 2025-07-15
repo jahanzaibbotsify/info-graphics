@@ -172,7 +172,8 @@ export default {
           {
             params: {
               page: this.currentPage,
-              q: this.searchQuery
+              q: this.searchQuery,
+              finalized: 'true' // Only fetch finalized infographics for explore section
             }
           }
         )

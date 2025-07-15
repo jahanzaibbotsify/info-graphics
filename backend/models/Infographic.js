@@ -13,8 +13,11 @@ class Infographic {
       userInfo: data.userInfo,
       htmlContent: data.htmlContent,
       title: data.title || 'Untitled Infographic',
+      description: data.description || data.userInfo || '', // Store original prompt as description
       imageFilename: data.imageFilename || null,
-      imagePath: data.imagePath || null
+      imagePath: data.imagePath || null,
+      finalized: data.finalized || false, // Track if infographic is finalized for explore section
+      finalizedAt: data.finalized ? new Date() : null // Track when it was finalized
     });
     
     return newInfographic;
@@ -34,6 +37,14 @@ class Infographic {
 
   static async findByIdAndDelete(id) {
     return storage.deleteOne('infographics', { _id: id });
+  }
+
+  // Method to finalize an infographic
+  static async finalize(id) {
+    return storage.updateOne('infographics', { _id: id }, {
+      finalized: true,
+      finalizedAt: new Date()
+    });
   }
 }
 

@@ -91,6 +91,7 @@ class InfographicController {
         userInfo,
         htmlContent,
         title: extractedTitle,
+        description: userInfo, // Store original prompt as description
         imageFilename: imageResult.success ? imageFilename : null,
         imagePath: imageResult.success ? imageResult.imagePath : null
       });
@@ -127,8 +128,15 @@ class InfographicController {
       const page = parseInt(req.query.page) || 1;
       const limit = 20;
       const skip = (page - 1) * limit;
+      const finalized = req.query.finalized; // Filter for finalized infographics
       
-      const allInfographics = await Infographic.find({});
+      let allInfographics = await Infographic.find({});
+      
+      // Filter for finalized infographics if requested
+      if (finalized === 'true') {
+        allInfographics = allInfographics.filter(infographic => infographic.finalized === true);
+      }
+      
       const totalInfographics = allInfographics.length;
       const totalPages = Math.ceil(totalInfographics / limit);
       
@@ -140,10 +148,13 @@ class InfographicController {
         id: infographic._id,
         title: infographic.title,
         userInfo: infographic.userInfo,
+        description: infographic.description || infographic.userInfo, // Include description
         // htmlContent: infographic.htmlContent,
         createdAt: infographic.created_at,
         imageFilename: infographic.imageFilename,
-        imageUrl: infographic.imageFilename ? `/generated-images/${infographic.imageFilename}` : null
+        imageUrl: infographic.imageFilename ? `/generated-images/${infographic.imageFilename}` : null,
+        finalized: infographic.finalized || false,
+        finalizedAt: infographic.finalizedAt
       }));
       
       res.json({
@@ -168,17 +179,23 @@ class InfographicController {
       const page = parseInt(req.query.page) || 1;
       const limit = 20;
       const skip = (page - 1) * limit;
+      const finalized = req.query.finalized; // Filter for finalized infographics
       
       if (!searchQuery) {
         return res.status(400).json({ error: 'Search query is required' });
       }
       
       // Search in both userInfo and title
-      const allInfographics = await Infographic.find({});
-      const filteredInfographics = allInfographics.filter(infographic => 
+      let allInfographics = await Infographic.find({});
+      let filteredInfographics = allInfographics.filter(infographic => 
         infographic.userInfo.toLowerCase().includes(searchQuery.toLowerCase()) ||
         infographic.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
+      
+      // Filter for finalized infographics if requested
+      if (finalized === 'true') {
+        filteredInfographics = filteredInfographics.filter(infographic => infographic.finalized === true);
+      }
       
       const totalInfographics = filteredInfographics.length;
       const totalPages = Math.ceil(totalInfographics / limit);
@@ -190,10 +207,13 @@ class InfographicController {
         id: infographic._id,
         title: infographic.title,
         userInfo: infographic.userInfo,
+        description: infographic.description || infographic.userInfo, // Include description
         htmlContent: infographic.htmlContent,
         createdAt: infographic.created_at,
         imageFilename: infographic.imageFilename,
-        imageUrl: infographic.imageFilename ? `/generated-images/${infographic.imageFilename}` : null
+        imageUrl: infographic.imageFilename ? `/generated-images/${infographic.imageFilename}` : null,
+        finalized: infographic.finalized || false,
+        finalizedAt: infographic.finalizedAt
       }));
       
       res.json({
@@ -225,10 +245,13 @@ class InfographicController {
         id: infographic._id,
         title: infographic.title,
         userInfo: infographic.userInfo,
+        description: infographic.description || infographic.userInfo, // Include description
         htmlContent: infographic.htmlContent,
         createdAt: infographic.created_at,
         imageFilename: infographic.imageFilename,
-        imageUrl: infographic.imageFilename ? `/generated-images/${infographic.imageFilename}` : null
+        imageUrl: infographic.imageFilename ? `/generated-images/${infographic.imageFilename}` : null,
+        finalized: infographic.finalized || false,
+        finalizedAt: infographic.finalizedAt
       });
     } catch (error) {
       console.error('Error fetching infographic:', error);
@@ -559,6 +582,7 @@ class InfographicController {
           userInfo: enhancedPrompt,
           htmlContent,
           title: extractedTitle,
+          description: userInfo, // Store original user prompt as description
           imageFilename: imageResult.success ? imageFilename : null,
           imagePath: imageResult.success ? imageResult.imagePath : null
         });
@@ -698,6 +722,43 @@ class InfographicController {
       console.error('Error in chat with infographic:', error);
       res.status(500).json({ 
         error: error.message || 'Failed to process chat message' 
+      });
+    }
+  }
+
+  static async finalizeInfographic(req, res) {
+    try {
+      const { id } = req.params;
+      
+      // Find the infographic
+      const infographic = await Infographic.findById(id);
+      if (!infographic) {
+        return res.status(404).json({ error: 'Infographic not found' });
+      }
+
+      // Check if already finalized
+      if (infographic.finalized) {
+        return res.status(400).json({ error: 'Infographic is already finalized' });
+      }
+
+      // Finalize the infographic
+      const finalizedInfographic = await Infographic.finalize(id);
+      
+      res.json({
+        message: 'Infographic finalized successfully',
+        data: {
+          id: finalizedInfographic._id,
+          title: finalizedInfographic.title,
+          description: finalizedInfographic.description,
+          imageUrl: finalizedInfographic.imageFilename ? `/generated-images/${finalizedInfographic.imageFilename}` : null,
+          finalized: finalizedInfographic.finalized,
+          finalizedAt: finalizedInfographic.finalizedAt
+        }
+      });
+    } catch (error) {
+      console.error('Error finalizing infographic:', error);
+      res.status(500).json({ 
+        error: error.message || 'Failed to finalize infographic' 
       });
     }
   }

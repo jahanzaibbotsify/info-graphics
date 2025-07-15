@@ -2,7 +2,6 @@ const OpenAI = require('openai');
 const path = require('path');
 const fs = require('fs');
 const { generateVisualIntelligencePrompt, analyzeDataForVisuals } = require('./visualIntelligence');
-const { generateDataStructurePrompt } = require('./dataStructureIntelligence');
 
 let openai;
 try {
@@ -27,7 +26,7 @@ async function generateInfographic(userInfo, existingHtml = null) {
             
             const updatePrompt = `Update the following HTML infographic based on this request: ${userInfo}
 
-ENHANCED VISUAL INTELLIGENCE FOR UPDATES:
+VISUAL INTELLIGENCE FOR UPDATES:
 📊 Data Type: ${dataType.toUpperCase()}
 
 HTML to Update:
@@ -39,37 +38,26 @@ CRITICAL INSTRUCTIONS:
    - Use appropriate icons and colors for ${dataType} data
    - Adjust font sizes based on data importance and hierarchy
    - Maintain visual consistency with the detected data type
-3. COMPONENT INTELLIGENCE:
-   - Duplicate components (cards, sections, grid items) if user provides multiple data points
-   - Add contextual icons and illustrations throughout the design
-   - Apply transparency effects to cards and grids for modern visual appeal
-4. TRANSPARENCY ENHANCEMENTS:
-   - Apply semi-transparent backgrounds to cards: rgba(255, 255, 255, 0.1)
-   - Add glass morphism effects: backdrop-filter: blur(10px)
-   - Ensure readability while enhancing visual depth
-5. DO NOT change any HTML structure, CSS classes, or JavaScript code that isn't explicitly mentioned
-6. Preserve all styling, colors, and layout unless specifically asked to change
-7. Keep all existing elements that aren't mentioned in the update request
-8. Maintain all CDN links and external dependencies exactly as they are
-9. Return ONLY the raw HTML content - no markdown or code blocks
+3. DO NOT change any HTML structure, CSS classes, or JavaScript code that isn't explicitly mentioned
+4. Preserve all styling, colors, and layout unless specifically asked to change
+5. Keep all existing elements that aren't mentioned in the update request
+6. Maintain all CDN links and external dependencies exactly as they are
+7. Return ONLY the raw HTML content - no markdown or code blocks
 
 Visual Enhancement Guidelines:
 - Apply larger fonts to key metrics and important data points
 - Use contextually appropriate icons that match the ${dataType} theme
-- Duplicate components when multiple data categories are provided
-- Add illustrations and icons to enhance data comprehension
-- Apply transparency effects for modern visual appeal
 - Ensure visual hierarchy guides attention to the most important information
 - Maintain readability while enhancing visual appeal
 
-Return ONLY the complete HTML document with the requested updates, component duplications, visual integrations, and transparency enhancements applied. No formatting, no code blocks, just raw HTML.`;
+Return ONLY the complete HTML document with the requested updates and visual enhancements integrated. No formatting, no code blocks, just raw HTML.`;
 
             const response = await openai.chat.completions.create({
                 model: "gpt-4o",
                 messages: [
                     {
                         role: "system",
-                        content: "You are an expert at precise HTML updates with advanced visual intelligence. Your job is to modify content while applying intelligent component duplication, visual enhancements, and transparency effects based on data type. Duplicate HTML components when user provides multiple data points. Add contextual icons and illustrations. Apply modern transparency effects to cards and grids. Use appropriate icons, colors, and font sizes that match the data context. Never change core structure unless explicitly asked. Return only raw HTML."
+                        content: "You are an expert at precise HTML updates with visual intelligence. Your job is to modify ONLY the specific content requested while applying intelligent visual enhancements based on data type. Use appropriate icons, colors, and font sizes that match the data context. Never change structure or styling unless explicitly asked. Return only raw HTML."
                     },
                     {
                         role: "user",
@@ -273,16 +261,15 @@ Respond with ONLY the template filename (e.g., "chart-analytics.html").`;
             throw new Error(`Template ${finalTemplate} not found. Please ensure all template files are present in the backend/templates directory.`);
         }
 
-        // Step 3: AI populates the selected template with advanced data structure intelligence
-        const dataType = analyzeDataForVisuals(userInfo);
-        const populationPrompt = generateDataStructurePrompt(userInfo, templateHtml, basePrompt, dataType);
+        // Step 3: AI populates the selected template with enhanced visual intelligence
+        const populationPrompt = generateVisualIntelligencePrompt(userInfo, templateHtml, basePrompt);
 
         const response = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
                 {
                     role: "system",
-                    content: "You are an expert data integrator with advanced data structure intelligence. Your job is to populate HTML templates with user data while applying intelligent component duplication, visual enhancements, and transparency effects. DUPLICATE HTML components (cards, sections, grid items) when user provides multiple data points. ADD contextual icons and illustrations throughout the design. APPLY modern transparency effects to cards and grids using rgba backgrounds and backdrop-filter. Use appropriate icons, colors, and font sizes that match the data context. Apply dynamic typography hierarchy based on data importance. Enhance templates to be visually rich and comprehensive. CRITICAL: Return ONLY raw HTML content - NO markdown formatting, NO code blocks. Create stunning, data-complete infographics."
+                    content: "You are an expert data integrator with visual intelligence capabilities. Your job is to populate HTML templates with user data while applying intelligent visual enhancements based on data type. Use appropriate icons, colors, and font sizes that match the data context. Apply dynamic typography hierarchy based on data importance. NEVER modify HTML structure, CSS, or JavaScript beyond content updates and visual enhancements. CRITICAL: Return ONLY raw HTML content - NO markdown formatting, NO code blocks, NO triple backticks. Apply visual intelligence to make data compelling and contextually appropriate."
                 },
                 {
                     role: "user",

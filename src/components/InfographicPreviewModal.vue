@@ -20,7 +20,7 @@
         <div class="flex justify-between items-start pr-12">
           <div>
             <h3 class="text-lg font-semibold">{{ infographic?.title || 'Infographic Preview' }}</h3>
-            <!-- <p class="text-sm text-gray-600 mt-1">{{ infographic?.userInfo || '' }}</p> -->
+            <p class="text-sm text-gray-600 mt-1">{{ infographic?.description || infographic?.userInfo || '' }}</p>
           </div>
         </div>
 
@@ -86,9 +86,17 @@
 
         <!-- Actions -->
         <div class="flex justify-end gap-3 pt-2">
+          <!-- <button
+            v-if="infographic?.imageUrl && !infographic?.finalized"
+            @click="handleFinalize"
+            class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors flex items-center gap-2 text-sm"
+          >
+            <wand-icon class="h-4 w-4" />
+            Finalize for Download
+          </button> -->
           <button
             v-if="infographic?.imageUrl"
-            @click="handleImageDownload"
+            @click="handleDownload"
             class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2 text-sm"
           >
             <download-icon class="h-4 w-4" />
@@ -151,6 +159,42 @@ export default {
         document.body.removeChild(link)
       } catch (error) {
         console.error('Error downloading image:', error)
+      }
+    },
+    async handleFinalize() {
+      try {
+        if (!this.infographic?.id) {
+          throw new Error('No infographic to finalize')
+        }
+
+        // Call the finalize API
+        const response = await axios.post(
+          `${process.env.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}/infographics/${this.infographic.id}/finalize`
+        )
+        
+        if (response.data.data) {
+          // Update the local infographic data
+          this.$emit('infographic-updated', {
+            ...this.infographic,
+            finalized: true,
+            finalizedAt: response.data.data.finalizedAt
+          })
+          
+          // Show success message
+          this.$emit('show-notification', {
+            type: 'success',
+            message: 'Infographic finalized successfully! It will now appear in the explore section.'
+          })
+          
+          // Close the modal
+          this.$emit('close')
+        }
+      } catch (error) {
+        console.error('Error finalizing infographic:', error)
+        this.$emit('show-notification', {
+          type: 'error',
+          message: error.response?.data?.error || 'Failed to finalize infographic'
+        })
       }
     },
     async handleUpdate() {

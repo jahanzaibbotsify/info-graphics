@@ -2,33 +2,58 @@
   <div class="container mx-auto py-12">
     <div class="text-center mb-10">
       <h1 class="text-4xl font-bold mb-2">Choose Your Plan</h1>
-      <p class="text-lg text-gray-500">Flexible pricing for every creator. Unlock more Lottie animations and features!</p>
+      <p class="text-lg text-gray-500">Flexible pricing for every creator. Create unlimited professional infographics!</p>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
       <div v-for="plan in plans" :key="plan._id" class="relative border rounded-xl p-8 bg-white shadow flex flex-col">
-        <!-- Badge for Unlimited plan -->
-        <span v-if="plan.is_unlimited" class="absolute top-4 right-4 bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">Best Value</span>
+        <!-- Badge for Best Value -->
+        <span v-if="plan.billing_period === 'yearly'" class="absolute top-4 right-4 bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">Best Value</span>
+        <span v-else-if="plan.is_unlimited && plan.billing_period !== 'yearly'" class="absolute top-4 right-4 bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">Popular</span>
+        
         <h2 class="text-2xl font-bold mb-1">{{ plan.name }}</h2>
         <p class="text-gray-500 mb-4">{{ plan.description }}</p>
-        <div class="text-3xl font-extrabold mb-4">${{ plan.amount }}</div>
+        
+        <!-- Pricing Display -->
+        <div class="mb-4">
+          <div class="text-3xl font-extrabold">
+            ${{ plan.amount }}
+            <span v-if="plan.billing_period" class="text-lg font-normal text-gray-500">
+              /{{ plan.billing_period === 'yearly' ? 'year' : 'month' }}
+            </span>
+          </div>
+          
+          <!-- Savings text for yearly plan -->
+          <p v-if="plan.savings_text" class="text-sm text-green-600 font-medium mt-1">
+            {{ plan.savings_text }}
+          </p>
+          
+          <!-- Monthly equivalent for yearly plan -->
+          <p v-if="plan.billing_period === 'yearly' && plan.original_monthly_price" class="text-sm text-gray-500 mt-1">
+            Only ${{ (plan.amount / 12).toFixed(2) }}/month when billed yearly
+          </p>
+        </div>
         <ul class="mb-6 space-y-2 text-gray-700 flex flex-col">
           <li class="flex gap-2">
             <check-icon class="h-5 w-5 text-green-500" />
             <span>
-              <span class="font-medium">{{ plan.is_unlimited? 'Unlimited' : plan.animations_allowed }} Animations Allowed</span>
+              <span class="font-medium">{{ plan.is_unlimited? 'Unlimited' : plan.animations_allowed }} Infographics</span>
             </span>
+          </li>
+          <li class="flex items-center gap-2">
+            <check-icon class="h-5 w-5 text-green-500" />
+            <span><span class="font-medium">AI-Powered Visual Intelligence</span></span>
+          </li>
+          <li class="flex items-center gap-2">
+            <check-icon class="h-5 w-5 text-green-500" />
+            <span><span class="font-medium">Professional Templates</span></span>
           </li>
           <li class="flex items-center gap-2">
             <check-icon class="h-5 w-5 text-green-500" />
             <span><span class="font-medium">Premium Customer Support</span></span>
           </li>
-          <li class="flex items-center gap-2">
+          <li v-if="plan.is_unlimited" class="flex items-center gap-2">
             <check-icon class="h-5 w-5 text-green-500" />
-            <span><span class="font-medium">High Quality</span></span>
-          </li>
-          <li class="flex items-center gap-2">
-            <check-icon class="h-5 w-5 text-green-500" />
-            <span><span class="font-medium">Lottie Animation</span></span>
+            <span><span class="font-medium">Export & Download</span></span>
           </li>
         </ul>
         <button 

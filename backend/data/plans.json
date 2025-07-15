@@ -1,7 +1,7 @@
 [
   {
     "name": "Free",
-    "description": "Free plan with limited animations",
+    "description": "Free plan with limited infographics",
     "pricing_id": "free",
     "animations_allowed": 5,
     "amount": 0,
@@ -11,14 +11,29 @@
     "updated_at": "2025-06-27T11:03:32.118Z"
   },
   {
-    "name": "Pro",
-    "description": "Pro plan with unlimited animations",
-    "pricing_id": "pro_monthly",
+    "name": "Pro Monthly",
+    "description": "Professional plan with unlimited infographics",
+    "pricing_id": "pro_monthly_20",
     "animations_allowed": null,
-    "amount": 9.99,
+    "amount": 20.00,
+    "billing_period": "monthly",
     "is_unlimited": true,
     "_id": "1b9b731259c6aa1a1e2ace66",
     "created_at": "2025-06-27T11:03:32.124Z",
     "updated_at": "2025-06-27T11:03:32.124Z"
+  },
+  {
+    "name": "Pro Yearly",
+    "description": "Professional plan with unlimited infographics - Best Value!",
+    "pricing_id": "pro_yearly_15",
+    "animations_allowed": null,
+    "amount": 15.00,
+    "billing_period": "yearly",
+    "original_monthly_price": 20.00,
+    "savings_text": "Save 25% with yearly billing",
+    "is_unlimited": true,
+    "_id": "2c8c842359d7bb2b2f3bdf77",
+    "created_at": "2025-06-27T11:03:32.130Z",
+    "updated_at": "2025-06-27T11:03:32.130Z"
   }
 ]

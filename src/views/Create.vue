@@ -104,12 +104,20 @@
                         Updated
                       </span>
                       <button
-                        @click="downloadInfographicFromMessage(message.infographic)"
-                        class="text-xs px-2 py-1 bg-primary text-white rounded hover:bg-primary/90 transition-colors flex items-center gap-1"
+                        @click="finalizeInfographic(message.infographic)"
+                        class="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex items-center gap-1"
+                        v-if="!message.infographic.finalized"
                       >
-                        <download-icon class="w-3 h-3" />
-                        Download
+                        <wand-icon class="w-3 h-3" />
+                        Finalize
                       </button>
+                      <span
+                        v-else
+                        class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded flex items-center gap-1"
+                      >
+                        <check-circle-icon class="w-3 h-3" />
+                        Finalized
+                      </span>
                     </div>
                   </div>
                   <div class="rounded-md overflow-hidden bg-gray-50 flex justify-center">
@@ -322,7 +330,8 @@ import {
   EyeIcon,
   RefreshCwIcon,
   UserIcon,
-  SendIcon
+  SendIcon,
+  CheckCircleIcon
 } from 'lucide-vue'
 import axios from 'axios'
 import PricingModal from '@/components/PricingModal.vue'
@@ -342,6 +351,7 @@ export default {
     RefreshCwIcon,
     UserIcon,
     SendIcon,
+    CheckCircleIcon,
     PricingModal,
     InfographicPreviewModal,
     AuthModal
@@ -585,6 +595,34 @@ export default {
         document.body.removeChild(link)
       } catch (error) {
         console.error('Error downloading infographic:', error)
+      }
+    },
+
+    async finalizeInfographic(infographic) {
+      try {
+        this.selectedInfographic = infographic
+        this.showInfographicPreviewModal = true
+        
+        // Call the finalize API
+        const response = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/infographics/${infographic.id}/finalize`)
+        
+        if (response.data.data) {
+          // Update the infographic in chat messages to show as finalized
+          this.chatMessages.forEach(msg => {
+            if (msg.infographic && msg.infographic.id === infographic.id) {
+              msg.infographic.finalized = true
+              msg.infographic.finalizedAt = response.data.data.finalizedAt
+            }
+          })
+          
+          // Refresh the stored infographics list to show finalized items
+          await this.fetchStoredInfographics()
+          
+          console.log('Infographic finalized successfully')
+        }
+      } catch (error) {
+        console.error('Error finalizing infographic:', error)
+        // Handle error - maybe show a toast notification
       }
     },
 
