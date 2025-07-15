@@ -25,9 +25,9 @@
   {
     "name": "Pro Yearly",
     "description": "Professional plan with unlimited infographics - Best Value!",
-    "pricing_id": "pro_yearly_15",
+    "pricing_id": "pro_yearly_180",
     "animations_allowed": null,
-    "amount": 15.00,
+    "amount": 180.00,
     "billing_period": "yearly",
     "original_monthly_price": 20.00,
     "savings_text": "Save 25% with yearly billing",
