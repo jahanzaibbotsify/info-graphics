@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "email": "jahanzaibbotsify@gmail.com",
+    "name": "jahanzaib",
+    "password": "$2b$10$4PTw/6sW4NUeRanJifA8ruYd5DaYmZTpNEgWzSZZ4zBlqB7LjrgC2",
+    "ip": "::1",
+    "city": null,
+    "stripe_id": null,
+    "created_animations": 0,
+    "allowed_animations": 0,
+    "_id": "921f1c440c604c6c925e3cda",
+    "created_at": "2025-07-15T10:04:43.992Z",
+    "updated_at": "2025-07-15T10:04:43.992Z"
+  }
+]

@@ -85,6 +85,11 @@
                     <div v-html="message.content.replace(/\n/g, '<br>')"></div>
                   </div>
                   
+                  <!-- Success message styling -->
+                  <div v-else-if="message.isSuccess" class="bg-green-50 border border-green-200 rounded-lg p-3 text-green-800">
+                    <div v-html="message.content.replace(/\n/g, '<br>')"></div>
+                  </div>
+                  
                   <!-- Regular message -->
                   <span v-else>{{ message.content }}</span>
             </div>
@@ -96,20 +101,30 @@
                   <div class="flex items-center justify-between mb-2">
                     <span class="text-xs font-medium text-gray-600">{{ message.infographic.title }}</span>
                     <div class="flex items-center gap-2">
-                      <!-- Update Badge -->
+                      <!-- Iteration Badge -->
                       <span 
-                        v-if="message.isUpdate || isUpdatedInfographic(message.infographic.id)"
-                        class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium"
+                        v-if="message.isIteration || message.infographic.isIteration"
+                        class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium"
                       >
-                        Updated
+                        Iteration {{ getIterationNumber(message.infographic.originalInfographicId) }}
+                      </span>
+                      <!-- Version Badge for original -->
+                      <span 
+                        v-else-if="hasIterationsInChat(message.infographic.id)"
+                        class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full font-medium"
+                      >
+                        Original
                       </span>
                       <button
-                        @click="finalizeInfographic(message.infographic)"
+                        @click="finalizeInfographic(message.infographic, $event)"
                         class="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex items-center gap-1"
                         v-if="!message.infographic.finalized"
+                        :title="hasIterationsInChat(message.infographic.id) ? 'Finalize this version (other iterations will be removed)' : 'Finalize and download'"
+                        :disabled="message.infographic.finalizing"
                       >
-                        <wand-icon class="w-3 h-3" />
-                        Finalize
+                        <div v-if="message.infographic.finalizing" class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <wand-icon v-else class="w-3 h-3" />
+                        {{ message.infographic.finalizing ? 'Finalizing...' : 'Finalize' }}
                       </button>
                       <span
                         v-else
@@ -481,35 +496,22 @@ export default {
         aiMessage.isGenerating = false
         
         if (response.data.isUpdate) {
-          aiMessage.content = "I've updated your infographic! Here's the improved version:"
-          aiMessage.isUpdate = true
+          aiMessage.content = "I've created an improved version! Here's the latest iteration:"
+          aiMessage.isIteration = true
           
-          // Find and update the existing infographic in previous messages
-          for (let i = this.chatMessages.length - 2; i >= 0; i--) {
-            if (this.chatMessages[i].infographic && this.chatMessages[i].infographic.id === response.data.data.id) {
-              // Update the existing message's infographic
-              this.chatMessages[i].infographic = {
-                id: response.data.data.id,
-                title: response.data.data.title,
-                imageUrl: `${process.env.VUE_APP_BACKEND_URL}${response.data.data.imageUrl}`,
-                imageFilename: response.data.data.imageFilename
-              }
-              // Add timestamp to track when it was updated
-              this.chatMessages[i].updatedAt = new Date()
-              break
-            }
-          }
-          
-          // Also add the updated infographic to the current AI message for convenience
+          // Don't update existing messages - preserve all versions in chat
+          // Each iteration gets its own chat message to preserve history
           aiMessage.infographic = {
             id: response.data.data.id,
             title: response.data.data.title,
             imageUrl: `${process.env.VUE_APP_BACKEND_URL}${response.data.data.imageUrl}`,
-            imageFilename: response.data.data.imageFilename
+            imageFilename: response.data.data.imageFilename,
+            isIteration: response.data.data.isIteration,
+            originalInfographicId: response.data.data.originalInfographicId
           }
         } else {
           aiMessage.content = "I've created your infographic! Here it is:"
-          aiMessage.isUpdate = false
+          aiMessage.isIteration = false
         }
         
         if (response.data.data.imageGenerated && response.data.data.imageUrl) {
@@ -617,10 +619,14 @@ export default {
       }
     },
 
-    async finalizeInfographic(infographic) {
+    async finalizeInfographic(infographic, event) {
       try {
-        this.selectedInfographic = infographic
-        this.showInfographicPreviewModal = true
+        // Set loading state reactively
+        this.chatMessages.forEach(msg => {
+          if (msg.infographic && msg.infographic.id === infographic.id) {
+            this.$set(msg.infographic, 'finalizing', true)
+          }
+        })
         
         // Call the finalize API
         const token = localStorage.getItem('jwt')
@@ -636,18 +642,112 @@ export default {
             if (msg.infographic && msg.infographic.id === infographic.id) {
               msg.infographic.finalized = true
               msg.infographic.finalizedAt = response.data.data.finalizedAt
+              this.$set(msg.infographic, 'finalizing', false)
             }
           })
+          
+          // Trigger direct download
+          await this.downloadInfographicImage(infographic)
           
           // Refresh the stored infographics list to show finalized items
           await this.fetchStoredInfographics()
           
-          console.log('Infographic finalized successfully')
+          console.log('Infographic finalized and downloaded successfully')
         }
       } catch (error) {
         console.error('Error finalizing infographic:', error)
-        // Handle error - maybe show a toast notification
+        
+        // Reset loading state on error
+        this.chatMessages.forEach(msg => {
+          if (msg.infographic && msg.infographic.id === infographic.id) {
+            this.$set(msg.infographic, 'finalizing', false)
+          }
+        })
+        
+        // Show error message
+        alert('Failed to finalize infographic. Please try again.')
       }
+    },
+
+    async downloadInfographicImage(infographic) {
+      try {
+        // Create download link for the image
+        const imageUrl = infographic.imageUrl.startsWith('http') 
+          ? infographic.imageUrl 
+          : `${process.env.VUE_APP_BACKEND_URL}${infographic.imageUrl}`
+        
+        // Fetch the image as blob
+        const response = await fetch(imageUrl)
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch image: ${response.status}`)
+        }
+        
+        const blob = await response.blob()
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        
+        // Clean filename for download
+        const cleanTitle = infographic.title
+          .replace(/[^a-z0-9\s]/gi, '') // Remove special characters
+          .replace(/\s+/g, '_') // Replace spaces with underscores
+          .toLowerCase()
+        
+        link.download = `${cleanTitle}_infographic.png`
+        
+        // Trigger download
+        document.body.appendChild(link)
+        link.click()
+        
+        // Cleanup
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+        
+        console.log('✅ Infographic downloaded successfully:', link.download)
+        
+        // Show success feedback
+        this.showDownloadSuccess(infographic.title)
+        
+      } catch (error) {
+        console.error('❌ Error downloading image:', error)
+        
+        // Fallback: open image in new tab
+        const imageUrl = infographic.imageUrl.startsWith('http') 
+          ? infographic.imageUrl 
+          : `${process.env.VUE_APP_BACKEND_URL}${infographic.imageUrl}`
+        
+        window.open(imageUrl, '_blank')
+        console.log('📂 Opened image in new tab as fallback')
+      }
+    },
+
+    showDownloadSuccess(title) {
+      // Create a temporary success message
+      const successMessage = {
+        id: this.messageId++,
+        role: 'assistant',
+        content: `✅ **Download Complete!**\n\n"${title}" has been finalized and downloaded to your device. It's now available in the Explore section for others to discover!`,
+        timestamp: new Date(),
+        isSuccess: true
+      }
+      
+      this.chatMessages.push(successMessage)
+      
+      // Auto-remove success message after 5 seconds
+      setTimeout(() => {
+        const index = this.chatMessages.findIndex(msg => msg.id === successMessage.id)
+        if (index > -1) {
+          this.chatMessages.splice(index, 1)
+        }
+      }, 5000)
+      
+      // Scroll to bottom to show success message
+      this.$nextTick(() => {
+        this.scrollToBottom()
+      })
     },
 
     handleImageError(event) {
@@ -674,6 +774,26 @@ export default {
         msg.infographic && msg.infographic.id === infographicId
       )
       return messagesWithThisId.length > 1
+    },
+
+    hasIterationsInChat(originalId) {
+      // Check if there are any iterations of this infographic in the chat
+      return this.chatMessages.some(msg => 
+        msg.infographic && 
+        (msg.infographic.originalInfographicId === originalId || 
+         (msg.infographic.isIteration && msg.infographic.originalInfographicId === originalId))
+      )
+    },
+
+    getIterationNumber(originalId) {
+      // Count how many iterations of this original infographic exist before this one
+      let count = 0
+      for (const msg of this.chatMessages) {
+        if (msg.infographic && msg.infographic.originalInfographicId === originalId) {
+          count++
+        }
+      }
+      return count
     },
 
 

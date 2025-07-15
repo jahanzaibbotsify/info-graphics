@@ -54,7 +54,7 @@ class HTMLToImageService {
           letter-spacing: 0.5px;
           text-decoration: none;
           transition: all 0.3s ease;
-          opacity: 0.5;
+          opacity: 0.3;
         }
         
         .infogiraffe-watermark:hover {

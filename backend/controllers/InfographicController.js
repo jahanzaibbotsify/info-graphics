@@ -454,12 +454,12 @@ class InfographicController {
       let savedInfographic;
       
       if (isUpdate && existingInfographic) {
-        // This is an update to existing infographic
-        console.log('Updating existing infographic:', existingInfographic._id);
+        // This is an iteration/modification - create NEW infographic to preserve chat history
+        console.log('Creating new iteration based on existing infographic:', existingInfographic._id);
         
         // Create enhanced prompt for modification
         const context = chatHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('\n');
-        enhancedPrompt = `You are updating an existing infographic. Here's the conversation context:\n${context}\n\nCurrent modification request: ${userInfo}\n\nOriginal infographic data: ${existingInfographic.userInfo}`;
+        enhancedPrompt = `You are creating an iteration of an existing infographic. Here's the conversation context:\n${context}\n\nCurrent modification request: ${userInfo}\n\nOriginal infographic data: ${existingInfographic.userInfo}`;
         
         // Generate updated infographic using existing HTML as base
         try {
@@ -474,8 +474,8 @@ class InfographicController {
           throw error;
         }
         
-        // Extract title from the updated HTML
-        extractedTitle = existingInfographic.title; // Keep original title unless explicitly changed
+        // Extract title from the updated HTML, or use original title with version suffix
+        extractedTitle = existingInfographic.title; 
         const titleMatch = htmlContent.match(/<h1[^>]*class="title"[^>]*>([^<]+)<\/h1>|<h1[^>]*>([^<]+)<\/h1>|<title>([^<]+)<\/title>/i);
         if (titleMatch) {
           const newTitle = (titleMatch[1] || titleMatch[2] || titleMatch[3]).replace(/\[|\]/g, '').trim();
@@ -486,7 +486,7 @@ class InfographicController {
 
         // Generate new image with updated content
         const timestamp = Date.now();
-        const imageFilename = `chat_updated_${timestamp}.png`;
+        const imageFilename = `chat_iteration_${timestamp}.png`;
         
         const imageOptions = htmlToImageService.getTemplateOptions('default');
         const imageResult = await htmlToImageService.convertAndSave(
@@ -496,25 +496,21 @@ class InfographicController {
         );
 
         if (imageResult.success) {
-          // Delete old image if it exists
-          if (existingInfographic.imageFilename) {
-            const oldImagePath = path.join(__dirname, '..', 'generated-images', existingInfographic.imageFilename);
-            if (fs.existsSync(oldImagePath)) {
-              fs.unlinkSync(oldImagePath);
-            }
-          }
-          
-          // Update existing infographic in database
-          await Infographic.findByIdAndUpdate(existingInfographic._id, {
+          // Create NEW infographic record to preserve chat history
+          // Mark as iteration and link to original
+          savedInfographic = await Infographic.create({
             userInfo: enhancedPrompt,
             htmlContent,
             title: extractedTitle,
             imageFilename: imageFilename,
             imagePath: imageResult.imagePath,
+            description: userInfo, // Use the modification request as description
+            finalized: false,
+            isIteration: true,
+            originalInfographicId: existingInfographic._id,
+            created_at: new Date(),
             updated_at: new Date()
           });
-          
-          savedInfographic = await Infographic.findById(existingInfographic._id);
         } else {
           throw new Error('Failed to generate updated image');
         }
@@ -590,7 +586,7 @@ class InfographicController {
       }
 
       const response = {
-        message: isUpdate ? 'Infographic updated successfully' : 'Infographic generated successfully',
+        message: isUpdate ? 'Infographic iteration created successfully' : 'Infographic generated successfully',
         isUpdate: isUpdate,
         data: {
           id: savedInfographic._id,
@@ -598,7 +594,9 @@ class InfographicController {
           title: savedInfographic.title,
           userInfo: userInfo, // Return original user info, not enhanced prompt
           createdAt: savedInfographic.created_at,
-          imageGenerated: true
+          imageGenerated: true,
+          isIteration: savedInfographic.isIteration || false,
+          originalInfographicId: savedInfographic.originalInfographicId || null
         }
       };
 
@@ -744,6 +742,47 @@ class InfographicController {
 
       // Finalize the infographic
       const finalizedInfographic = await Infographic.finalize(id);
+      
+      // Clean up non-finalized iterations to reduce clutter
+      // Find and remove iterations that weren't finalized
+      if (infographic.isIteration) {
+        // If finalizing an iteration, remove other iterations of the same original
+        const iterations = await Infographic.find({ 
+          originalInfographicId: infographic.originalInfographicId,
+          finalized: false,
+          _id: { $ne: id } // Don't delete the one we just finalized
+        });
+        
+        for (const iteration of iterations) {
+          // Delete the image file
+          if (iteration.imageFilename) {
+            const imagePath = path.join(__dirname, '..', 'generated-images', iteration.imageFilename);
+            if (fs.existsSync(imagePath)) {
+              fs.unlinkSync(imagePath);
+            }
+          }
+          // Delete from database
+          await Infographic.findByIdAndDelete(iteration._id);
+        }
+      } else {
+        // If finalizing an original, remove its iterations
+        const iterations = await Infographic.find({ 
+          originalInfographicId: id,
+          finalized: false
+        });
+        
+        for (const iteration of iterations) {
+          // Delete the image file
+          if (iteration.imageFilename) {
+            const imagePath = path.join(__dirname, '..', 'generated-images', iteration.imageFilename);
+            if (fs.existsSync(imagePath)) {
+              fs.unlinkSync(imagePath);
+            }
+          }
+          // Delete from database
+          await Infographic.findByIdAndDelete(iteration._id);
+        }
+      }
       
       res.json({
         message: 'Infographic finalized successfully',

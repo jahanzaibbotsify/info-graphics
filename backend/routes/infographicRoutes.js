@@ -5,10 +5,10 @@ const rateLimiter = require('../rateLimiter');
 const { requireAuth, optionalAuth } = require('../middleware/auth');
 
 // Create a new infographic (requires auth and rate limiting)
-router.post('/generate-infographic', requireAuth, rateLimiter, InfographicController.generateInfographic);
+router.post('/generate-infographic', optionalAuth, rateLimiter, InfographicController.generateInfographic);
 
 // Chat-based infographic generation (requires auth and rate limiting)
-router.post('/chat/generate-infographic', requireAuth, InfographicController.chatGenerateInfographic);
+router.post('/chat/generate-infographic', optionalAuth, rateLimiter, InfographicController.chatGenerateInfographic);
 
 // Update an existing infographic (requires auth)
 router.put('/infographics/:id', requireAuth, InfographicController.updateInfographic);

@@ -17,7 +17,9 @@ class Infographic {
       imageFilename: data.imageFilename || null,
       imagePath: data.imagePath || null,
       finalized: data.finalized || false, // Track if infographic is finalized for explore section
-      finalizedAt: data.finalized ? new Date() : null // Track when it was finalized
+      finalizedAt: data.finalized ? new Date() : null, // Track when it was finalized
+      isIteration: data.isIteration || false, // Track if this is an iteration of another infographic
+      originalInfographicId: data.originalInfographicId || null // Link to the original infographic
     });
     
     return newInfographic;
