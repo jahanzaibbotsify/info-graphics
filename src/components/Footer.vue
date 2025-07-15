@@ -4,7 +4,7 @@
       <div class="flex items-center gap-2">
         <router-link to="/" class="flex items-center gap-2">
           <sparkles-icon class="h-4 w-4 text-primary" />
-          <span class="text-sm font-medium">InfographicsAI</span>
+          <span class="text-sm font-medium">Infogiraffe Art</span>
         </router-link>
         <span class="text-sm text-muted-foreground">© {{ new Date().getFullYear() }}</span>
       </div>
@@ -22,8 +22,8 @@
         >
           Terms
         </a>
-        <a 
-          href="https://twitter.com/infographicsai" 
+        <!-- <a 
+          href="https://twitter.com/Infogiraffe Art" 
           target="_blank" 
           rel="noopener noreferrer"
           class="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -31,13 +31,13 @@
           Twitter
         </a>
         <a 
-          href="https://github.com/infographicsai" 
+          href="https://github.com/Infogiraffe Art" 
           target="_blank" 
           rel="noopener noreferrer"
           class="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           GitHub
-        </a>
+        </a> -->
       </nav>
     </div>
   </footer>

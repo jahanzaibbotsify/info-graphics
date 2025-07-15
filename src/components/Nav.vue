@@ -4,7 +4,7 @@
       <div class="flex items-center gap-2">
         <router-link to="/" class="flex items-center gap-2">
           <sparkles-icon class="h-6 w-6 text-primary" />
-          <span class="font-bold text-xl">InfographicsAI</span>
+          <span class="font-bold text-xl">Infogiraffe Art</span>
         </router-link>
       </div>
       

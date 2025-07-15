@@ -1,4 +1,4 @@
-# InfographicsAI - AI-Powered Infographic Generator
+# Infogiraffe Art - AI-Powered Infographic Generator
 
 A modern web application for generating beautiful infographics using AI-powered template selection and data integration. Built with Vue.js frontend and Node.js backend with local JSON storage.
 
@@ -55,7 +55,7 @@ The AI system:
 ## 📁 Project Structure
 
 ```
-infographicsai/
+Infogiraffe Art/
 ├── src/                     # Vue.js frontend source
 │   ├── components/         # Reusable Vue components
 │   ├── views/             # Page components
@@ -86,8 +86,8 @@ infographicsai/
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/infographicsai.git
-cd infographicsai
+git clone https://github.com/yourusername/Infogiraffe Art.git
+cd Infogiraffe Art
 ```
 
 2. **Install dependencies**
@@ -229,4 +229,4 @@ For questions or issues, please:
 
 ---
 
-**InfographicsAI** - Transform your data into beautiful, professional infographics with the power of AI.
+**Infogiraffe Art** - Transform your data into beautiful, professional infographics with the power of AI.
