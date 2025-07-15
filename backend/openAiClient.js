@@ -1,6 +1,8 @@
 const OpenAI = require('openai');
 const path = require('path');
 const fs = require('fs');
+const { generateVisualIntelligencePrompt, analyzeDataForVisuals } = require('./visualIntelligence');
+const { generateDataStructurePrompt } = require('./dataStructureIntelligence');
 
 let openai;
 try {
@@ -20,33 +22,54 @@ async function generateInfographic(userInfo, existingHtml = null) {
 
         // If we're updating an existing infographic
         if (existingHtml) {
+            // Analyze data type for visual intelligence
+            const dataType = analyzeDataForVisuals(userInfo);
+            
             const updatePrompt = `Update the following HTML infographic based on this request: ${userInfo}
+
+ENHANCED VISUAL INTELLIGENCE FOR UPDATES:
+📊 Data Type: ${dataType.toUpperCase()}
 
 HTML to Update:
 ${existingHtml}
 
 CRITICAL INSTRUCTIONS:
 1. ONLY modify the content that needs to be updated based on the user's request
-2. DO NOT change any HTML structure, CSS classes, or JavaScript code that isn't explicitly mentioned in the update request
-3. Preserve all styling, colors, and layout unless specifically asked to change
-4. Keep all existing elements that aren't mentioned in the update request
-5. Maintain all CDN links and external dependencies exactly as they are
-6. Return ONLY the raw HTML content - no markdown or code blocks
+2. Apply intelligent visual enhancements based on data type:
+   - Use appropriate icons and colors for ${dataType} data
+   - Adjust font sizes based on data importance and hierarchy
+   - Maintain visual consistency with the detected data type
+3. COMPONENT INTELLIGENCE:
+   - Duplicate components (cards, sections, grid items) if user provides multiple data points
+   - Add contextual icons and illustrations throughout the design
+   - Apply transparency effects to cards and grids for modern visual appeal
+4. TRANSPARENCY ENHANCEMENTS:
+   - Apply semi-transparent backgrounds to cards: rgba(255, 255, 255, 0.1)
+   - Add glass morphism effects: backdrop-filter: blur(10px)
+   - Ensure readability while enhancing visual depth
+5. DO NOT change any HTML structure, CSS classes, or JavaScript code that isn't explicitly mentioned
+6. Preserve all styling, colors, and layout unless specifically asked to change
+7. Keep all existing elements that aren't mentioned in the update request
+8. Maintain all CDN links and external dependencies exactly as they are
+9. Return ONLY the raw HTML content - no markdown or code blocks
 
-Update Requirements:
-- Only change the specific elements mentioned in the update request
-- Keep all other content and structure exactly the same
-- Ensure data consistency if modifying numbers or percentages
-- Preserve all existing functionality
+Visual Enhancement Guidelines:
+- Apply larger fonts to key metrics and important data points
+- Use contextually appropriate icons that match the ${dataType} theme
+- Duplicate components when multiple data categories are provided
+- Add illustrations and icons to enhance data comprehension
+- Apply transparency effects for modern visual appeal
+- Ensure visual hierarchy guides attention to the most important information
+- Maintain readability while enhancing visual appeal
 
-Return ONLY the complete HTML document with the requested updates integrated. No formatting, no code blocks, just raw HTML.`;
+Return ONLY the complete HTML document with the requested updates, component duplications, visual integrations, and transparency enhancements applied. No formatting, no code blocks, just raw HTML.`;
 
             const response = await openai.chat.completions.create({
                 model: "gpt-4o",
                 messages: [
                     {
                         role: "system",
-                        content: "You are an expert at precise HTML updates. Your job is to modify ONLY the specific content requested while preserving everything else exactly as is. Never change structure or styling unless explicitly asked. Return only raw HTML."
+                        content: "You are an expert at precise HTML updates with advanced visual intelligence. Your job is to modify content while applying intelligent component duplication, visual enhancements, and transparency effects based on data type. Duplicate HTML components when user provides multiple data points. Add contextual icons and illustrations. Apply modern transparency effects to cards and grids. Use appropriate icons, colors, and font sizes that match the data context. Never change core structure unless explicitly asked. Return only raw HTML."
                     },
                     {
                         role: "user",
@@ -60,7 +83,68 @@ Return ONLY the complete HTML document with the requested updates integrated. No
             return cleanHtmlContent(htmlContent);
         }
 
-        // If generating a new infographic, use existing logic
+        // Step 0: Validate that the request is appropriate for factual data visualizations
+        const validationPrompt = `You are a content validator for a data visualization AI system. Your job is to determine if a user request is appropriate for creating factual data visualizations and infographics.
+
+ACCEPTABLE REQUESTS:
+- Statistics and data analysis
+- Business metrics and KPIs
+- Health data and medical information  
+- Technology trends and adoption rates
+- Financial data and market analysis
+- Social media analytics and engagement metrics
+- Educational statistics and learning outcomes
+- Environmental data and climate statistics
+- Survey results and research findings
+- Economic indicators and comparisons
+- Demographic data and population statistics
+- Scientific data and research visualization
+- Industry trends and market insights
+- Performance metrics and analytics dashboards
+
+UNACCEPTABLE REQUESTS:
+- Recipes and cooking instructions
+- Entertainment content (movies, music, games)
+- Personal stories and narratives
+- Generic creative content
+- Travel itineraries and guides
+- Fashion and styling advice
+- Product reviews unrelated to data
+- General how-to guides without data
+- Poetry, jokes, or creative writing
+- Generic web content without statistics
+
+USER REQUEST: "${userInfo}"
+
+Analyze the request and respond with ONLY one word:
+- "VALID" if the request is for factual data visualization, statistics, analytics, or quantifiable information
+- "INVALID" if the request is for recipes, entertainment, or content outside data visualization scope
+
+Response:`;
+
+        const validationResponse = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                {
+                    role: "system",
+                    content: "You are a strict content validator for data visualization requests. Only approve requests that involve factual data, statistics, analytics, or quantifiable information that can be visualized. Reject requests for recipes, entertainment, creative content, or anything not related to data visualization."
+                },
+                {
+                    role: "user",
+                    content: validationPrompt
+                }
+            ],
+            temperature: 0.1,
+            max_tokens: 10
+        });
+
+        const validationResult = validationResponse.choices[0].message.content.trim().toUpperCase();
+        
+        if (validationResult === "INVALID") {
+            throw new Error('I specialize in creating factual data visualizations and infographics. Please provide requests related to statistics, data analysis, business metrics, health data, technology trends, or other factual information that can be visualized. Generic requests like recipes, entertainment, or unrelated topics are outside my expertise.');
+        }
+
+        // If validation passes, continue with existing logic
         // Read the prompt from the text file
         const promptPath = path.join(__dirname, '..', 'public', 'files', 'prompt.txt');
         let basePrompt;
@@ -189,39 +273,16 @@ Respond with ONLY the template filename (e.g., "chart-analytics.html").`;
             throw new Error(`Template ${finalTemplate} not found. Please ensure all template files are present in the backend/templates directory.`);
         }
 
-        // Step 3: AI populates the selected template with data only
-        const populationPrompt = `${basePrompt}
-
-User Data to Integrate: ${userInfo}
-
-HTML Template (DO NOT MODIFY STRUCTURE):
-${templateHtml}
-
-CRITICAL INSTRUCTIONS:
-1. ONLY update data content - titles, numbers, percentages, chart data arrays
-2. DO NOT modify HTML structure, CSS classes, or JavaScript code
-3. DO NOT change styling, colors, or layout
-4. DO NOT add or remove HTML elements
-5. Keep all CDN links and external dependencies exactly as they are
-6. DO NOT wrap the response in markdown code blocks or any other formatting
-7. DO NOT use triple backticks or html code block tags - return ONLY the raw HTML content
-
-Data Integration Requirements:
-- Replace template titles with topic from user data
-- Update all statistical values with user's numbers  
-- Modify chart data arrays (if present) with user's data
-- Change category labels to match user's context
-- Update source information if provided
-- Ensure data consistency (percentages sum correctly)
-
-Return ONLY the complete HTML document with user data integrated into the existing template structure. No markdown formatting, no code blocks, just raw HTML.`;
+        // Step 3: AI populates the selected template with advanced data structure intelligence
+        const dataType = analyzeDataForVisuals(userInfo);
+        const populationPrompt = generateDataStructurePrompt(userInfo, templateHtml, basePrompt, dataType);
 
         const response = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
                 {
                     role: "system",
-                    content: "You are an expert data integrator. Your ONLY job is to replace data content within the provided HTML template. NEVER modify HTML structure, CSS, or JavaScript. Only update text content, numbers, and data arrays. Preserve the exact template design and functionality. CRITICAL: Return ONLY raw HTML content - NO markdown formatting, NO code blocks, NO triple backticks or html tags. Just return the plain HTML document."
+                    content: "You are an expert data integrator with advanced data structure intelligence. Your job is to populate HTML templates with user data while applying intelligent component duplication, visual enhancements, and transparency effects. DUPLICATE HTML components (cards, sections, grid items) when user provides multiple data points. ADD contextual icons and illustrations throughout the design. APPLY modern transparency effects to cards and grids using rgba backgrounds and backdrop-filter. Use appropriate icons, colors, and font sizes that match the data context. Apply dynamic typography hierarchy based on data importance. Enhance templates to be visually rich and comprehensive. CRITICAL: Return ONLY raw HTML content - NO markdown formatting, NO code blocks. Create stunning, data-complete infographics."
                 },
                 {
                     role: "user",
@@ -257,6 +318,157 @@ function cleanHtmlContent(content) {
     return content;
 }
 
+// Function to analyze if a message is requesting modification to an infographic
+async function analyzeMessageForModification(message, chatContext) {
+    try {
+        // First validate that the message is appropriate for data visualization context
+        const validationPrompt = `You are validating a user message in the context of data visualization and infographic modification.
+
+ACCEPTABLE REQUESTS:
+- Questions about the infographic data or statistics
+- Requests to modify colors, layout, or design elements
+- Requests to update data values or add new data
+- Questions about data interpretation or insights
+- Requests to change chart types or visualization styles
+- Technical questions about the infographic content
+
+UNACCEPTABLE REQUESTS:
+- Recipes and cooking instructions
+- Entertainment content discussions
+- Personal stories unrelated to data
+- Generic creative content requests
+- Travel, fashion, or lifestyle advice
+- Content completely unrelated to data visualization
+
+USER MESSAGE: "${message}"
+
+Respond with ONLY one word:
+- "VALID" if the message is related to data visualization, infographic modification, or factual data discussion
+- "INVALID" if the message is completely unrelated to data visualization or infographics
+
+Response:`;
+
+        const validationResponse = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                {
+                    role: "system",
+                    content: "You are a validator for infographic-related conversations. Only approve messages that relate to data visualization, infographic modification, or factual data discussions."
+                },
+                {
+                    role: "user",
+                    content: validationPrompt
+                }
+            ],
+            temperature: 0.1,
+            max_tokens: 10
+        });
+
+        const validationResult = validationResponse.choices[0].message.content.trim().toUpperCase();
+        
+        if (validationResult === "INVALID") {
+            return 'invalid';
+        }
+
+        // If validation passes, analyze the intent
+        const analysisPrompt = `Analyze this user message to determine the intent in the context of infographic interaction:
+
+USER MESSAGE: "${message}"
+CHAT CONTEXT: ${chatContext.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
+
+Classify the message intent. Respond with ONLY one word:
+- "modify" if the user wants to change, update, edit, or modify the infographic
+- "factual" if the user is asking questions about the data, seeking information, or having a factual discussion
+
+Examples:
+- "Change the colors to blue" → modify
+- "Make the chart bigger" → modify
+- "Update the revenue to 2.5M" → modify
+- "What does this data mean?" → factual
+- "How was this calculated?" → factual
+- "Can you explain the trends?" → factual
+
+Response:`;
+
+        const analysisResponse = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                {
+                    role: "system",
+                    content: "You are an intent classifier for infographic interactions. Determine if the user wants to modify the infographic or is asking factual questions about the data."
+                },
+                {
+                    role: "user",
+                    content: analysisPrompt
+                }
+            ],
+            temperature: 0.1,
+            max_tokens: 10
+        });
+
+        const intent = analysisResponse.choices[0].message.content.trim().toLowerCase();
+        
+        if (intent === 'modify' || intent === 'factual') {
+            return intent;
+        }
+        
+        // Default to factual if unclear
+        return 'factual';
+        
+    } catch (error) {
+        console.error('Error analyzing message:', error);
+        return 'invalid';
+    }
+}
+
+// Function to generate conversational response about infographic data
+async function generateConversationalResponse(message, chatContext, existingInfographic) {
+    try {
+        const responsePrompt = `You are an AI assistant specializing in data visualization and infographics. A user is asking about their infographic data.
+
+INFOGRAPHIC CONTEXT:
+Title: ${existingInfographic.title}
+Original Request: ${existingInfographic.userInfo}
+
+USER MESSAGE: "${message}"
+CHAT HISTORY: ${chatContext.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
+
+Guidelines for your response:
+1. Focus on factual data and statistical insights
+2. Provide helpful explanations about the data visualization
+3. Offer constructive suggestions related to data interpretation
+4. Keep responses educational and informative
+5. Stay within the context of data visualization and analytics
+6. If the question is outside your expertise, politely redirect to data-related topics
+
+Generate a helpful, conversational response that addresses the user's question while staying focused on data visualization and factual information.`;
+
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                {
+                    role: "system",
+                    content: "You are a knowledgeable assistant specializing in data visualization and infographics. Provide helpful, educational responses about data interpretation, visualization techniques, and statistical insights. Always stay focused on factual data and avoid topics outside of data visualization."
+                },
+                {
+                    role: "user",
+                    content: responsePrompt
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 300
+        });
+
+        return response.choices[0].message.content.trim();
+        
+    } catch (error) {
+        console.error('Error generating conversational response:', error);
+        return "I can help you with questions about your infographic data and visualization. Please ask about the statistics, data interpretation, or visualization elements.";
+    }
+}
+
 module.exports = {
-    generateInfographic
+    generateInfographic,
+    analyzeMessageForModification,
+    generateConversationalResponse
 };

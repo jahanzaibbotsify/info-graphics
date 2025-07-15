@@ -374,16 +374,16 @@ export default {
       
       // Suggestions for chat
       infographicSuggestions: [
-        "Technology adoption rates and digital transformation",
-        "Climate change statistics and environmental data",
-        "Social media usage trends and demographics",
-        "Health and wellness statistics for modern lifestyle",
-        "Global economic indicators and market trends",
-        "Renewable energy adoption and sustainability metrics",
-        "Remote work statistics and productivity data",
-        "AI and machine learning industry growth",
-        "E-commerce sales trends and consumer behavior",
-        "Education technology usage and learning outcomes"
+        "Q4 business metrics with $2.8M revenue and 15% growth",
+        "Social media engagement: Instagram vs TikTok analytics",
+        "Diabetes awareness: statistics and prevention tips",
+        "Climate change impact: temperature rise data by region",
+        "Remote work productivity: 2024 workplace statistics",
+        "AI adoption rates across different industries",
+        "Customer satisfaction survey: 89% positive feedback",
+        "Renewable energy growth: solar vs wind statistics",
+        "E-commerce sales trends: mobile vs desktop data",
+        "Educational technology usage in remote learning"
       ]
     }
   },
@@ -524,12 +524,12 @@ export default {
             lastMessage.content = `❌ ${error.response.data.error}`
             lastMessage.isError = true
             
-            // Add helpful suggestions
+            // Add helpful suggestions with more comprehensive examples
             setTimeout(() => {
               const suggestionMessage = {
                 id: this.messageId++,
                 role: 'assistant',
-                content: `💡 **Try these instead:**\n\n• "Create a technology adoption statistics infographic"\n• "Show social media usage trends for 2025"\n• "Generate health and wellness data visualization"\n• "Climate change statistics and environmental data"\n• "Business analytics dashboard with KPIs"`,
+                content: `💡 **Here are some examples of what I can help you create:**\n\n**📊 Business & Analytics:**\n• "Q4 revenue dashboard with $2.5M total sales"\n• "Customer satisfaction survey results with 85% positive rating"\n• "Sales performance metrics by region"\n\n**📈 Technology & Trends:**\n• "AI adoption rates across industries in 2025"\n• "Remote work statistics and productivity metrics"\n• "Social media engagement trends by platform"\n\n**🏥 Health & Research:**\n• "Diabetes prevention statistics and health tips"\n• "Mental health awareness data and resources"\n• "Clinical trial results visualization"\n\n**🌍 Environmental & Social:**\n• "Climate change impact statistics by region"\n• "Renewable energy adoption rates globally"\n• "Educational technology usage in schools"`,
                 timestamp: new Date(),
                 isSuggestion: true
               }

@@ -32,6 +32,74 @@ class HTMLToImageService {
     return this.browser;
   }
 
+  // Add watermark to HTML content
+  addWatermark(htmlContent) {
+    const watermarkCSS = `
+      <style>
+        .infogiraffe-watermark {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          font-family: 'Arial', sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+          color: rgba(0, 0, 0, 0.6);
+          background: rgba(255, 255, 255, 0.9);
+          padding: 8px 12px;
+          border-radius: 20px;
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          backdrop-filter: blur(10px);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          z-index: 9999;
+          letter-spacing: 0.5px;
+          text-decoration: none;
+          transition: all 0.3s ease;
+        }
+        
+        .infogiraffe-watermark:hover {
+          color: rgba(0, 0, 0, 0.8);
+          background: rgba(255, 255, 255, 0.95);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        @media print {
+          .infogiraffe-watermark {
+            color: rgba(0, 0, 0, 0.5) !important;
+            background: rgba(255, 255, 255, 0.8) !important;
+          }
+        }
+      </style>
+    `;
+
+    const watermarkHTML = `
+      <div class="infogiraffe-watermark">
+        infogiraffe.art
+      </div>
+    `;
+
+    // Insert watermark CSS in the head section
+    let modifiedHtml = htmlContent;
+    if (modifiedHtml.includes('</head>')) {
+      modifiedHtml = modifiedHtml.replace('</head>', watermarkCSS + '\n</head>');
+    } else if (modifiedHtml.includes('<head>')) {
+      modifiedHtml = modifiedHtml.replace('<head>', '<head>' + watermarkCSS);
+    } else {
+      // If no head tag, add it
+      modifiedHtml = modifiedHtml.replace('<html>', '<html><head>' + watermarkCSS + '</head>');
+    }
+
+    // Insert watermark HTML before closing body tag
+    if (modifiedHtml.includes('</body>')) {
+      modifiedHtml = modifiedHtml.replace('</body>', watermarkHTML + '\n</body>');
+    } else {
+      // If no body tag, add the watermark at the end
+      modifiedHtml = modifiedHtml + watermarkHTML;
+    }
+
+    return modifiedHtml;
+  }
+
   async convertHtmlToImage(htmlContent, options = {}) {
     const defaultOptions = {
       width: 1200,
@@ -55,8 +123,11 @@ class HTMLToImageService {
         deviceScaleFactor: config.deviceScaleFactor
       });
 
+      // Add watermark to HTML content before setting page content
+      const htmlWithWatermark = this.addWatermark(htmlContent);
+
       // Set content with proper base URL for assets
-      await page.setContent(htmlContent, {
+      await page.setContent(htmlWithWatermark, {
         waitUntil: ['networkidle0', 'domcontentloaded'],
         timeout: 30000
       });

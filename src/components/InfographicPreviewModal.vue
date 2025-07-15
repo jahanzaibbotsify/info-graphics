@@ -20,7 +20,7 @@
         <div class="flex justify-between items-start pr-12">
           <div>
             <h3 class="text-lg font-semibold">{{ infographic?.title || 'Infographic Preview' }}</h3>
-            <p class="text-sm text-gray-600 mt-1">{{ infographic?.userInfo || '' }}</p>
+            <!-- <p class="text-sm text-gray-600 mt-1">{{ infographic?.userInfo || '' }}</p> -->
           </div>
         </div>
 
@@ -49,10 +49,10 @@
                 : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
             ]"
           >
-            <div class="flex items-center gap-2">
+            <!-- <div class="flex items-center gap-2">
               <message-circle-icon class="w-4 h-4" />
               Chat with AI
-            </div>
+            </div> -->
           </button>
         </div>
 
