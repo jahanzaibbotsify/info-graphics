@@ -1,7 +1,7 @@
 [
   {
     "name": "Free",
-    "description": "Free plan with 2 lifetime infographics",
+    "description": "Free plan with 1 lifetime infographics",
     "pricing_id": "free",
     "animations_allowed": 2,
     "amount": 0,
@@ -13,7 +13,7 @@
   {
     "name": "Pro Monthly",
     "description": "Professional plan with unlimited infographics",
-    "pricing_id": "pro_monthly_20",
+    "pricing_id": "price_1RlOY6C1mUy08pFCnBPdmsF7",
     "animations_allowed": null,
     "amount": 20.00,
     "billing_period": "monthly",
@@ -25,7 +25,7 @@
   {
     "name": "Pro Yearly",
     "description": "Professional plan with unlimited infographics - Best Value!",
-    "pricing_id": "pro_yearly_180",
+    "pricing_id": "price_1RlOYXC1mUy08pFCSxxCOHWd",
     "animations_allowed": null,
     "amount": 180.00,
     "billing_period": "yearly",

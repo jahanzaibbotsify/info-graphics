@@ -3,8 +3,7 @@
     <div class="container flex h-16 items-center justify-between">
       <div class="flex items-center gap-2">
         <router-link to="/" class="flex items-center gap-2">
-          <sparkles-icon class="h-6 w-6 text-primary" />
-          <span class="font-bold text-xl">Infogiraffe Art</span>
+          <img src="/logo.png" alt="Infogiraffe Art" class="object-contain" style="max-width: 100px;" />
         </router-link>
       </div>
       

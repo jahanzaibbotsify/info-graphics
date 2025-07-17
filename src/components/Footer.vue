@@ -3,8 +3,7 @@
     <div class="container mx-auto h-16 flex items-center justify-between">
       <div class="flex items-center gap-2">
         <router-link to="/" class="flex items-center gap-2">
-          <sparkles-icon class="h-4 w-4 text-primary" />
-          <span class="text-sm font-medium">Infogiraffe Art</span>
+          <img src="/logo.png" alt="Infogiraffe Art" class="object-contain" style="max-width: 100px;"  />
         </router-link>
         <span class="text-sm text-muted-foreground">© {{ new Date().getFullYear() }}</span>
       </div>
