@@ -62,7 +62,7 @@
           class="text-sm font-medium py-2 hover:text-primary transition-colors"
           @click="isOpen = false"
         >
-          Infographics
+          Create
         </router-link>
         <router-link 
           to="/" 

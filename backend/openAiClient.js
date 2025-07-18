@@ -240,45 +240,33 @@ ${SYSTEM_PROMPT}`;
 }
 
 /**
- * Generate new infographic image
+ * Generate new image
  * @param {string} prompt - Enhanced prompt for generation
  * @returns {Promise<Object>} OpenAI API response
  */
 async function generateNewImage(prompt) {
     return await openai.images.generate({
-        model: "gpt-image-1",
+        model: "dall-e-3",
         prompt: prompt,
-        quality: "high",
+        quality: "hd",
+        size: "1024x1024"
     });
 }
 
 /**
- * Update existing infographic image
+ * Update existing image (fallback to new generation since DALL-E 3 doesn't support editing)
  * @param {string} prompt - Prompt for modifications
  * @param {string} imagePath - Path to existing image
  * @returns {Promise<Object>} OpenAI API response
  */
 async function updateExistingImage(prompt, imagePath) {
     try {
-        // Import toFile from OpenAI library for proper file formatting
-        const { toFile } = require('openai');
-        
-        // Create a proper file object for the API
-        const imageFile = await toFile(fs.createReadStream(imagePath), path.basename(imagePath), {
-            type: "image/png"
-        });
-        
-        // Use OpenAI's image edit endpoint with proper file format
-        return await openai.images.edit({
-            model: "gpt-image-1",
-            image: imageFile,
-            prompt: prompt,
-            quality: "high",
-        });
-    } catch (error) {
-        console.warn('Failed to update existing image, generating new one instead:', error.message);
-        // Fallback to generating new image if edit fails
+        // DALL-E 3 doesn't support image editing, so we'll generate a new image
+        console.log('DALL-E 3 does not support image editing, generating new image instead...');
         return await generateNewImage(prompt);
+    } catch (error) {
+        console.error('Failed to generate new image:', error.message);
+        throw error;
     }
 }
 
@@ -329,45 +317,49 @@ async function downloadAndSaveImage(imageData, filename) {
 }
 
 /**
- * Main function: Generate infographic (new or update)
+ * Simplified function: Generate single image from prompt
  */
 async function generateInfographic(userInstruction, existingImagePath = null) {
     try {
-        // Step 1: Check if user instruction is factual
-        console.log('Step 1: Validating user instruction...');
-        const isFactual = await validateUserInstruction(userInstruction);
-        
-        if (!isFactual) {
-            throw new Error('I specialize in creating factual data visualizations and infographics. Please provide requests related to statistics, data analysis, business metrics, health data, technology trends, or other factual information that can be visualized. Generic requests like recipes, entertainment, or unrelated topics are outside my expertise.');
+        if (!openai || !process.env.OPENAI_API_KEY) {
+            throw new Error('OpenAI API key is required');
         }
 
-        // Step 2: Generate infographic image
-        const isUpdate = existingImagePath && fs.existsSync(existingImagePath);
-        const updateContext = isUpdate ? 'This is an update to an existing infographic. Maintain design consistency while incorporating requested changes.' : '';
+        console.log('Generating image from prompt...');
         
-        console.log(`Step 2: Generating infographic image (${isUpdate ? 'update' : 'new'})...`);
-        const imageResult = await generateInfographicImage(userInstruction, isUpdate, updateContext, existingImagePath);
-        
-        if (!imageResult.success) {
-            throw new Error(`Failed to generate infographic: ${imageResult.error}`);
+        // Create a simple, friendly prompt for image generation
+        const enhancedPrompt = `Create a beautiful, professional image based on this description: ${userInstruction}. 
+        Make it visually appealing, well-designed, and high-quality. If it involves data or information, present it in an attractive, easy-to-understand visual format.`;
+
+        let imageResponse;
+
+        if (existingImagePath && fs.existsSync(existingImagePath)) {
+            // Use image editing for updates with previous image
+            console.log('Updating existing image...');
+            imageResponse = await updateExistingImage(enhancedPrompt, existingImagePath);
+        } else {
+            // Generate new image
+            console.log('Generating new image...');
+            imageResponse = await generateNewImage(enhancedPrompt);
         }
 
-        // Step 3: Download and save image
-        console.log('Step 3: Downloading and saving image...');
+        // Download and save image
+        console.log('Downloading and saving image...');
         const timestamp = Date.now();
-        const filename = `infographic_${timestamp}.png`;
+        const filename = `image_${timestamp}.png`;
         
-        const saveResult = await downloadAndSaveImage(imageResult.imageUrl, filename);
+        const imageUrl = `data:image/png;base64,${imageResponse.data[0].b64_json}`;
+        const saveResult = await downloadAndSaveImage(imageUrl, filename);
         
         if (!saveResult.success) {
             throw new Error(`Failed to save image: ${saveResult.error}`);
         }
 
         return {
-            imageUrl: imageResult.imageUrl,
+            imageUrl: imageUrl,
             localPath: saveResult.imagePath,
             filename: saveResult.filename,
-            isUpdate: imageResult.isUpdate
+            isUpdate: existingImagePath ? true : false
         };
 
     } catch (error) {
@@ -376,185 +368,9 @@ async function generateInfographic(userInstruction, existingImagePath = null) {
     }
 }
 
-/**
- * Handle update image scenario specifically
- */
-async function updateInfographic(userInstruction, existingImagePath) {
-    try {
-        if (!existingImagePath || !fs.existsSync(existingImagePath)) {
-            throw new Error('Existing image path is required for updates');
-        }
-
-        console.log('Handling update scenario...');
-        return await generateInfographic(userInstruction, existingImagePath);
-
-    } catch (error) {
-        console.error('Error updating infographic:', error);
-        throw error;
-    }
-}
-
-/**
- * Analyze message for modification intent
- */
-async function analyzeMessageForModification(message, chatContext) {
-    try {
-        if (!openai || !process.env.OPENAI_API_KEY) {
-            return 'invalid';
-        }
-
-        // First validate if the message is appropriate for data visualization
-        const validationPrompt = `You are a content validator for a data visualization AI system. Determine if this message is appropriate for infographic interaction.
-
-ACCEPTABLE TOPICS:
-- Data visualization questions and modifications
-- Statistical analysis and interpretation
-- Chart and graph adjustments
-- Infographic design changes
-- Data accuracy discussions
-- Visualization technique questions
-
-UNACCEPTABLE TOPICS:
-- Recipes, cooking, food preparation
-- Entertainment (movies, music, games)
-- Personal stories and narratives
-- Generic creative content not related to data
-- Off-topic conversations
-
-USER MESSAGE: "${message}"
-CHAT CONTEXT: ${chatContext.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
-
-Respond with ONLY one word:
-- "VALID" if the message relates to data visualization, infographics, or statistical content
-- "INVALID" if the message is off-topic or inappropriate for data visualization
-
-Response:`;
-
-        const validationResponse = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are a strict content validator for data visualization interactions. Only approve messages related to infographics, data analysis, and visualization topics."
-                },
-                {
-                    role: "user",
-                    content: validationPrompt
-                }
-            ],
-            temperature: 0.1,
-            max_tokens: 10
-        });
-
-        const validationResult = validationResponse.choices[0].message.content.trim().toUpperCase();
-        
-        if (validationResult === "INVALID") {
-            return 'invalid';
-        }
-
-        // If validation passes, analyze the intent
-        const analysisPrompt = `Analyze this user message to determine the intent in the context of infographic interaction:
-
-USER MESSAGE: "${message}"
-CHAT CONTEXT: ${chatContext.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
-
-Classify the message intent. Respond with ONLY one word:
-- "modify" if the user wants to change, update, edit, or modify the infographic
-- "factual" if the user is asking questions about the data, seeking information, or having a factual discussion
-
-Examples:
-- "Change the colors to blue" → modify
-- "Make the chart bigger" → modify
-- "Update the revenue to 2.5M" → modify
-- "What does this data mean?" → factual
-- "How was this calculated?" → factual
-- "Can you explain the trends?" → factual
-
-Response:`;
-
-        const analysisResponse = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are an intent classifier for infographic interactions. Determine if the user wants to modify the infographic or is asking factual questions about the data."
-                },
-                {
-                    role: "user",
-                    content: analysisPrompt
-                }
-            ],
-            temperature: 0.1,
-            max_tokens: 10
-        });
-
-        const intent = analysisResponse.choices[0].message.content.trim().toLowerCase();
-        
-        if (intent === 'modify' || intent === 'factual') {
-            return intent;
-        }
-        
-        // Default to factual if unclear
-        return 'factual';
-        
-    } catch (error) {
-        console.error('Error analyzing message:', error);
-        return 'invalid';
-    }
-}
-
-/**
- * Generate conversational response about infographic data
- */
-async function generateConversationalResponse(message, chatContext, existingInfographic) {
-    try {
-        const responsePrompt = `You are an AI assistant specializing in data visualization and infographics. A user is asking about their infographic data.
-
-INFOGRAPHIC CONTEXT:
-Title: ${existingInfographic.title}
-Original Request: ${existingInfographic.userInfo}
-
-USER MESSAGE: "${message}"
-CHAT HISTORY: ${chatContext.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
-
-Guidelines for your response:
-1. Focus on factual data and statistical insights
-2. Provide helpful explanations about the data visualization
-3. Offer constructive suggestions related to data interpretation
-4. Keep responses educational and informative
-5. Stay within the context of data visualization and analytics
-6. If the question is outside your expertise, politely redirect to data-related topics
-
-Generate a helpful, conversational response that addresses the user's question while staying focused on data visualization and factual information.`;
-
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are a knowledgeable assistant specializing in data visualization and infographics. Provide helpful, educational responses about data interpretation, visualization techniques, and statistical insights. Always stay focused on factual data and avoid topics outside of data visualization."
-                },
-                {
-                    role: "user",
-                    content: responsePrompt
-                }
-            ],
-            temperature: 0.7,
-            max_tokens: 300
-        });
-
-        return response.choices[0].message.content.trim();
-        
-    } catch (error) {
-        console.error('Error generating conversational response:', error);
-        return "I can help you with questions about your infographic data and visualization. Please ask about the statistics, data interpretation, or visualization elements.";
-    }
-}
+// Complex chat analysis functions removed for simplified single image generation
 
 module.exports = {
     generateInfographic,
-    updateInfographic,
-    downloadAndSaveImage,
-    analyzeMessageForModification,
-    generateConversationalResponse
+    downloadAndSaveImage
 };

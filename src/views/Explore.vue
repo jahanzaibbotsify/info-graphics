@@ -54,7 +54,7 @@
     </div>
 
     <!-- Infographics Grid -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <div
         v-for="infographic in infographics"
         :key="infographic.id"
@@ -62,8 +62,7 @@
       >
         <!-- Preview Image -->
         <div
-          class="h-48 bg-gray-50 flex items-center justify-center cursor-pointer"
-          @click="openPreview(infographic)"
+          class="h-48 bg-gray-50 flex items-center justify-center relative group"
         >
           <img
             v-if="infographic.imageUrl"
@@ -72,6 +71,24 @@
             class="w-full h-full object-contain p-4"
           />
           <file-icon v-else class="h-12 w-12 text-gray-400" />
+          
+          <!-- Action Buttons Overlay -->
+          <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+            <button
+              @click="viewImage(infographic)"
+              class="px-3 py-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium flex items-center gap-2"
+            >
+              <eye-icon class="h-4 w-4" />
+              View
+            </button>
+            <button
+              @click="downloadImage(infographic)"
+              class="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium flex items-center gap-2"
+            >
+              <download-icon class="h-4 w-4" />
+              Download
+            </button>
+          </div>
         </div>
 
         <!-- Info -->
@@ -103,25 +120,82 @@
       </button>
     </div>
 
-    <!-- Preview Modal -->
-    <infographic-preview-modal
-      :show="showPreview"
-      :infographic="selectedInfographic"
-      @close="closePreview"
-      @infographic-updated="handleInfographicUpdate"
-      @show-notification="showNotification"
-    />
-
-    <!-- Notification -->
-    <div
-      v-if="notification"
-      :class="[
-        'fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transition-opacity',
-        notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-      ]"
-    >
-      {{ notification.message }}
+    <!-- Image View Modal -->
+    <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center p-4 border-b">
+          <h3 class="text-lg font-semibold">{{ selectedImage?.title }}</h3>
+          <button @click="closeModal" class="p-2 hover:bg-gray-100 rounded-full">
+            <x-icon class="h-5 w-5" />
+          </button>
+        </div>
+        
+        <!-- Modal Content -->
+        <div class="p-4 overflow-y-auto" style="max-height: calc(90vh - 120px);">
+          <!-- Image Display -->
+          <div class="flex justify-center mb-6">
+            <img
+              v-if="selectedImage?.imageUrl"
+              :src="`${$options.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}${selectedImage.imageUrl}`"
+              :alt="selectedImage.title"
+              class="max-w-full h-auto rounded-lg shadow-lg"
+              style="max-height: 500px;"
+            />
+          </div>
+          
+          <!-- Image Info -->
+          <div class="space-y-4">
+            <div>
+              <h4 class="font-medium text-gray-900 mb-2">Title</h4>
+              <p class="text-gray-700">{{ selectedImage?.title }}</p>
+            </div>
+            
+            <div>
+              <h4 class="font-medium text-gray-900 mb-2">Prompt</h4>
+              <div class="text-gray-700">
+                <p v-if="!showFullPrompt && selectedImage?.userInfo?.length > 150">
+                  {{ selectedImage.userInfo.substring(0, 150) }}...
+                  <button 
+                    @click="togglePrompt"
+                    class="text-primary hover:text-primary/80 font-medium ml-2"
+                  >
+                    Read more
+                  </button>
+                </p>
+                <p v-else-if="showFullPrompt">
+                  {{ selectedImage?.userInfo }}
+                  <button 
+                    @click="togglePrompt"
+                    class="text-primary hover:text-primary/80 font-medium ml-2"
+                  >
+                    Read less
+                  </button>
+                </p>
+                <p v-else>{{ selectedImage?.userInfo }}</p>
+              </div>
+            </div>
+            
+            <div>
+              <h4 class="font-medium text-gray-900 mb-2">Created</h4>
+              <p class="text-gray-700">{{ formatDate(selectedImage?.createdAt) }}</p>
+            </div>
+          </div>
+          
+          <!-- Modal Actions -->
+          <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+            <button
+              @click="downloadImage(selectedImage)"
+              class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2"
+            >
+              <download-icon class="h-4 w-4" />
+              Download
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+
   </div>
 </template>
 
@@ -130,9 +204,11 @@ import {
   SearchIcon,
   FileIcon,
   ClockIcon,
-  AlertCircleIcon
+  AlertCircleIcon,
+  EyeIcon,
+  DownloadIcon,
+  XIcon
 } from 'lucide-vue'
-import InfographicPreviewModal from '@/components/InfographicPreviewModal.vue'
 import axios from 'axios'
 import { debounce } from 'lodash'
 
@@ -143,7 +219,9 @@ export default {
     FileIcon,
     ClockIcon,
     AlertCircleIcon,
-    InfographicPreviewModal
+    EyeIcon,
+    DownloadIcon,
+    XIcon
   },
   data() {
     return {
@@ -153,9 +231,9 @@ export default {
       searchQuery: '',
       currentPage: 1,
       totalPages: 1,
-      showPreview: false,
-      selectedInfographic: null,
-      notification: null
+      showModal: false,
+      selectedImage: null,
+      showFullPrompt: false
     }
   },
   created() {
@@ -197,36 +275,32 @@ export default {
       this.currentPage = page
       this.fetchInfographics()
     },
-    openPreview(infographic) {
-      this.selectedInfographic = infographic
-      this.showPreview = true
+    viewImage(infographic) {
+      this.selectedImage = infographic
+      this.showModal = true
+      this.showFullPrompt = false
     },
-    closePreview() {
-      this.showPreview = false
-      this.selectedInfographic = null
+    closeModal() {
+      this.showModal = false
+      this.selectedImage = null
+      this.showFullPrompt = false
     },
-    handleInfographicUpdate(updatedInfographic) {
-      // Update the infographic in the list
-      const index = this.infographics.findIndex(i => i.id === updatedInfographic.id)
-      if (index !== -1) {
-        this.infographics[index] = {
-          ...this.infographics[index],
-          ...updatedInfographic
-        }
+    downloadImage(infographic) {
+      try {
+        if (!infographic?.imageFilename) return
+
+        const link = document.createElement('a')
+        link.href = `${process.env.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}/download/${infographic.imageFilename}`
+        link.download = `${infographic.title?.replace(/[^a-zA-Z0-9]/g, '-') || 'image'}-${Date.now()}.png`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      } catch (error) {
+        console.error('Error downloading image:', error)
       }
-      // Update the selected infographic in the preview
-      if (this.selectedInfographic?.id === updatedInfographic.id) {
-        this.selectedInfographic = {
-          ...this.selectedInfographic,
-          ...updatedInfographic
-        }
-      }
     },
-    showNotification({ type, message }) {
-      this.notification = { type, message }
-      setTimeout(() => {
-        this.notification = null
-      }, 3000)
+    togglePrompt() {
+      this.showFullPrompt = !this.showFullPrompt
     }
   }
 }

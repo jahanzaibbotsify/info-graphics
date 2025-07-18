@@ -1,52 +1,9 @@
 const Infographic = require('../models/Infographic');
-const { generateInfographic, downloadAndSaveImage, analyzeMessageForModification, generateConversationalResponse } = require('../openAiClient');
+const { generateInfographic, downloadAndSaveImage } = require('../openAiClient');
 const path = require('path');
 const fs = require('fs'); // Added fs module for file deletion
 
-// Helper function to check if message is related to infographics
-function isInfographicRelated(message, infographic) {
-  const messageLower = message.toLowerCase();
-  
-  // Strict off-topic keywords that should be immediately rejected
-  const offTopicKeywords = [
-    'pizza', 'food', 'restaurant', 'cooking', 'recipe', 'car', 'vehicle', 'driving',
-    'weather', 'sports', 'movie', 'music', 'game', 'travel', 'shopping', 'fashion',
-    'politics', 'news', 'celebrity', 'entertainment', 'animal', 'pet', 'joke', 'story'
-  ];
-  
-  // Check for strict off-topic keywords
-  const hasOffTopicKeywords = offTopicKeywords.some(keyword => 
-    messageLower.includes(keyword)
-  );
-  
-  if (hasOffTopicKeywords) {
-    return false;
-  }
-  
-  const infographicKeywords = [
-    'chart', 'graph', 'data', 'statistics', 'infographic', 'visualization', 'diagram',
-    'number', 'percent', 'metric', 'analysis', 'report', 'dashboard', 'trend',
-    'color', 'title', 'section', 'layout', 'design', 'modify', 'change', 'update',
-    'add', 'remove', 'edit', 'alter', 'adjust', 'improve', 'enhance', 'diabetes',
-    'health', 'medical', 'wellness', 'disease', 'treatment', 'symptoms', 'healthcare'
-  ];
-  
-  const messageWords = messageLower.split(' ');
-  const infographicTopic = infographic.userInfo.toLowerCase();
-  
-  // Check if message contains infographic-related keywords
-  const hasInfographicKeywords = infographicKeywords.some(keyword => 
-    messageWords.includes(keyword) || messageLower.includes(keyword)
-  );
-  
-  // Check if message relates to the infographic topic
-  const topicWords = infographicTopic.split(' ');
-  const hasTopicRelation = topicWords.some(word => 
-    word.length > 3 && messageWords.includes(word.toLowerCase())
-  );
-  
-  return hasInfographicKeywords || hasTopicRelation;
-}
+// Complex chat helper functions removed for simplified single image generation
 
 class InfographicController {
   static async generateInfographic(req, res) {
@@ -57,11 +14,11 @@ class InfographicController {
         return res.status(400).json({ error: 'User information is required' });
       }
 
-      // Generate infographic image using DALL-E
+      // Generate image using DALL-E
       const result = await generateInfographic(userInfo);
       
       // Extract title from user input or use default
-      let extractedTitle = title || 'Generated Infographic';
+      let extractedTitle = title || 'Generated Image';
       
       // Create a more descriptive title based on the user input
       if (!title && userInfo) {
@@ -69,16 +26,8 @@ class InfographicController {
         extractedTitle = words.join(' ') + (words.length >= 5 ? '...' : '');
       }
 
-      // Download and save image locally
-      const timestamp = Date.now();
-      const imageFilename = `infographic_${timestamp}.png`;
-      
-      const imageResult = await downloadAndSaveImage(result.imageUrl, imageFilename);
-
-      if (!imageResult.success) {
-        console.error('Image download failed:', imageResult.error);
-        return res.status(500).json({ error: 'Failed to save generated image' });
-      }
+      // The image is already saved by the generateInfographic function
+      const imageFilename = result.filename;
 
       // Save to database with image information
       const savedInfographic = await Infographic.create({
@@ -86,12 +35,12 @@ class InfographicController {
         title: extractedTitle,
         description: userInfo, // Store original prompt as description
         imageFilename: imageFilename,
-        imagePath: imageResult.imagePath,
+        imagePath: result.localPath,
         originalImageUrl: result.imageUrl // Store original DALL-E URL for potential re-editing
       });
 
       const response = {
-        message: 'Infographic generated successfully',
+        message: 'Image generated successfully',
         data: {
           id: savedInfographic._id,
           title: savedInfographic.title,
@@ -105,9 +54,9 @@ class InfographicController {
 
       res.status(200).json(response);
     } catch (error) {
-      console.error('Error generating infographic:', error);
+      console.error('Error generating image:', error);
       res.status(500).json({ 
-        error: error.message || 'Failed to generate infographic' 
+        error: error.message || 'Failed to generate image' 
       });
     }
   }
@@ -391,286 +340,9 @@ class InfographicController {
     }
   }
 
-  static async chatGenerateInfographic(req, res) {
-    try {
-      const { userInfo, chatHistory } = req.body;
-      
-      if (!userInfo) {
-        return res.status(400).json({ error: 'User information is required' });
-      }
+  // Complex chat methods removed for simplified single image generation
 
-      // Check if there are existing images in the chat history
-      let existingInfographic = null;
-      let isUpdate = false;
-      
-      if (chatHistory && chatHistory.length > 0) {
-        // Find the most recent image in the chat history
-        for (let i = chatHistory.length - 1; i >= 0; i--) {
-          if (chatHistory[i].infographic && chatHistory[i].infographic.id) {
-            existingInfographic = await Infographic.findById(chatHistory[i].infographic.id);
-            if (existingInfographic) {
-              isUpdate = true;
-              break;
-            }
-          }
-        }
-      }
 
-      let enhancedPrompt = userInfo;
-      let result;
-      let savedInfographic;
-      let extractedTitle;
-      
-      if (isUpdate && existingInfographic) {
-        // This is an iteration/modification - create NEW infographic to preserve chat history
-        console.log('Creating new iteration based on existing infographic:', existingInfographic._id);
-        
-        // Create enhanced prompt for modification
-        const context = chatHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('\n');
-        enhancedPrompt = `Previous conversation context:\n${context}\n\nOriginal infographic: ${existingInfographic.userInfo}\n\nCurrent modification request: ${userInfo}`;
-        
-        // Generate updated infographic using existing image as reference
-        let existingImagePath = null;
-        if (existingInfographic.imagePath && fs.existsSync(existingInfographic.imagePath)) {
-          existingImagePath = existingInfographic.imagePath;
-        }
-
-        try {
-          result = await generateInfographic(enhancedPrompt, existingImagePath);
-        } catch (error) {
-          if (error.message.includes('specialize in creating factual data visualizations')) {
-            return res.status(400).json({ 
-              error: 'I specialize in creating factual data visualizations and infographics. Please provide requests related to statistics, data analysis, business metrics, health data, technology trends, or other factual information that can be visualized. Generic requests like recipes, entertainment, or unrelated topics are outside my expertise.',
-              type: 'invalid_request'
-            });
-          }
-          throw error;
-        }
-        
-        // Use existing title or create new one
-        extractedTitle = existingInfographic.title;
-        if (userInfo.toLowerCase().includes('title') || userInfo.toLowerCase().includes('name')) {
-          const words = userInfo.split(' ').slice(0, 5);
-          extractedTitle = words.join(' ') + (words.length >= 5 ? '...' : '');
-        }
-
-        // Download and save new image
-        const timestamp = Date.now();
-        const imageFilename = `chat_iteration_${timestamp}.png`;
-        
-        const imageResult = await downloadAndSaveImage(result.imageUrl, imageFilename);
-
-        if (imageResult.success) {
-          // Create NEW infographic record to preserve chat history
-          savedInfographic = await Infographic.create({
-            userInfo: enhancedPrompt,
-            title: extractedTitle,
-            imageFilename: imageFilename,
-            imagePath: imageResult.imagePath,
-            originalImageUrl: result.imageUrl,
-            description: userInfo, // Use the modification request as description
-            finalized: false,
-            isIteration: true,
-            originalInfographicId: existingInfographic._id,
-            created_at: new Date(),
-            updated_at: new Date()
-          });
-        } else {
-          throw new Error('Failed to save updated image');
-        }
-        
-      } else {
-        // This is a new infographic generation
-        console.log('Creating new infographic');
-        
-        // If there's chat history, consider context for better generation
-        if (chatHistory && chatHistory.length > 0) {
-          const context = chatHistory.slice(-3).map(msg => `${msg.role}: ${msg.content}`).join('\n');
-          enhancedPrompt = `Previous conversation context:\n${context}\n\nCurrent request: ${userInfo}`;
-        }
-
-        // Generate new infographic
-        try {
-          result = await generateInfographic(enhancedPrompt);
-        } catch (error) {
-          if (error.message.includes('specialize in creating factual data visualizations')) {
-            return res.status(400).json({ 
-              error: 'I specialize in creating factual data visualizations and infographics. Please provide requests related to statistics, data analysis, business metrics, health data, technology trends, or other factual information that can be visualized. Generic requests like recipes, entertainment, or unrelated topics are outside my expertise.',
-              type: 'invalid_request'
-            });
-          }
-          throw error;
-        }
-        
-        // Create title from user input
-        extractedTitle = 'Generated Infographic';
-        if (userInfo) {
-          const words = userInfo.split(' ').slice(0, 5);
-          extractedTitle = words.join(' ') + (words.length >= 5 ? '...' : '');
-        }
-
-        // Download and save image
-        const timestamp = Date.now();
-        const imageFilename = `chat_infographic_${timestamp}.png`;
-        
-        const imageResult = await downloadAndSaveImage(result.imageUrl, imageFilename);
-
-        if (!imageResult.success) {
-          console.error('Image download failed:', imageResult.error);
-          throw new Error('Failed to save generated image');
-        }
-
-        // Save new infographic to database
-        savedInfographic = await Infographic.create({
-          userInfo: enhancedPrompt,
-          title: extractedTitle,
-          description: userInfo, // Store original user prompt as description
-          imageFilename: imageFilename,
-          imagePath: imageResult.imagePath,
-          originalImageUrl: result.imageUrl
-        });
-      }
-
-      const response = {
-        message: isUpdate ? 'Infographic iteration created successfully' : 'Infographic generated successfully',
-        isUpdate: isUpdate,
-        data: {
-          id: savedInfographic._id,
-          title: savedInfographic.title,
-          userInfo: userInfo, // Return original user info, not enhanced prompt
-          createdAt: savedInfographic.created_at,
-          imageGenerated: true,
-          imageFilename: savedInfographic.imageFilename,
-          imageUrl: `/generated-images/${savedInfographic.imageFilename}`,
-          isIteration: savedInfographic.isIteration || false,
-          originalInfographicId: savedInfographic.originalInfographicId || null
-        }
-      };
-
-      res.status(200).json(response);
-    } catch (error) {
-      console.error('Error generating/updating chat infographic:', error);
-      res.status(500).json({ 
-        error: error.message || 'Failed to generate/update infographic' 
-      });
-    }
-  }
-
-  static async chatWithInfographic(req, res) {
-    try {
-      const { id } = req.params;
-      const { message, chatHistory } = req.body;
-      
-      if (!message || !message.trim()) {
-        return res.status(400).json({ error: 'Message is required' });
-      }
-
-      // Find the existing infographic
-      const existingInfographic = await Infographic.findById(id);
-      if (!existingInfographic) {
-        return res.status(404).json({ error: 'Infographic not found' });
-      }
-
-      // Create chat context from history
-      const chatContext = chatHistory ? chatHistory.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      })) : [];
-
-      // First check if message is related to infographics at all
-      if (!isInfographicRelated(message, existingInfographic)) {
-        return res.json({
-          message: "I can only help with factual data and infographic modifications. Please ask questions about your infographic data or request specific changes to your visualization.",
-          isModifying: false
-        });
-      }
-
-      // Analyze the message to determine if it's a modification request
-      const messageAnalysis = await analyzeMessageForModification(message, chatContext);
-      
-      // Handle different analysis results
-      if (messageAnalysis === 'invalid') {
-        return res.json({
-          message: "I can only help with factual data and infographic modifications. Please ask questions about your infographic data or request specific changes to your visualization.",
-          isModifying: false
-        });
-      }
-
-      if (messageAnalysis === 'modify') {
-        // Generate updated infographic using image-to-image generation
-        let existingImagePath = null;
-        if (existingInfographic.imagePath && fs.existsSync(existingInfographic.imagePath)) {
-          existingImagePath = existingInfographic.imagePath;
-        }
-
-        const contextualPrompt = `Original request: ${existingInfographic.userInfo}\n\nModification request: ${message}`;
-        
-        const result = await generateInfographic(contextualPrompt, existingImagePath);
-        
-        // Download and save updated image
-        const timestamp = Date.now();
-        const imageFilename = `infographic_${timestamp}.png`;
-        
-        const imageResult = await downloadAndSaveImage(result.imageUrl, imageFilename);
-
-        if (!imageResult.success) {
-          throw new Error('Failed to save updated image');
-        }
-
-        // Delete old image if it exists
-        if (existingInfographic.imageFilename) {
-          const oldImagePath = path.join(__dirname, '..', 'generated-images', existingInfographic.imageFilename);
-          if (fs.existsSync(oldImagePath)) {
-            fs.unlinkSync(oldImagePath);
-          }
-        }
-
-        // Update the infographic in database
-        const updatedInfographic = await Infographic.findByIdAndUpdate(
-          id,
-          {
-            imageFilename: imageFilename,
-            imagePath: imageResult.imagePath,
-            originalImageUrl: result.imageUrl,
-            updated_at: new Date()
-          },
-          { new: true }
-        );
-
-        res.json({
-          message: "I've updated your infographic based on your request. Please check the preview to see the changes!",
-          isModifying: true,
-          updatedInfographic: {
-            id: updatedInfographic._id,
-            title: updatedInfographic.title,
-            userInfo: updatedInfographic.userInfo,
-            imageFilename: updatedInfographic.imageFilename,
-            imageUrl: updatedInfographic.imageFilename ? `/generated-images/${updatedInfographic.imageFilename}` : null,
-            updatedAt: updatedInfographic.updated_at
-          }
-        });
-      } else if (messageAnalysis === 'factual') {
-        // Generate factual response without modifying the infographic
-        const conversationalResponse = await generateConversationalResponse(message, chatContext, existingInfographic);
-        
-        res.json({
-          message: conversationalResponse,
-          isModifying: false
-        });
-      } else {
-        // Default case - should not reach here but handle gracefully
-        res.json({
-          message: "I can only help with factual data and infographic modifications. Please ask questions about your infographic data or request specific changes to your visualization.",
-          isModifying: false
-        });
-      }
-    } catch (error) {
-      console.error('Error in chat with infographic:', error);
-      res.status(500).json({ 
-        error: error.message || 'Failed to process chat message' 
-      });
-    }
-  }
 
   static async finalizeInfographic(req, res) {
     try {

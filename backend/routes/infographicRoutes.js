@@ -7,14 +7,12 @@ const { requireAuth, optionalAuth } = require('../middleware/auth');
 // Create a new infographic (requires auth and rate limiting)
 router.post('/generate-infographic', optionalAuth, rateLimiter, InfographicController.generateInfographic);
 
-// Chat-based infographic generation (requires auth and rate limiting)
-router.post('/chat/generate-infographic', optionalAuth, rateLimiter, InfographicController.chatGenerateInfographic);
+// Complex chat routes removed for simplified single image generation
 
 // Update an existing infographic (requires auth)
 router.put('/infographics/:id', requireAuth, InfographicController.updateInfographic);
 
-// Chat with an infographic (requires auth)
-router.post('/infographics/:id/chat', requireAuth, InfographicController.chatWithInfographic);
+
 
 // Finalize an infographic (requires auth)
 router.post('/infographics/:id/finalize', requireAuth, InfographicController.finalizeInfographic);
