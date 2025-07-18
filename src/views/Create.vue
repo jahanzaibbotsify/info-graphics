@@ -264,7 +264,7 @@
                 @error="handleImageError($event, infographic)"
               />
             </div>
-            <!-- <div v-else v-html="infographic.htmlContent" class="infographic-thumbnail"></div> -->
+            
           </div>
           <div class="space-y-2">
             <h4 class="font-medium text-sm truncate">{{ infographic.title }}</h4>
@@ -910,14 +910,13 @@ export default {
 
     async downloadStoredInfographic(infographic) {
       try {
-        // Create blob and download
-        const blob = new Blob([infographic.htmlContent], { type: 'text/html' })
-        const url = URL.createObjectURL(blob)
+        // Download the image directly using the backend endpoint
+        const downloadUrl = `${process.env.VUE_APP_BACKEND_URL}/infographics/download/${infographic.imageFilename}`
         
         // Create and trigger download
         const link = document.createElement('a')
-        link.href = url
-        link.download = `infographic-${Date.now()}.html`
+        link.href = downloadUrl
+        link.download = infographic.imageFilename || `infographic-${Date.now()}.png`
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)

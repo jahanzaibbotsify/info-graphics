@@ -61,17 +61,22 @@
           <!-- Preview Tab -->
           <div v-if="activeTab === 'preview'" class="w-full h-[60vh] border rounded-lg overflow-auto bg-gray-50">
             <!-- Show image if available, otherwise show HTML -->
-            <div v-if="infographic?.imageUrl" class="w-full h-full flex items-center justify-center p-4">
+            <div v-if="infographic?.imageUrl" class="infographic-content">
               <img 
-                :src="`${$options.VUE_APP_BACKEND_URL || 'https://infogiraffe.art/api'}${infographic.imageUrl}`" 
-                :alt="infographic.title"
-                class="max-w-full max-h-full object-contain rounded shadow-sm"
-                @error="handleImageError"
+                :src="infographic.imageUrl" 
+                :alt="infographic.title || 'Infographic'"
+                class="w-full h-auto max-h-[70vh] object-contain rounded-lg shadow-lg"
+                @load="onImageLoad"
+                @error="onImageError"
               />
             </div>
-            <div v-else-if="infographic?.htmlContent" v-html="infographic.htmlContent" class="infographic-content"></div>
-            <div v-else class="flex items-center justify-center h-full text-gray-500">
-              No content available
+            <div v-else class="infographic-content flex items-center justify-center h-64 bg-gray-100 dark:bg-gray-800 rounded-lg">
+              <div class="text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No image available</p>
+              </div>
             </div>
           </div>
 
@@ -230,12 +235,14 @@ export default {
         this.isUpdating = false;
       }
     },
-    handleImageError(event) {
-      // Hide the broken image and show HTML content as fallback
-      const parent = event.target.closest('.w-full.h-full');
-      if (parent && this.infographic?.htmlContent) {
-        parent.innerHTML = `<div class="infographic-content p-4">${this.infographic.htmlContent}</div>`;
-      }
+    onImageLoad() {
+      // Image loaded successfully
+      console.log('Infographic image loaded');
+    },
+    onImageError(event) {
+      // Handle image loading error
+      console.error('Failed to load infographic image');
+      event.target.style.display = 'none';
     },
 
     handleInfographicUpdated(updatedInfographic) {

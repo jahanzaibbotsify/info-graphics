@@ -1,6 +1,5 @@
 const Infographic = require('../models/Infographic');
-const { generateInfographic, analyzeMessageForModification, generateConversationalResponse } = require('../openAiClient');
-const htmlToImageService = require('../services/htmlToImageService');
+const { generateInfographic, downloadAndSaveImage, analyzeMessageForModification, generateConversationalResponse } = require('../openAiClient');
 const path = require('path');
 const fs = require('fs'); // Added fs module for file deletion
 
@@ -58,61 +57,51 @@ class InfographicController {
         return res.status(400).json({ error: 'User information is required' });
       }
 
-      // Generate infographic using OpenAI
-      const htmlContent = await generateInfographic(userInfo);
+      // Generate infographic image using DALL-E
+      const result = await generateInfographic(userInfo);
       
-      // Extract title from the generated HTML if not provided
-      let extractedTitle = title;
-      if (!extractedTitle) {
-        const titleMatch = htmlContent.match(/<h1[^>]*class="title"[^>]*>([^<]+)<\/h1>/);
-        extractedTitle = titleMatch ? titleMatch[1].replace(/\[|\]/g, '') : 'Generated Infographic';
+      // Extract title from user input or use default
+      let extractedTitle = title || 'Generated Infographic';
+      
+      // Create a more descriptive title based on the user input
+      if (!title && userInfo) {
+        const words = userInfo.split(' ').slice(0, 5); // Take first 5 words
+        extractedTitle = words.join(' ') + (words.length >= 5 ? '...' : '');
       }
 
-      // Convert HTML to image
+      // Download and save image locally
       const timestamp = Date.now();
       const imageFilename = `infographic_${timestamp}.png`;
       
-      // Get template-specific options for image generation
-      const imageOptions = htmlToImageService.getTemplateOptions('default');
-      
-      const imageResult = await htmlToImageService.convertAndSave(
-        htmlContent, 
-        imageFilename, 
-        imageOptions
-      );
+      const imageResult = await downloadAndSaveImage(result.imageUrl, imageFilename);
 
       if (!imageResult.success) {
-        console.error('Image generation failed:', imageResult.error);
-        // Continue without image if generation fails
+        console.error('Image download failed:', imageResult.error);
+        return res.status(500).json({ error: 'Failed to save generated image' });
       }
 
       // Save to database with image information
       const savedInfographic = await Infographic.create({
         userInfo,
-        htmlContent,
         title: extractedTitle,
         description: userInfo, // Store original prompt as description
-        imageFilename: imageResult.success ? imageFilename : null,
-        imagePath: imageResult.success ? imageResult.imagePath : null
+        imageFilename: imageFilename,
+        imagePath: imageResult.imagePath,
+        originalImageUrl: result.imageUrl // Store original DALL-E URL for potential re-editing
       });
 
       const response = {
         message: 'Infographic generated successfully',
         data: {
           id: savedInfographic._id,
-          htmlContent: savedInfographic.htmlContent,
           title: savedInfographic.title,
           userInfo: savedInfographic.userInfo,
           createdAt: savedInfographic.created_at,
-          imageGenerated: imageResult.success
+          imageGenerated: true,
+          imageFilename: imageFilename,
+          imageUrl: `/generated-images/${imageFilename}`
         }
       };
-
-      // Add image data if generation was successful
-      if (imageResult.success) {
-        response.data.imageFilename = imageFilename;
-        response.data.imageUrl = `/generated-images/${imageFilename}`;
-      }
 
       res.status(200).json(response);
     } catch (error) {
@@ -149,7 +138,6 @@ class InfographicController {
         title: infographic.title,
         userInfo: infographic.userInfo,
         description: infographic.description || infographic.userInfo, // Include description
-        // htmlContent: infographic.htmlContent,
         createdAt: infographic.created_at,
         imageFilename: infographic.imageFilename,
         imageUrl: infographic.imageFilename ? `/generated-images/${infographic.imageFilename}` : null,
@@ -208,7 +196,6 @@ class InfographicController {
         title: infographic.title,
         userInfo: infographic.userInfo,
         description: infographic.description || infographic.userInfo, // Include description
-        htmlContent: infographic.htmlContent,
         createdAt: infographic.created_at,
         imageFilename: infographic.imageFilename,
         imageUrl: infographic.imageFilename ? `/generated-images/${infographic.imageFilename}` : null,
@@ -246,7 +233,6 @@ class InfographicController {
         title: infographic.title,
         userInfo: infographic.userInfo,
         description: infographic.description || infographic.userInfo, // Include description
-        htmlContent: infographic.htmlContent,
         createdAt: infographic.created_at,
         imageFilename: infographic.imageFilename,
         imageUrl: infographic.imageFilename ? `/generated-images/${infographic.imageFilename}` : null,
@@ -262,7 +248,7 @@ class InfographicController {
   static async updateInfographic(req, res) {
     try {
       const { id } = req.params;
-      const { updatePrompt, imageOptions } = req.body;
+      const { updatePrompt } = req.body;
       
       if (!updatePrompt) {
         return res.status(400).json({ error: 'Update prompt is required' });
@@ -274,26 +260,26 @@ class InfographicController {
         return res.status(404).json({ error: 'Infographic not found' });
       }
 
-      // Generate updated infographic using OpenAI with existing HTML and update prompt
-      const updatedHtmlContent = await generateInfographic(updatePrompt, existingInfographic.htmlContent);
+      // Generate updated infographic using image-to-image or context-based generation
+      let existingImagePath = null;
+      if (existingInfographic.imagePath && fs.existsSync(existingInfographic.imagePath)) {
+        existingImagePath = existingInfographic.imagePath;
+      }
+
+      // Create context for the update
+      const contextualPrompt = `Original request: ${existingInfographic.userInfo}\n\nUpdate request: ${updatePrompt}`;
       
-      // Convert updated HTML to image
+      const result = await generateInfographic(contextualPrompt, existingImagePath);
+      
+      // Download and save the updated image
       const timestamp = Date.now();
       const imageFilename = `infographic_${timestamp}.png`;
       
-      // Get template-specific options and merge with custom options if provided
-      const templateOptions = htmlToImageService.getTemplateOptions(existingInfographic.template || 'default');
-      const finalImageOptions = imageOptions ? { ...templateOptions, ...imageOptions } : templateOptions;
-      
-      const imageResult = await htmlToImageService.convertAndSave(
-        updatedHtmlContent, 
-        imageFilename, 
-        finalImageOptions
-      );
+      const imageResult = await downloadAndSaveImage(result.imageUrl, imageFilename);
 
       if (!imageResult.success) {
-        console.error('Image generation failed:', imageResult.error);
-        // Continue without image if generation fails
+        console.error('Image download failed:', imageResult.error);
+        return res.status(500).json({ error: 'Failed to save updated image' });
       }
 
       // Delete old image if it exists
@@ -304,13 +290,13 @@ class InfographicController {
         }
       }
 
-      // Update the infographic in database using findByIdAndUpdate
+      // Update the infographic in database
       const updatedInfographic = await Infographic.findByIdAndUpdate(
         id,
         {
-          htmlContent: updatedHtmlContent,
-          imageFilename: imageResult.success ? imageFilename : existingInfographic.imageFilename,
-          imagePath: imageResult.success ? imageResult.imagePath : existingInfographic.imagePath,
+          imageFilename: imageFilename,
+          imagePath: imageResult.imagePath,
+          originalImageUrl: result.imageUrl,
           updated_at: new Date()
         },
         { new: true } // Return the updated document
@@ -324,19 +310,14 @@ class InfographicController {
         message: 'Infographic updated successfully',
         data: {
           id: updatedInfographic._id,
-          htmlContent: updatedInfographic.htmlContent,
           title: updatedInfographic.title,
           userInfo: updatedInfographic.userInfo,
           updatedAt: updatedInfographic.updated_at,
-          imageGenerated: imageResult.success
+          imageGenerated: true,
+          imageFilename: imageFilename,
+          imageUrl: `/generated-images/${imageFilename}`
         }
       };
-
-      // Add image data if generation was successful
-      if (imageResult.success) {
-        response.data.imageFilename = imageFilename;
-        response.data.imageUrl = `/generated-images/${imageFilename}`;
-      }
 
       res.status(200).json(response);
     } catch (error) {
@@ -428,19 +409,6 @@ class InfographicController {
           if (chatHistory[i].infographic && chatHistory[i].infographic.id) {
             existingInfographic = await Infographic.findById(chatHistory[i].infographic.id);
             if (existingInfographic) {
-              // Check if the user's message is requesting a modification
-              // const modificationKeywords = [
-              //   'change', 'modify', 'update', 'edit', 'alter', 'adjust', 'revise',
-              //   'make it', 'turn it', 'convert', 'transform', 'switch',
-              //   'different color', 'new color', 'other color', 'another style',
-              //   'more', 'less', 'bigger', 'smaller', 'brighter', 'darker',
-              //   'add', 'remove', 'replace', 'include', 'exclude',
-              //   'instead of', 'rather than', 'better', 'improve',
-              //   'fix', 'correct', 'enhance', 'upgrade'
-              // ];
-              
-              // const userMessage = userInfo.toLowerCase();
-              // isUpdate = modificationKeywords.some(keyword => userMessage.includes(keyword));
               isUpdate = true;
               break;
             }
@@ -449,9 +417,9 @@ class InfographicController {
       }
 
       let enhancedPrompt = userInfo;
-      let htmlContent;
-      let extractedTitle;
+      let result;
       let savedInfographic;
+      let extractedTitle;
       
       if (isUpdate && existingInfographic) {
         // This is an iteration/modification - create NEW infographic to preserve chat history
@@ -459,11 +427,16 @@ class InfographicController {
         
         // Create enhanced prompt for modification
         const context = chatHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('\n');
-        enhancedPrompt = `You are creating an iteration of an existing infographic. Here's the conversation context:\n${context}\n\nCurrent modification request: ${userInfo}\n\nOriginal infographic data: ${existingInfographic.userInfo}`;
+        enhancedPrompt = `Previous conversation context:\n${context}\n\nOriginal infographic: ${existingInfographic.userInfo}\n\nCurrent modification request: ${userInfo}`;
         
-        // Generate updated infographic using existing HTML as base
+        // Generate updated infographic using existing image as reference
+        let existingImagePath = null;
+        if (existingInfographic.imagePath && fs.existsSync(existingInfographic.imagePath)) {
+          existingImagePath = existingInfographic.imagePath;
+        }
+
         try {
-          htmlContent = await generateInfographic(enhancedPrompt, existingInfographic.htmlContent);
+          result = await generateInfographic(enhancedPrompt, existingImagePath);
         } catch (error) {
           if (error.message.includes('specialize in creating factual data visualizations')) {
             return res.status(400).json({ 
@@ -474,36 +447,27 @@ class InfographicController {
           throw error;
         }
         
-        // Extract title from the updated HTML, or use original title with version suffix
-        extractedTitle = existingInfographic.title; 
-        const titleMatch = htmlContent.match(/<h1[^>]*class="title"[^>]*>([^<]+)<\/h1>|<h1[^>]*>([^<]+)<\/h1>|<title>([^<]+)<\/title>/i);
-        if (titleMatch) {
-          const newTitle = (titleMatch[1] || titleMatch[2] || titleMatch[3]).replace(/\[|\]/g, '').trim();
-          if (newTitle && newTitle.toLowerCase() !== 'generated infographic') {
-            extractedTitle = newTitle;
-          }
+        // Use existing title or create new one
+        extractedTitle = existingInfographic.title;
+        if (userInfo.toLowerCase().includes('title') || userInfo.toLowerCase().includes('name')) {
+          const words = userInfo.split(' ').slice(0, 5);
+          extractedTitle = words.join(' ') + (words.length >= 5 ? '...' : '');
         }
 
-        // Generate new image with updated content
+        // Download and save new image
         const timestamp = Date.now();
         const imageFilename = `chat_iteration_${timestamp}.png`;
         
-        const imageOptions = htmlToImageService.getTemplateOptions('default');
-        const imageResult = await htmlToImageService.convertAndSave(
-          htmlContent, 
-          imageFilename, 
-          imageOptions
-        );
+        const imageResult = await downloadAndSaveImage(result.imageUrl, imageFilename);
 
         if (imageResult.success) {
           // Create NEW infographic record to preserve chat history
-          // Mark as iteration and link to original
           savedInfographic = await Infographic.create({
             userInfo: enhancedPrompt,
-            htmlContent,
             title: extractedTitle,
             imageFilename: imageFilename,
             imagePath: imageResult.imagePath,
+            originalImageUrl: result.imageUrl,
             description: userInfo, // Use the modification request as description
             finalized: false,
             isIteration: true,
@@ -512,7 +476,7 @@ class InfographicController {
             updated_at: new Date()
           });
         } else {
-          throw new Error('Failed to generate updated image');
+          throw new Error('Failed to save updated image');
         }
         
       } else {
@@ -525,11 +489,9 @@ class InfographicController {
           enhancedPrompt = `Previous conversation context:\n${context}\n\nCurrent request: ${userInfo}`;
         }
 
-        // Generate new infographic using OpenAI with enhanced context
+        // Generate new infographic
         try {
-          htmlContent = await generateInfographic(enhancedPrompt);
-          console.log('Generated HTML content type:', typeof htmlContent);
-          console.log('Generated HTML content length:', htmlContent ? htmlContent.length : 'undefined/null');
+          result = await generateInfographic(enhancedPrompt);
         } catch (error) {
           if (error.message.includes('specialize in creating factual data visualizations')) {
             return res.status(400).json({ 
@@ -540,48 +502,32 @@ class InfographicController {
           throw error;
         }
         
-        // Ensure htmlContent is a string
-        if (typeof htmlContent !== 'string') {
-          console.error('htmlContent is not a string:', htmlContent);
-          throw new Error('Failed to generate HTML content - received invalid response type');
-        }
-        
-        if (!htmlContent || htmlContent.length === 0) {
-          console.error('htmlContent is empty or null');
-          throw new Error('Failed to generate HTML content - received empty response');
-        }
-        
-        // Extract title from the generated HTML
+        // Create title from user input
         extractedTitle = 'Generated Infographic';
-        const titleMatch = htmlContent.match(/<h1[^>]*class="title"[^>]*>([^<]+)<\/h1>|<h1[^>]*>([^<]+)<\/h1>|<title>([^<]+)<\/title>/i);
-        if (titleMatch) {
-          extractedTitle = (titleMatch[1] || titleMatch[2] || titleMatch[3]).replace(/\[|\]/g, '').trim();
+        if (userInfo) {
+          const words = userInfo.split(' ').slice(0, 5);
+          extractedTitle = words.join(' ') + (words.length >= 5 ? '...' : '');
         }
 
-        // Convert HTML to image
+        // Download and save image
         const timestamp = Date.now();
         const imageFilename = `chat_infographic_${timestamp}.png`;
         
-        const imageOptions = htmlToImageService.getTemplateOptions('default');
-        const imageResult = await htmlToImageService.convertAndSave(
-          htmlContent, 
-          imageFilename, 
-          imageOptions
-        );
+        const imageResult = await downloadAndSaveImage(result.imageUrl, imageFilename);
 
         if (!imageResult.success) {
-          console.error('Image generation failed:', imageResult.error);
-          // Continue without image if generation fails
+          console.error('Image download failed:', imageResult.error);
+          throw new Error('Failed to save generated image');
         }
 
         // Save new infographic to database
         savedInfographic = await Infographic.create({
           userInfo: enhancedPrompt,
-          htmlContent,
           title: extractedTitle,
           description: userInfo, // Store original user prompt as description
-          imageFilename: imageResult.success ? imageFilename : null,
-          imagePath: imageResult.success ? imageResult.imagePath : null
+          imageFilename: imageFilename,
+          imagePath: imageResult.imagePath,
+          originalImageUrl: result.imageUrl
         });
       }
 
@@ -590,21 +536,16 @@ class InfographicController {
         isUpdate: isUpdate,
         data: {
           id: savedInfographic._id,
-          htmlContent: savedInfographic.htmlContent,
           title: savedInfographic.title,
           userInfo: userInfo, // Return original user info, not enhanced prompt
           createdAt: savedInfographic.created_at,
           imageGenerated: true,
+          imageFilename: savedInfographic.imageFilename,
+          imageUrl: `/generated-images/${savedInfographic.imageFilename}`,
           isIteration: savedInfographic.isIteration || false,
           originalInfographicId: savedInfographic.originalInfographicId || null
         }
       };
-
-      // Add image data
-      if (savedInfographic.imageFilename) {
-        response.data.imageFilename = savedInfographic.imageFilename;
-        response.data.imageUrl = `/generated-images/${savedInfographic.imageFilename}`;
-      }
 
       res.status(200).json(response);
     } catch (error) {
@@ -656,18 +597,25 @@ class InfographicController {
       }
 
       if (messageAnalysis === 'modify') {
-        // Generate updated infographic using the existing update logic
-        const updatedHtmlContent = await generateInfographic(message, existingInfographic.htmlContent);
+        // Generate updated infographic using image-to-image generation
+        let existingImagePath = null;
+        if (existingInfographic.imagePath && fs.existsSync(existingInfographic.imagePath)) {
+          existingImagePath = existingInfographic.imagePath;
+        }
+
+        const contextualPrompt = `Original request: ${existingInfographic.userInfo}\n\nModification request: ${message}`;
         
-        // Convert updated HTML to image
+        const result = await generateInfographic(contextualPrompt, existingImagePath);
+        
+        // Download and save updated image
         const timestamp = Date.now();
         const imageFilename = `infographic_${timestamp}.png`;
         
-        const imageResult = await htmlToImageService.convertAndSave(
-          updatedHtmlContent, 
-          imageFilename, 
-          htmlToImageService.getTemplateOptions('default')
-        );
+        const imageResult = await downloadAndSaveImage(result.imageUrl, imageFilename);
+
+        if (!imageResult.success) {
+          throw new Error('Failed to save updated image');
+        }
 
         // Delete old image if it exists
         if (existingInfographic.imageFilename) {
@@ -681,9 +629,9 @@ class InfographicController {
         const updatedInfographic = await Infographic.findByIdAndUpdate(
           id,
           {
-            htmlContent: updatedHtmlContent,
-            imageFilename: imageResult.success ? imageFilename : existingInfographic.imageFilename,
-            imagePath: imageResult.success ? imageResult.imagePath : existingInfographic.imagePath,
+            imageFilename: imageFilename,
+            imagePath: imageResult.imagePath,
+            originalImageUrl: result.imageUrl,
             updated_at: new Date()
           },
           { new: true }
@@ -694,7 +642,6 @@ class InfographicController {
           isModifying: true,
           updatedInfographic: {
             id: updatedInfographic._id,
-            htmlContent: updatedInfographic.htmlContent,
             title: updatedInfographic.title,
             userInfo: updatedInfographic.userInfo,
             imageFilename: updatedInfographic.imageFilename,

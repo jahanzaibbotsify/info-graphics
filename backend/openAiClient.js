@@ -1,7 +1,7 @@
 const OpenAI = require('openai');
 const path = require('path');
 const fs = require('fs');
-const { generateVisualIntelligencePrompt, analyzeDataForVisuals } = require('./visualIntelligence');
+const https = require('https');
 
 let openai;
 try {
@@ -12,69 +12,102 @@ try {
     console.log('OpenAI not configured');
 }
 
-async function generateInfographic(userInfo, existingHtml = null) {
+// System prompt placeholder - to be replaced
+const SYSTEM_PROMPT = `Act as an expert infographic designer highly skilled in visual communication, information design, and data visualization. Your sole task is to create an infographic outline based strictly and only on the exact factual data or numbers provided in the user’s input prompt. You may NOT alter, supplement, summarize, research, invent, or estimate any data or figures—use the provided factual data exactly as given in the user's instruction, and nothing else.
+
+**CRITICAL REQUIREMENT:**  
+- Only use the exact factual data given in the user’s instruction. Do not add, deduce, infer, invent, generalize, research, update, or supplement the information. No external facts or interpretation—output must be strictly based on the provided data only.
+
+**VISUALIZATION ACCURACY:**  
+- Every visual element (chart, graph, icon, segment, etc.) must physically and proportionally represent the underlying factual values as provided, with no exaggeration, distortion, or visual error.  
+- Example: If one group is 30% and another 70%, their respective chart elements must be visually and proportionally correct and reflect those exact values—small vs. large as dictated by the numbers.
+
+**LABEL AND TYPOGRAPHY STANDARDS:**  
+- All infographic text/labels/annotations must be spelled correctly, use proper punctuation, and always use a dot (.) as the decimal separator.  
+- Do not introduce or alter any data when designing or labeling.
+
+**SOURCE:**
+- Do not include any data source field, reference, or citation anywhere in the infographic or its description.
+
+# Steps
+
+1. Identify and extract all relevant and exact data values from the provided input—do not add or alter any value or label.
+2. For each proposed visual element:
+    - Explicitly specify the underlying value(s) from the input, and describe how its graphical dimension(s) (height, area, angle, etc.) will represent the numbers precisely and visually.
+    - Check that every value’s visual representation is strictly proportional and corresponds directly to the provided numbers.
+    - Carefully verify correct spelling and use of dots as decimal separators in all labels and values.
+3. Build an infographic outline, listing the headline, subheadings, narrative, and each chart/visual in a logical, visually progressive sequence.
+4. Contain roughly 30% text and 70% visuals, with a clear and accessible color palette and strong visual hierarchy, harmonious style, and adequate white space.
+5. For each visual: state the type (pie chart, bar chart, etc.), accompanying data, explicit proportional mapping, label details (with spelling/notation checks), and rationale for that visualization.
+6. Confirm in your notes for each chart that:
+    - Only provided data is represented.
+    - Every label is spelled correctly.
+    - Every decimal uses a dot.
+    - No source or citation appears anywhere.
+
+# Output Format
+
+Provide your answer as a clear, ordered bullet-pointed storyboard or outline describing all infographic elements and visuals. For each chart or visual element, include:
+- Data used (must match user input exactly).
+- Visualization type.
+- Explicit description of proportional/graphical mapping (matching the given numbers, with examples like “A: 30%, B: 70%” shown as visually smaller/larger chart elements).
+- Label wording (with spelling and decimal separator confirmation).
+- Rationale for visualization type.
+- Explicit note confirming use of only the provided factual data and verification of spelling, punctuation, and no source/citation.
+
+Length: 10–30 bullet points, with thoroughly described visuals and notes for proportional mapping, data fidelity, and correct text/labeling.
+
+# Examples
+
+Example 1 (excerpt):  
+Input Data:  
+A: 30%  
+B: 70%  
+
+Output:  
+- Main headline: “Distribution of Groups A and B”
+- Visualization: Pie chart  
+    - Data: A (30%), B (70%) (used exactly as provided)
+    - Physical mapping: Slice A = 108°, slice B = 252°, visibly proportional; A is clearly smaller than B
+    - Labels: “A: 30%”, “B: 70%” (spelling verified, decimal separator is dot if needed)
+    - Rationale: Pie chart shows part-to-whole split visually
+    - Note: Only provided data used, all spelling double-checked, decimal uses dot, no source/citation present
+
+Example 2 (excerpt):  
+Input Data: Q1: 15.5, Q2: 84.5  
+- Visualization: Vertical bar chart  
+    - Bars: Q1 (height = 15.5 units), Q2 (height = 84.5 units)—strictly matches input numbers
+    - Labels: “Q1: 15.5”, “Q2: 84.5” with dot as decimal
+    - Rationale: Bar chart for easy magnitude comparison
+    - Note: Used only the input data, spelling/punctuation checked, decimal is dot, no source/citation anywhere
+
+(For real applications, provide a fully detailed outline with all visual elements, structure, and checks for spelling and correct data usage according to this template. Placeholders may be used to indicate where more detailed content/labels fit in.)
+
+# Notes
+
+- Never use, invent, supplement, or modify any data—absolutely restrict all infographics and visuals to the specific input values provided by the user.
+- Verify that all spelling is correct, every decimal uses a dot, and sources/citations are entirely omitted.
+- Explain or annotate any ambiguous or unvisualizable data, but do not infer or substitute your own.
+- Your output should allow direct implementation of the infographic, as a bullet-pointed visual/narrative plan.
+- Rigorously confirm that only the given factual data is used—no added, summarized, generalized, or external content.
+
+**Remember:**  
+- Use only the exact factual data given in the user’s input, nothing more.  
+- All charts/visuals must be quantitatively and visually accurate, strictly proportional to the supplied numbers.  
+- Every word is spelled correctly, all decimals use a dot, and no source/citation can appear anywhere.  
+- Confirm fidelity to these principles explicitly in each element description.
+- Use the exact data provided by the user, do not add, subtract, or modify any data.`;
+
+/**
+ * Step 1: Check if user instruction is factual or not
+ */
+async function validateUserInstruction(userInstruction) {
     try {
-        // Check if OpenAI is configured
         if (!openai || !process.env.OPENAI_API_KEY) {
-            throw new Error('OpenAI API key is required for infographic generation. Please configure OPENAI_API_KEY in your environment variables.');
+            throw new Error('OpenAI API key is required');
         }
 
-        // If we're updating an existing infographic
-        if (existingHtml) {
-            // Analyze data type for visual intelligence
-            const dataType = analyzeDataForVisuals(userInfo);
-            
-            const updatePrompt = `Update the following HTML infographic based on this request: ${userInfo}
-
-VISUAL INTELLIGENCE FOR UPDATES:
-📊 Data Type: ${dataType.toUpperCase()}
-
-HTML to Update:
-${existingHtml}
-
-CRITICAL INSTRUCTIONS:
-1. ONLY modify the content that needs to be updated based on the user's request
-2. Apply intelligent visual enhancements based on data type:
-   - Use appropriate icons and colors for ${dataType} data
-   - Adjust font sizes based on data importance and hierarchy
-   - Maintain visual consistency with the detected data type
-3. DO NOT change any HTML structure, CSS classes, or JavaScript code that isn't explicitly mentioned
-4. Preserve all styling, colors, and layout unless specifically asked to change
-5. Keep all existing elements that aren't mentioned in the update request
-6. Maintain all CDN links and external dependencies exactly as they are
-7. Return ONLY the raw HTML content - no markdown or code blocks
-
-Visual Enhancement Guidelines:
-- Apply larger fonts to key metrics and important data points
-- Use contextually appropriate icons that match the ${dataType} theme
-- Ensure visual hierarchy guides attention to the most important information
-- Maintain readability while enhancing visual appeal
-
-Return ONLY the complete HTML document with the requested updates and visual enhancements integrated. No formatting, no code blocks, just raw HTML.`;
-
-            const response = await openai.chat.completions.create({
-                model: "gpt-4o",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are an expert at precise HTML updates with visual intelligence. Your job is to modify ONLY the specific content requested while applying intelligent visual enhancements based on data type. Use appropriate icons, colors, and font sizes that match the data context. Never change structure or styling unless explicitly asked. Return only raw HTML."
-                    },
-                    {
-                        role: "user",
-                        content: updatePrompt
-                    }
-                ],
-                temperature: 0.3,
-            });
-
-            let htmlContent = response.choices[0].message.content;
-            return cleanHtmlContent(htmlContent);
-        }
-
-        // Step 0: Validate that the request is appropriate for factual data visualizations
-        // Skip validation when updating existing HTML content
-        if (!existingHtml) {
-            const validationPrompt = `You are a content validator for a data visualization AI system. Your job is to determine if a user request is appropriate for creating factual data visualizations and infographics.
+        const validationPrompt = `You are a content validator for a data visualization AI system. Your job is to determine if a user request is appropriate for creating factual data visualizations and infographics.
 
 ACCEPTABLE REQUESTS:
 - Statistics and data analysis
@@ -104,7 +137,7 @@ UNACCEPTABLE REQUESTS:
 - Poetry, jokes, or creative writing
 - Generic web content without statistics
 
-USER REQUEST: "${userInfo}"
+USER REQUEST: "${userInstruction}"
 
 Analyze the request and respond with ONLY one word:
 - "VALID" if the request is for factual data visualization, statistics, analytics, or quantifiable information
@@ -112,247 +145,321 @@ Analyze the request and respond with ONLY one word:
 
 Response:`;
 
-            const validationResponse = await openai.chat.completions.create({
-                model: "gpt-4o",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are a strict content validator for data visualization requests. Only approve requests that involve factual data, statistics, analytics, or quantifiable information that can be visualized. Reject requests for recipes, entertainment, creative content, or anything not related to data visualization."
-                    },
-                    {
-                        role: "user",
-                        content: validationPrompt
-                    }
-                ],
-                temperature: 0.1,
-                max_tokens: 10
-            });
-
-            const validationResult = validationResponse.choices[0].message.content.trim().toUpperCase();
-            
-            if (validationResult === "INVALID") {
-                throw new Error('I specialize in creating factual data visualizations and infographics. Please provide requests related to statistics, data analysis, business metrics, health data, technology trends, or other factual information that can be visualized. Generic requests like recipes, entertainment, or unrelated topics are outside my expertise.');
-            }
-        }
-
-        // If validation passes, continue with existing logic
-        // Read the prompt from the text file
-        const promptPath = path.join(__dirname, '..', 'public', 'files', 'prompt.txt');
-        let basePrompt;
-        try {
-            basePrompt = fs.readFileSync(promptPath, 'utf8');
-        } catch (error) {
-            console.log('Prompt file not found, using default prompt');
-            basePrompt = 'Edit an HTML document by integrating user data into a predefined HTML template, ensuring only the data is updated while maintaining the original design.';
-        }
-
-        // Updated template descriptions for ALL available templates
-        const templateDescriptions = {
-            // New modern templates
-            'modern-statistics-overview.html': 'Modern clean business statistics overview - Best for: professional business insights, quarterly metrics, clean presentations, executive summaries, performance indicators. Features clean modern design with professional styling.',
-            'minimal-data-showcase.html': 'Minimal asymmetric data showcase - Best for: key metrics display, large number highlighting, two-column layouts, gradient text, clean design, executive dashboards. Features minimal design with prominent numbers.',
-            'circular-metrics-layout.html': 'Circular orbital metrics layout - Best for: performance radar, central metrics with surrounding data, 360° visualization, radial charts, futuristic presentations. Features circular/orbital design patterns.',
-            'vertical-timeline-stats.html': 'Vertical timeline statistics - Best for: quarterly progression, growth tracking, time series data, historical analysis, timeline visualization, chronological data. Features vertical timeline layout.',
-            'geometric-data-grid.html': 'Geometric grid data layout - Best for: categorical data, grid layouts, hexagonal/triangular shapes, modern visualization, geometric presentations, angular designs. Features geometric shape patterns.',
-            'diagonal-split-layout.html': 'Diagonal split analytics layout - Best for: analytics dashboards, department performance, large central metrics, split view analysis, performance tracking. Features diagonal split design.',
-            'online-learning-infographic.html': 'Pros and cons of online learning - Best for: educational insights, e-learning presentations, student and teacher resources, remote education analysis. Features a balanced, modern layout with clear benefits and drawbacks, engaging visuals, and professional styling.',
-            'diabetes-info.html': 'Diabetes information infographic - Best for: health education, disease awareness, medical info, diabetes types, symptoms, and treatments. Features clear sections for types, symptoms, and treatments with engaging visuals and health-focused design.',
-            'diabetes-bg.html': 'Diabetes background infographic - Best for: health education, disease awareness, diabetes symptoms, treatment, and prevention. Features a visually engaging background, clear symptom icons, and sections for treatment and prevention tips.',
-            'Infographics-Stock-Illustrations.html': 'Stock illustrations infographic - Best for: step-by-step processes, business workflows, multi-step guides, visual explanations, and general infographics. Features a central info circle, surrounding process steps, and colorful icon-based design.',
-            'the-time-spend-on-internet.html': 'Internet usage and work-life infographic - Best for: visualizing time spent online, workplace stress, work week statistics, and digital habits. Features large headline stats, pie charts, and engaging layouts for internet and work-life data.',
-
-            // Existing corrected templates  
-            'data-visualization-report.html': 'Analytics dashboard with mixed chart types - Best for: business analytics, dashboard overviews, performance metrics, mixed data types, general business intelligence reports. Features multiple chart sections and KPI displays.',
-            'financial-analytics.html': 'Financial performance dashboard - Best for: financial reporting, investment data, stock performance, revenue metrics, portfolio analysis, financial KPIs. Features financial-specific charts and currency displays.',
-            'social-media-comparison.html': 'Social media analytics comparison - Best for: social platform performance, engagement metrics, follower data, content performance, social media reporting, platform comparisons. Features platform-specific visualizations.',
-            'customer-analytics.html': 'Customer analytics and insights - Best for: customer data, satisfaction metrics, demographic analysis, customer journey, behavior tracking, customer intelligence. Features customer-focused visualizations.',
-            'sales-performance-dashboard.html': 'Sales performance dashboard - Best for: sales metrics, revenue tracking, sales team performance, quarterly sales, sales targets, conversion rates. Features sales-specific KPI layouts.',
-            'marketing-trends-timeline.html': 'Marketing trends and timeline - Best for: marketing campaigns, trend analysis, campaign performance, marketing timelines, brand metrics, marketing ROI. Features marketing-focused timeline design.',
-            'global-economic-comparison.html': 'Global economic comparison - Best for: country comparisons, economic indicators, global markets, international data, geographic comparisons, economic analysis. Features global/economic data layouts.'
-        };
-
-        // Step 1: AI selects the best template based on data type using the intelligent selection criteria
-        const selectionPrompt = `Analyze the user request and select the most appropriate infographic template based on these criteria:
-
-USER REQUEST: ${userInfo}
-
-SELECTION CRITERIA:
-1. MODERN BUSINESS: Clean, professional business insights, quarterly metrics → modern-statistics-overview.html
-2. MINIMAL SHOWCASE: Key metrics, large numbers, minimal design, two-column → minimal-data-showcase.html
-3. CIRCULAR METRICS: Performance radar, central metric, 360° visualization → circular-metrics-layout.html
-4. TIMELINE DATA: Quarterly progression, growth tracking, time series → vertical-timeline-stats.html
-5. GEOMETRIC DESIGN: Grid layouts, hexagonal shapes, modern visualization → geometric-data-grid.html
-6. SPLIT ANALYTICS: Analytics dashboard, department performance, large central metric → diagonal-split-layout.html
-7. FINANCIAL: Revenue, stocks, investments, financial metrics → financial-analytics.html
-8. SOCIAL MEDIA: Platforms, followers, engagement, social analytics → social-media-comparison.html
-9. CUSTOMER DATA: Customer analytics, satisfaction, demographics → customer-analytics.html
-10. SALES METRICS: Sales performance, revenue tracking, sales targets → sales-performance-dashboard.html
-11. MARKETING: Marketing campaigns, trends, campaign performance → marketing-trends-timeline.html
-12. GLOBAL/ECONOMIC: Country comparisons, economic indicators, global markets → global-economic-comparison.html
-13. GENERAL ANALYTICS: Dashboard, overview, mixed metrics (fallback) → data-visualization-report.html
-14. ONLINE LEARNING: Educational insights, e-learning, student/teacher resources, remote education analysis → online-learning-infographic.html
-15. DIABETES INFO: Diabetes types, symptoms, treatments, health education → diabetes-info.html
-16. DIABETES BG: Diabetes symptoms, treatment, prevention, health education → diabetes-bg.html
-17. INFOGRAPHICS STOCK ILLUSTRATIONS: Step-by-step processes, business workflows, multi-step guides, visual explanations → Infographics-Stock-Illustrations.html
-18. TIME SPENT ON INTERNET: Internet usage, work-life balance, workplace stress, digital habits, time statistics → the-time-spend-on-internet.html
-
-Available Templates:
-${Object.entries(templateDescriptions).map(([name, desc]) => `- ${name}: ${desc}`).join('\n')}
-
-Analysis Process:
-1. Identify key keywords in the user request
-2. Determine the primary data type (financial, social media, survey, etc.)
-3. Match use case to template strength
-4. Consider visualization requirements
-
-Based on the user data content, which template best matches the data structure and visualization needs?
-Respond with ONLY the template filename (e.g., "chart-analytics.html").`;
-
-        const selectionResponse = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are an intelligent infographic template selector. Analyze user requests and select the most appropriate template from the available options based on data type, keywords, and use case. Always provide reasoning for your selection and respond with only the template filename."
-                },
-                {
-                    role: "user",
-                    content: selectionPrompt
-                }
-            ],
-            temperature: 0.3,
-        });
-
-        const selectedTemplate = selectionResponse.choices[0].message.content.trim();
-        console.log(`AI selected template: ${selectedTemplate}`);
-
-        // Validate selected template against available templates
-        const validTemplates = [
-            'modern-statistics-overview.html',
-            'minimal-data-showcase.html',
-            'circular-metrics-layout.html',
-            'vertical-timeline-stats.html',
-            'geometric-data-grid.html',
-            'diagonal-split-layout.html',
-            'financial-analytics.html',
-            'social-media-comparison.html',
-            'customer-analytics.html',
-            'sales-performance-dashboard.html',
-            'marketing-trends-timeline.html',
-            'global-economic-comparison.html',
-            'data-visualization-report.html',
-            'online-learning-infographic.html',
-            'diabetes-info.html',
-            'diabetes-bg.html',
-            'Infographics-Stock-Illustrations.html',
-            'the-time-spend-on-internet.html'
-        ];
-        
-        const finalTemplate = validTemplates.includes(selectedTemplate) ? selectedTemplate : 'data-visualization-report.html';
-        
-        if (finalTemplate !== selectedTemplate) {
-            console.log(`Invalid template selection "${selectedTemplate}", falling back to ${finalTemplate}`);
-        }
-
-        // Step 2: Load the selected template
-        const templatePath = path.join(__dirname, 'templates', finalTemplate);
-        let templateHtml;
-        try {
-            templateHtml = fs.readFileSync(templatePath, 'utf8');
-            templateHtml = templateHtml.replace('{base_url}', process.env.SERVER_URL ?? '');            
-        } catch (error) {
-            throw new Error(`Template ${finalTemplate} not found. Please ensure all template files are present in the backend/templates directory.`);
-        }
-
-        // Step 3: AI populates the selected template with enhanced visual intelligence
-        const populationPrompt = generateVisualIntelligencePrompt(userInfo, templateHtml, basePrompt);
-
         const response = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
                 {
                     role: "system",
-                    content: "You are an expert data integrator with visual intelligence capabilities. Your job is to populate HTML templates with user data while applying intelligent visual enhancements based on data type. Use appropriate icons, colors, and font sizes that match the data context. Apply dynamic typography hierarchy based on data importance. NEVER modify HTML structure, CSS, or JavaScript beyond content updates and visual enhancements. CRITICAL: Return ONLY raw HTML content - NO markdown formatting, NO code blocks, NO triple backticks. Apply visual intelligence to make data compelling and contextually appropriate."
+                    content: "You are a strict content validator for data visualization requests. Only approve requests that involve factual data, statistics, analytics, or quantifiable information that can be visualized."
                 },
                 {
                     role: "user",
-                    content: populationPrompt
+                    content: validationPrompt
                 }
             ],
-            temperature: 0.7,
+            temperature: 0.1,
+            max_tokens: 10
         });
 
-        let htmlContent = response.choices[0].message.content;
-        
-        // Clean up any markdown code blocks that might still appear
-        htmlContent = cleanHtmlContent(htmlContent);
+        const validationResult = response.choices[0].message.content.trim().toUpperCase();
+        return validationResult === "VALID";
 
-        return htmlContent;
     } catch (error) {
-        console.error('Error generating infographic:', error);
+        console.error('Error validating user instruction:', error);
+        return false;
+    }
+}
+
+/**
+ * Step 2: Generate infographic image using GPT-4o and image generation
+ */
+async function generateInfographicImage(userInstruction, isUpdate = false, updateContext = '', previousImagePath = null) {
+    try {
+        if (!openai || !process.env.OPENAI_API_KEY) {
+            throw new Error('OpenAI API key is required');
+        }
+
+        // Create the prompt based on whether it's an update or new generation
+        const promptMessage = isUpdate ? 
+            `UPDATE CONTEXT: ${updateContext}
+MODIFICATION REQUEST: ${userInstruction}
+
+Generate an updated infographic that incorporates the requested changes while maintaining design consistency. Use the provided previous image as a reference.` :
+            `USER REQUEST: ${userInstruction}`;
+
+        // Prepare user content array
+        const userContent = [
+            {
+                "type": "input_text",
+                "text": promptMessage
+            }
+        ];
+
+        // If updating and previous image exists, include it in the request
+        if (isUpdate && previousImagePath && fs.existsSync(previousImagePath)) {
+            try {
+                // Read the previous image and convert to base64
+                const imageBuffer = fs.readFileSync(previousImagePath);
+                const base64Image = imageBuffer.toString('base64');
+                const mimeType = previousImagePath.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+                
+                // Add the previous image to user content
+                userContent.push({
+                    "type": "input_image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": mimeType,
+                        "data": base64Image
+                    }
+                });
+                
+                console.log('Previous image included in update request');
+            } catch (imageError) {
+                console.warn('Could not read previous image, proceeding without it:', imageError.message);
+            }
+        }
+
+        // Generate the infographic image using image generation
+        const response = await openai.responses.create({
+            model: "gpt-4.1",
+            input: [
+              {
+                "role": "system",
+                "content": [
+                  {
+                    "type": "input_text",
+                    "text": SYSTEM_PROMPT
+                  }
+                ]
+              },
+              {
+                "role": "user",
+                "content": userContent
+              },
+            ],
+            text: {
+              "format": {
+                "type": "text"
+              }
+            },
+            reasoning: {},
+            tools: [
+              {
+                "type": "image_generation",
+                "size": "auto",
+                "quality": "high",
+                "output_format": "png",
+                "background": "auto",
+                "moderation": "auto",
+              }
+            ],
+            tool_choice: {
+              "type": "image_generation"
+            },
+            temperature: 1.0,
+            max_output_tokens: 32768,
+            top_p: 1.0,
+            store: true
+          });
+          console.log(response);
+        return {
+            success: true,
+            imageUrl: response.output[0].result,
+            isUpdate: isUpdate
+        };
+
+    } catch (error) {
+        console.error('Error generating infographic image:', error);
+        return {
+            success: false,
+            error: error.message,
+            isUpdate: isUpdate
+        };
+    }
+}
+
+/**
+ * Step 3: Save image locally (handles both base64 and URL)
+ */
+async function downloadAndSaveImage(imageData, filename) {
+    return new Promise((resolve, reject) => {
+        try {
+            const imagesDir = path.join(__dirname, 'generated-images');
+            
+            // Create directory if it doesn't exist
+            if (!fs.existsSync(imagesDir)) {
+                fs.mkdirSync(imagesDir, { recursive: true });
+            }
+
+            const filePath = path.join(imagesDir, filename);
+
+            // Check if imageData is base64 encoded
+            if (typeof imageData === 'string' && (imageData.startsWith('data:image/') || imageData.length > 100)) {
+                // Handle base64 image data
+                let base64Data = imageData;
+                
+                // Remove data URL prefix if present (e.g., "data:image/png;base64,")
+                if (imageData.startsWith('data:image/')) {
+                    base64Data = imageData.split(',')[1];
+                }
+                
+                // Convert base64 to buffer and save
+                const buffer = Buffer.from(base64Data, 'base64');
+                
+                fs.writeFile(filePath, buffer, (error) => {
+                    if (error) {
+                        reject({
+                            success: false,
+                            error: error.message
+                        });
+                    } else {
+                        resolve({
+                            success: true,
+                            imagePath: filePath,
+                            filename: filename
+                        });
+                    }
+                });
+            } else {
+                // Handle URL (fallback for backward compatibility)
+                const file = fs.createWriteStream(filePath);
+
+                https.get(imageData, (response) => {
+                    response.pipe(file);
+                    
+                    file.on('finish', () => {
+                        file.close();
+                        resolve({
+                            success: true,
+                            imagePath: filePath,
+                            filename: filename
+                        });
+                    });
+
+                    file.on('error', (error) => {
+                        fs.unlink(filePath, () => {}); // Delete incomplete file
+                        reject({
+                            success: false,
+                            error: error.message
+                        });
+                    });
+
+                }).on('error', (error) => {
+                    reject({
+                        success: false,
+                        error: error.message
+                    });
+                });
+            }
+
+        } catch (error) {
+            reject({
+                success: false,
+                error: error.message
+            });
+        }
+    });
+}
+
+/**
+ * Main function: Generate infographic (new or update)
+ */
+async function generateInfographic(userInstruction, existingImagePath = null) {
+    try {
+        // Step 1: Check if user instruction is factual
+        console.log('Step 1: Validating user instruction...');
+        const isFactual = await validateUserInstruction(userInstruction);
+        
+        if (!isFactual) {
+            throw new Error('I specialize in creating factual data visualizations and infographics. Please provide requests related to statistics, data analysis, business metrics, health data, technology trends, or other factual information that can be visualized. Generic requests like recipes, entertainment, or unrelated topics are outside my expertise.');
+        }
+
+        // Step 2: Generate infographic image
+        const isUpdate = existingImagePath && fs.existsSync(existingImagePath);
+        const updateContext = isUpdate ? 'This is an update to an existing infographic. Maintain design consistency while incorporating requested changes.' : '';
+        
+        console.log(`Step 2: Generating infographic image (${isUpdate ? 'update' : 'new'})...`);
+        const imageResult = await generateInfographicImage(userInstruction, isUpdate, updateContext, existingImagePath);
+        
+        if (!imageResult.success) {
+            throw new Error(`Failed to generate infographic: ${imageResult.error}`);
+        }
+
+        // Step 3: Download and save image
+        console.log('Step 3: Downloading and saving image...');
+        const timestamp = Date.now();
+        const filename = `infographic_${timestamp}.png`;
+        
+        const saveResult = await downloadAndSaveImage(imageResult.imageUrl, filename);
+        
+        if (!saveResult.success) {
+            throw new Error(`Failed to save image: ${saveResult.error}`);
+        }
+
+        return {
+            imageUrl: imageResult.imageUrl,
+            localPath: saveResult.imagePath,
+            filename: saveResult.filename,
+            isUpdate: imageResult.isUpdate
+        };
+
+    } catch (error) {
+        console.error('Error in generateInfographic:', error);
         throw error;
     }
 }
 
-// Function to clean up markdown code blocks from HTML content
-function cleanHtmlContent(content) {
-    // Remove markdown code blocks
-    content = content.replace(/```html\s*\n?/gi, '');
-    content = content.replace(/```\s*$/g, '');
-    content = content.replace(/^\s*```html\s*/gi, '');
-    content = content.replace(/\s*```\s*$/g, '');
-    
-    // Ensure content starts with <!DOCTYPE or <html
-    content = content.trim();
-    
-    return content;
+/**
+ * Handle update image scenario specifically
+ */
+async function updateInfographic(userInstruction, existingImagePath) {
+    try {
+        if (!existingImagePath || !fs.existsSync(existingImagePath)) {
+            throw new Error('Existing image path is required for updates');
+        }
+
+        console.log('Handling update scenario...');
+        return await generateInfographic(userInstruction, existingImagePath);
+
+    } catch (error) {
+        console.error('Error updating infographic:', error);
+        throw error;
+    }
 }
 
-// Function to analyze if a message is requesting modification to an infographic
+/**
+ * Analyze message for modification intent
+ */
 async function analyzeMessageForModification(message, chatContext) {
     try {
-        // For HTML updates, be more permissive since we're modifying existing approved content
-        // Only check for basic modification intent rather than strict data validation
-        const modificationKeywords = [
-            'change', 'modify', 'update', 'edit', 'alter', 'adjust', 'revise',
-            'make it', 'turn it', 'convert', 'transform', 'switch',
-            'different color', 'new color', 'other color', 'another style',
-            'more', 'less', 'bigger', 'smaller', 'brighter', 'darker',
-            'add', 'remove', 'replace', 'include', 'exclude',
-            'instead of', 'rather than', 'better', 'improve',
-            'fix', 'correct', 'enhance', 'upgrade'
-        ];
-        
-        const isModificationRequest = modificationKeywords.some(keyword => 
-            message.toLowerCase().includes(keyword)
-        );
-        
-        // If it's clearly a modification request, skip strict validation
-        if (isModificationRequest) {
-            return 'modify';
+        if (!openai || !process.env.OPENAI_API_KEY) {
+            return 'invalid';
         }
-        
-        // For non-modification requests, apply lighter validation
-        const validationPrompt = `You are validating a user message in the context of infographic modification and updates.
 
-ACCEPTABLE REQUESTS:
-- Questions about the infographic data or statistics
-- Requests to modify colors, layout, or design elements
-- Requests to update data values or add new data
-- Questions about data interpretation or insights
-- Requests to change chart types or visualization styles
-- Technical questions about the infographic content
-- Any requests to change, update, or modify existing visual elements
+        // First validate if the message is appropriate for data visualization
+        const validationPrompt = `You are a content validator for a data visualization AI system. Determine if this message is appropriate for infographic interaction.
 
-UNACCEPTABLE REQUESTS:
-- Completely unrelated topics (weather, sports, personal life)
-- Requests that have nothing to do with the infographic at all
+ACCEPTABLE TOPICS:
+- Data visualization questions and modifications
+- Statistical analysis and interpretation
+- Chart and graph adjustments
+- Infographic design changes
+- Data accuracy discussions
+- Visualization technique questions
+
+UNACCEPTABLE TOPICS:
+- Recipes, cooking, food preparation
+- Entertainment (movies, music, games)
+- Personal stories and narratives
+- Generic creative content not related to data
+- Off-topic conversations
 
 USER MESSAGE: "${message}"
+CHAT CONTEXT: ${chatContext.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
 
 Respond with ONLY one word:
-- "VALID" if the message is related to the infographic in any way
-- "INVALID" if the message is completely unrelated to the infographic
+- "VALID" if the message relates to data visualization, infographics, or statistical content
+- "INVALID" if the message is off-topic or inappropriate for data visualization
 
 Response:`;
 
@@ -361,7 +468,7 @@ Response:`;
             messages: [
                 {
                     role: "system",
-                    content: "You are a validator for infographic conversations. Be permissive and approve most requests that relate to modifying, updating, or discussing the infographic in any way."
+                    content: "You are a strict content validator for data visualization interactions. Only approve messages related to infographics, data analysis, and visualization topics."
                 },
                 {
                     role: "user",
@@ -429,7 +536,9 @@ Response:`;
     }
 }
 
-// Function to generate conversational response about infographic data
+/**
+ * Generate conversational response about infographic data
+ */
 async function generateConversationalResponse(message, chatContext, existingInfographic) {
     try {
         const responsePrompt = `You are an AI assistant specializing in data visualization and infographics. A user is asking about their infographic data.
@@ -477,6 +586,8 @@ Generate a helpful, conversational response that addresses the user's question w
 
 module.exports = {
     generateInfographic,
+    updateInfographic,
+    downloadAndSaveImage,
     analyzeMessageForModification,
     generateConversationalResponse
 };

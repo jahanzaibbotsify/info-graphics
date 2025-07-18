@@ -11,11 +11,11 @@ class Infographic {
 
     const newInfographic = storage.create('infographics', {
       userInfo: data.userInfo,
-      htmlContent: data.htmlContent,
       title: data.title || 'Untitled Infographic',
       description: data.description || data.userInfo || '', // Store original prompt as description
       imageFilename: data.imageFilename || null,
       imagePath: data.imagePath || null,
+      originalImageUrl: data.originalImageUrl || null, // Store original DALL-E URL for re-editing
       finalized: data.finalized || false, // Track if infographic is finalized for explore section
       finalizedAt: data.finalized ? new Date() : null, // Track when it was finalized
       isIteration: data.isIteration || false, // Track if this is an iteration of another infographic
