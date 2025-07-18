@@ -5,7 +5,7 @@ const rateLimiter = require('../rateLimiter');
 const { requireAuth, optionalAuth } = require('../middleware/auth');
 
 // Create a new infographic (requires auth and rate limiting)
-router.post('/generate-infographic', optionalAuth, rateLimiter, InfographicController.generateInfographic);
+router.post('/generate-infographic', optionalAuth, InfographicController.generateInfographic);
 
 // Complex chat routes removed for simplified single image generation
 
