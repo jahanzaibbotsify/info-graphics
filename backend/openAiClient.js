@@ -1,23 +1,34 @@
-const OpenAI = require('openai');
+const axios = require('axios');
 const path = require('path');
 const fs = require('fs');
 const { generateVisualIntelligencePrompt, analyzeDataForVisuals } = require('./visualIntelligence');
 
-let openai;
-try {
-    openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY
-    });
-} catch (error) {
-    console.log('OpenAI not configured');
+// Ollama API configuration
+const OLLAMA_API_URL = 'http://142.93.222.0:11434/api/generate';
+const MODEL_NAME = 'deepseek-coder';
+
+// Function to call Ollama API
+async function callOllamaAPI(prompt, temperature = 0.7, maxTokens = null) {
+    try {
+        const response = await axios.post(OLLAMA_API_URL, {
+            model: MODEL_NAME,
+            prompt: prompt,
+            stream: false,
+            options: {
+                temperature: temperature,
+                ...(maxTokens && { num_predict: maxTokens })
+            }
+        });
+        
+        return response.data.response;
+    } catch (error) {
+        console.error('Error calling Ollama API:', error);
+        throw new Error('Failed to generate response from Ollama API');
+    }
 }
 
 async function generateInfographic(userInfo, existingHtml = null) {
     try {
-        // Check if OpenAI is configured
-        if (!openai || !process.env.OPENAI_API_KEY) {
-            throw new Error('OpenAI API key is required for infographic generation. Please configure OPENAI_API_KEY in your environment variables.');
-        }
 
         // If we're updating an existing infographic
         if (existingHtml) {
@@ -52,22 +63,11 @@ Visual Enhancement Guidelines:
 
 Return ONLY the complete HTML document with the requested updates and visual enhancements integrated. No formatting, no code blocks, just raw HTML.`;
 
-            const response = await openai.chat.completions.create({
-                model: "gpt-4o",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are an expert at precise HTML updates with visual intelligence. Your job is to modify ONLY the specific content requested while applying intelligent visual enhancements based on data type. Use appropriate icons, colors, and font sizes that match the data context. Never change structure or styling unless explicitly asked. Return only raw HTML."
-                    },
-                    {
-                        role: "user",
-                        content: updatePrompt
-                    }
-                ],
-                temperature: 0.3,
-            });
-
-            let htmlContent = response.choices[0].message.content;
+            const systemPrompt = "You are an expert at precise HTML updates with visual intelligence. Your job is to modify ONLY the specific content requested while applying intelligent visual enhancements based on data type. Use appropriate icons, colors, and font sizes that match the data context. Never change structure or styling unless explicitly asked. Return only raw HTML.";
+            
+            const fullPrompt = `${systemPrompt}\n\nUser Request:\n${updatePrompt}`;
+            
+            let htmlContent = await callOllamaAPI(fullPrompt, 0.3);
             return cleanHtmlContent(htmlContent);
         }
 
@@ -112,23 +112,11 @@ Analyze the request and respond with ONLY one word:
 
 Response:`;
 
-            const validationResponse = await openai.chat.completions.create({
-                model: "gpt-4o",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are a strict content validator for data visualization requests. Only approve requests that involve factual data, statistics, analytics, or quantifiable information that can be visualized. Reject requests for recipes, entertainment, creative content, or anything not related to data visualization."
-                    },
-                    {
-                        role: "user",
-                        content: validationPrompt
-                    }
-                ],
-                temperature: 0.1,
-                max_tokens: 10
-            });
-
-            const validationResult = validationResponse.choices[0].message.content.trim().toUpperCase();
+            const validationSystemPrompt = "You are a strict content validator for data visualization requests. Only approve requests that involve factual data, statistics, analytics, or quantifiable information that can be visualized. Reject requests for recipes, entertainment, creative content, or anything not related to data visualization.";
+            
+            const fullValidationPrompt = `${validationSystemPrompt}\n\nValidation Request:\n${validationPrompt}`;
+            
+            const validationResult = (await callOllamaAPI(fullValidationPrompt, 0.1, 10)).trim().toUpperCase();
             
             if (validationResult === "INVALID") {
                 throw new Error('I specialize in creating factual data visualizations and infographics. Please provide requests related to statistics, data analysis, business metrics, health data, technology trends, or other factual information that can be visualized. Generic requests like recipes, entertainment, or unrelated topics are outside my expertise.');
@@ -208,22 +196,11 @@ Analysis Process:
 Based on the user data content, which template best matches the data structure and visualization needs?
 Respond with ONLY the template filename (e.g., "chart-analytics.html").`;
 
-        const selectionResponse = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are an intelligent infographic template selector. Analyze user requests and select the most appropriate template from the available options based on data type, keywords, and use case. Always provide reasoning for your selection and respond with only the template filename."
-                },
-                {
-                    role: "user",
-                    content: selectionPrompt
-                }
-            ],
-            temperature: 0.3,
-        });
-
-        const selectedTemplate = selectionResponse.choices[0].message.content.trim();
+        const selectionSystemPrompt = "You are an intelligent infographic template selector. Analyze user requests and select the most appropriate template from the available options based on data type, keywords, and use case. Always provide reasoning for your selection and respond with only the template filename.";
+        
+        const fullSelectionPrompt = `${selectionSystemPrompt}\n\nTemplate Selection Request:\n${selectionPrompt}`;
+        
+        const selectedTemplate = (await callOllamaAPI(fullSelectionPrompt, 0.3)).trim();
         console.log(`AI selected template: ${selectedTemplate}`);
 
         // Validate selected template against available templates
@@ -267,22 +244,11 @@ Respond with ONLY the template filename (e.g., "chart-analytics.html").`;
         // Step 3: AI populates the selected template with enhanced visual intelligence
         const populationPrompt = generateVisualIntelligencePrompt(userInfo, templateHtml, basePrompt);
 
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are an expert data integrator with visual intelligence capabilities. Your job is to populate HTML templates with user data while applying intelligent visual enhancements based on data type. Use appropriate icons, colors, and font sizes that match the data context. Apply dynamic typography hierarchy based on data importance. NEVER modify HTML structure, CSS, or JavaScript beyond content updates and visual enhancements. CRITICAL: Return ONLY raw HTML content - NO markdown formatting, NO code blocks, NO triple backticks. Apply visual intelligence to make data compelling and contextually appropriate."
-                },
-                {
-                    role: "user",
-                    content: populationPrompt
-                }
-            ],
-            temperature: 0.7,
-        });
-
-        let htmlContent = response.choices[0].message.content;
+        const populationSystemPrompt = "You are an expert data integrator with visual intelligence capabilities. Your job is to populate HTML templates with user data while applying intelligent visual enhancements based on data type. Use appropriate icons, colors, and font sizes that match the data context. Apply dynamic typography hierarchy based on data importance. NEVER modify HTML structure, CSS, or JavaScript beyond content updates and visual enhancements. CRITICAL: Return ONLY raw HTML content - NO markdown formatting, NO code blocks, NO triple backticks. Apply visual intelligence to make data compelling and contextually appropriate.";
+        
+        const fullPopulationPrompt = `${populationSystemPrompt}\n\nData Population Request:\n${populationPrompt}`;
+        
+        let htmlContent = await callOllamaAPI(fullPopulationPrompt, 0.7);
         
         // Clean up any markdown code blocks that might still appear
         htmlContent = cleanHtmlContent(htmlContent);
@@ -356,23 +322,11 @@ Respond with ONLY one word:
 
 Response:`;
 
-        const validationResponse = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are a validator for infographic conversations. Be permissive and approve most requests that relate to modifying, updating, or discussing the infographic in any way."
-                },
-                {
-                    role: "user",
-                    content: validationPrompt
-                }
-            ],
-            temperature: 0.1,
-            max_tokens: 10
-        });
-
-        const validationResult = validationResponse.choices[0].message.content.trim().toUpperCase();
+        const validationSystemPrompt = "You are a validator for infographic conversations. Be permissive and approve most requests that relate to modifying, updating, or discussing the infographic in any way.";
+        
+        const fullValidationPrompt = `${validationSystemPrompt}\n\nValidation Request:\n${validationPrompt}`;
+        
+        const validationResult = (await callOllamaAPI(fullValidationPrompt, 0.1, 10)).trim().toUpperCase();
         
         if (validationResult === "INVALID") {
             return 'invalid';
@@ -398,23 +352,11 @@ Examples:
 
 Response:`;
 
-        const analysisResponse = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are an intent classifier for infographic interactions. Determine if the user wants to modify the infographic or is asking factual questions about the data."
-                },
-                {
-                    role: "user",
-                    content: analysisPrompt
-                }
-            ],
-            temperature: 0.1,
-            max_tokens: 10
-        });
-
-        const intent = analysisResponse.choices[0].message.content.trim().toLowerCase();
+        const analysisSystemPrompt = "You are an intent classifier for infographic interactions. Determine if the user wants to modify the infographic or is asking factual questions about the data.";
+        
+        const fullAnalysisPrompt = `${analysisSystemPrompt}\n\nIntent Analysis Request:\n${analysisPrompt}`;
+        
+        const intent = (await callOllamaAPI(fullAnalysisPrompt, 0.1, 10)).trim().toLowerCase();
         
         if (intent === 'modify' || intent === 'factual') {
             return intent;
@@ -451,23 +393,11 @@ Guidelines for your response:
 
 Generate a helpful, conversational response that addresses the user's question while staying focused on data visualization and factual information.`;
 
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are a knowledgeable assistant specializing in data visualization and infographics. Provide helpful, educational responses about data interpretation, visualization techniques, and statistical insights. Always stay focused on factual data and avoid topics outside of data visualization."
-                },
-                {
-                    role: "user",
-                    content: responsePrompt
-                }
-            ],
-            temperature: 0.7,
-            max_tokens: 300
-        });
-
-        return response.choices[0].message.content.trim();
+        const responseSystemPrompt = "You are a knowledgeable assistant specializing in data visualization and infographics. Provide helpful, educational responses about data interpretation, visualization techniques, and statistical insights. Always stay focused on factual data and avoid topics outside of data visualization.";
+        
+        const fullResponsePrompt = `${responseSystemPrompt}\n\nConversational Response Request:\n${responsePrompt}`;
+        
+        return (await callOllamaAPI(fullResponsePrompt, 0.7, 300)).trim();
         
     } catch (error) {
         console.error('Error generating conversational response:', error);
