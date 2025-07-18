@@ -4,19 +4,19 @@ const fs = require('fs');
 const { generateVisualIntelligencePrompt, analyzeDataForVisuals } = require('./visualIntelligence');
 
 // Ollama API configuration
-const OLLAMA_API_URL = 'http://142.93.222.0:11434/api/generate';
+const OLLAMA_API_URL = 'http://deepseek.saasbakers.com:11434/api/generate';
 const MODEL_NAME = 'deepseek-coder';
 
 // Function to call Ollama API
 async function callOllamaAPI(prompt, temperature = 0.7, maxTokens = null) {
     try {
+        console.log('Prompt:', prompt);
         const response = await axios.post(OLLAMA_API_URL, {
             model: MODEL_NAME,
             prompt: prompt,
             stream: false,
             options: {
-                temperature: temperature,
-                ...(maxTokens && { num_predict: maxTokens })
+                temperature: temperature
             }
         });
         
