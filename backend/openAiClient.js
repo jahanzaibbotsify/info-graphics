@@ -1,7 +1,6 @@
 const OpenAI = require('openai');
 const path = require('path');
 const fs = require('fs');
-const https = require('https');
 
 let openai;
 try {
@@ -96,7 +95,9 @@ Input Data: Q1: 15.5, Q2: 84.5
 - All charts/visuals must be quantitatively and visually accurate, strictly proportional to the supplied numbers.  
 - Every word is spelled correctly, all decimals use a dot, and no source/citation can appear anywhere.  
 - Confirm fidelity to these principles explicitly in each element description.
-- Use the exact data provided by the user, do not add, subtract, or modify any data.`;
+- Use the exact data provided by the user, do not add, subtract, or modify any data.
+- Add equal padding to the top and bottom, left and right of the infographic.
+- Make sure the infogrphics are not getting cut off or truncated.`;
 
 /**
  * Step 1: Check if user instruction is factual or not
@@ -171,7 +172,12 @@ Response:`;
 }
 
 /**
- * Step 2: Generate infographic image using GPT-4o and image generation
+ * Generate infographic image using the new gpt-image-1 model
+ * @param {string} userInstruction - User's instruction for the infographic
+ * @param {boolean} isUpdate - Whether this is an update to existing infographic
+ * @param {string} updateContext - Context for updates
+ * @param {string|null} previousImagePath - Path to previous image for updates
+ * @returns {Promise<Object>} Result object with success status and image data
  */
 async function generateInfographicImage(userInstruction, isUpdate = false, updateContext = '', previousImagePath = null) {
     try {
@@ -179,92 +185,25 @@ async function generateInfographicImage(userInstruction, isUpdate = false, updat
             throw new Error('OpenAI API key is required');
         }
 
-        // Create the prompt based on whether it's an update or new generation
-        const promptMessage = isUpdate ? 
-            `UPDATE CONTEXT: ${updateContext}
-MODIFICATION REQUEST: ${userInstruction}
+        // Create enhanced prompt based on whether it's an update or new generation
+        const enhancedPrompt = createEnhancedPrompt(userInstruction, isUpdate, updateContext);
 
-Generate an updated infographic that incorporates the requested changes while maintaining design consistency. Use the provided previous image as a reference.` :
-            `USER REQUEST: ${userInstruction}`;
+        let imageResponse;
 
-        // Prepare user content array
-        const userContent = [
-            {
-                "type": "input_text",
-                "text": promptMessage
-            }
-        ];
-
-        // If updating and previous image exists, include it in the request
         if (isUpdate && previousImagePath && fs.existsSync(previousImagePath)) {
-            try {
-                // Read the previous image and convert to base64
-                const imageBuffer = fs.readFileSync(previousImagePath);
-                const base64Image = imageBuffer.toString('base64');
-                const mimeType = previousImagePath.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
-                
-                // Add the previous image to user content
-                userContent.push({
-                    "type": "input_image",
-                    "source": {
-                        "type": "base64",
-                        "media_type": mimeType,
-                        "data": base64Image
-                    }
-                });
-                
-                console.log('Previous image included in update request');
-            } catch (imageError) {
-                console.warn('Could not read previous image, proceeding without it:', imageError.message);
-            }
+            // Use image editing for updates with previous image
+            console.log('Updating existing infographic...');
+            imageResponse = await updateExistingImage(enhancedPrompt, previousImagePath);
+        } else {
+            // Generate new infographic
+            console.log('Generating new infographic...');
+            imageResponse = await generateNewImage(enhancedPrompt);
         }
 
-        // Generate the infographic image using image generation
-        const response = await openai.responses.create({
-            model: "gpt-4.1",
-            input: [
-              {
-                "role": "system",
-                "content": [
-                  {
-                    "type": "input_text",
-                    "text": SYSTEM_PROMPT
-                  }
-                ]
-              },
-              {
-                "role": "user",
-                "content": userContent
-              },
-            ],
-            text: {
-              "format": {
-                "type": "text"
-              }
-            },
-            reasoning: {},
-            tools: [
-              {
-                "type": "image_generation",
-                "size": "auto",
-                "quality": "high",
-                "output_format": "png",
-                "background": "auto",
-                "moderation": "auto",
-              }
-            ],
-            tool_choice: {
-              "type": "image_generation"
-            },
-            temperature: 1.0,
-            max_output_tokens: 32768,
-            top_p: 1.0,
-            store: true
-          });
-          console.log(response);
+        console.log('Infographic generated successfully');
         return {
             success: true,
-            imageUrl: response.output[0].result,
+            imageUrl: `data:image/png;base64,${imageResponse.data[0].b64_json}`,
             isUpdate: isUpdate
         };
 
@@ -279,86 +218,114 @@ Generate an updated infographic that incorporates the requested changes while ma
 }
 
 /**
- * Step 3: Save image locally (handles both base64 and URL)
+ * Create enhanced prompt for infographic generation
+ * @param {string} userInstruction - User's instruction
+ * @param {boolean} isUpdate - Whether this is an update
+ * @param {string} updateContext - Update context
+ * @returns {string} Enhanced prompt
+ */
+function createEnhancedPrompt(userInstruction, isUpdate, updateContext) {
+    const basePrompt = `Create a professional, visually appealing infographic that accurately represents the following data: ${userInstruction}`;
+
+    if (isUpdate && updateContext) {
+        return `${basePrompt}
+
+UPDATE INSTRUCTIONS: ${updateContext}
+Modify the existing design while maintaining visual consistency and professional appearance.
+
+${SYSTEM_PROMPT}`;
+    }
+
+    return `${basePrompt}${SYSTEM_PROMPT}`;
+}
+
+/**
+ * Generate new infographic image
+ * @param {string} prompt - Enhanced prompt for generation
+ * @returns {Promise<Object>} OpenAI API response
+ */
+async function generateNewImage(prompt) {
+    return await openai.images.generate({
+        model: "gpt-image-1",
+        prompt: prompt,
+        quality: "high",
+    });
+}
+
+/**
+ * Update existing infographic image
+ * @param {string} prompt - Prompt for modifications
+ * @param {string} imagePath - Path to existing image
+ * @returns {Promise<Object>} OpenAI API response
+ */
+async function updateExistingImage(prompt, imagePath) {
+    try {
+        // Import toFile from OpenAI library for proper file formatting
+        const { toFile } = require('openai');
+        
+        // Create a proper file object for the API
+        const imageFile = await toFile(fs.createReadStream(imagePath), path.basename(imagePath), {
+            type: "image/png"
+        });
+        
+        // Use OpenAI's image edit endpoint with proper file format
+        return await openai.images.edit({
+            model: "gpt-image-1",
+            image: imageFile,
+            prompt: prompt,
+            quality: "high",
+        });
+    } catch (error) {
+        console.warn('Failed to update existing image, generating new one instead:', error.message);
+        // Fallback to generating new image if edit fails
+        return await generateNewImage(prompt);
+    }
+}
+
+/**
+ * Save base64 image data to local file system
+ * @param {string} imageData - Base64 encoded image data (with or without data URL prefix)
+ * @param {string} filename - Name for the saved file
+ * @returns {Promise<Object>} Result object with success status and file information
  */
 async function downloadAndSaveImage(imageData, filename) {
-    return new Promise((resolve, reject) => {
-        try {
-            const imagesDir = path.join(__dirname, 'generated-images');
-            
-            // Create directory if it doesn't exist
-            if (!fs.existsSync(imagesDir)) {
-                fs.mkdirSync(imagesDir, { recursive: true });
-            }
+    try {
+        const imagesDir = path.join(__dirname, 'generated-images');
+        
+        // Ensure directory exists
+        await fs.promises.mkdir(imagesDir, { recursive: true });
+        
+        const filePath = path.join(imagesDir, filename);
 
-            const filePath = path.join(imagesDir, filename);
-
-            // Check if imageData is base64 encoded
-            if (typeof imageData === 'string' && (imageData.startsWith('data:image/') || imageData.length > 100)) {
-                // Handle base64 image data
-                let base64Data = imageData;
-                
-                // Remove data URL prefix if present (e.g., "data:image/png;base64,")
-                if (imageData.startsWith('data:image/')) {
-                    base64Data = imageData.split(',')[1];
-                }
-                
-                // Convert base64 to buffer and save
-                const buffer = Buffer.from(base64Data, 'base64');
-                
-                fs.writeFile(filePath, buffer, (error) => {
-                    if (error) {
-                        reject({
-                            success: false,
-                            error: error.message
-                        });
-                    } else {
-                        resolve({
-                            success: true,
-                            imagePath: filePath,
-                            filename: filename
-                        });
-                    }
-                });
-            } else {
-                // Handle URL (fallback for backward compatibility)
-                const file = fs.createWriteStream(filePath);
-
-                https.get(imageData, (response) => {
-                    response.pipe(file);
-                    
-                    file.on('finish', () => {
-                        file.close();
-                        resolve({
-                            success: true,
-                            imagePath: filePath,
-                            filename: filename
-                        });
-                    });
-
-                    file.on('error', (error) => {
-                        fs.unlink(filePath, () => {}); // Delete incomplete file
-                        reject({
-                            success: false,
-                            error: error.message
-                        });
-                    });
-
-                }).on('error', (error) => {
-                    reject({
-                        success: false,
-                        error: error.message
-                    });
-                });
-            }
-
-        } catch (error) {
-            reject({
-                success: false,
-                error: error.message
-            });
+        // Extract base64 data (remove data URL prefix if present)
+        let base64Data = imageData;
+        if (imageData.startsWith('data:image/')) {
+            base64Data = imageData.split(',')[1];
         }
-    });
+
+        // Validate base64 data
+        if (!base64Data || typeof base64Data !== 'string') {
+            throw new Error('Invalid base64 image data provided');
+        }
+        
+        // Convert base64 to buffer and save
+        const buffer = Buffer.from(base64Data, 'base64');
+        await fs.promises.writeFile(filePath, buffer);
+
+        console.log(`Image saved successfully: ${filename}`);
+        return {
+            success: true,
+            imagePath: filePath,
+            filename: filename
+        };
+
+    } catch (error) {
+        console.error('Error saving image:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
 }
 
 /**
