@@ -20,7 +20,21 @@
           <div class="flex justify-between items-start pr-12">
             <div>
               <h3 class="text-lg font-semibold">{{ infographic?.title || 'Infographic Preview' }}</h3>
-              <p class="text-sm text-gray-600 mt-1">{{ infographic?.description || infographic?.userInfo || '' }}</p>
+              <div class="text-sm text-gray-600 mt-1">
+                <p 
+                  :class="{ 'line-clamp-1': !isDescriptionExpanded && shouldShowReadMore }"
+                  class="inline"
+                >
+                  {{ infographic?.description || infographic?.userInfo || '' }}
+                </p>
+                <button
+                  v-if="shouldShowReadMore"
+                  @click="toggleDescription"
+                  class="text-primary hover:text-primary/80 ml-1 text-sm font-medium transition-colors"
+                >
+                  {{ isDescriptionExpanded ? 'Read less' : 'Read more' }}
+                </button>
+              </div>
             </div>
           </div>
   
@@ -126,7 +140,14 @@
       return {
         updatePrompt: '',
         isUpdating: false,
-        activeTab: 'preview'
+        activeTab: 'preview',
+        isDescriptionExpanded: false
+      }
+    },
+    computed: {
+      shouldShowReadMore() {
+        const description = this.infographic?.description || this.infographic?.userInfo || '';
+        return description.length > 150; // Show read more if description is longer than 150 characters
       }
     },
     props: {
@@ -139,7 +160,16 @@
         required: true
       }
     },
+    watch: {
+      infographic() {
+        // Reset expanded state when infographic changes
+        this.isDescriptionExpanded = false;
+      }
+    },
     methods: {
+      toggleDescription() {
+        this.isDescriptionExpanded = !this.isDescriptionExpanded;
+      },
       handleDownload() {
         try {
           if (!this.infographic?.imageUrl) {
@@ -288,6 +318,13 @@
     resize: vertical;
     min-height: 6rem;
     max-height: 12rem;
+  }
+  
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   
   .animate-spin {

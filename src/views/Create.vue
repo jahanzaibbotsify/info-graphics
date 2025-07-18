@@ -93,36 +93,6 @@
             </div>
             <div v-else-if="infographicHtml" v-html="infographicHtml" class="infographic-preview"></div>
           </div>
-
-          <!-- Update Prompt Area -->
-          <div v-if="currentInfographicImage || infographicHtml" class="mt-6 space-y-4">
-            <div class="flex items-center justify-between">
-              <h4 class="text-sm font-medium">Update Infographic</h4>
-              <div v-if="isUpdating" class="text-sm text-gray-500">
-                <span class="animate-pulse">Updating...</span>
-              </div>
-            </div>
-            <div class="space-y-3">
-              <textarea
-                v-model="updatePrompt"
-                placeholder="Describe what you want to update in this infographic (e.g., 'Make the title larger and change the main chart color to blue')"
-                class="w-full px-4 py-3 text-sm border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary resize-vertical"
-                :disabled="isUpdating"
-                rows="3"
-              ></textarea>
-              <div class="flex justify-end">
-                <button
-                  @click="handleUpdate"
-                  class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                  :disabled="!updatePrompt.trim() || isUpdating"
-                >
-                  <refresh-cw-icon v-if="isUpdating" class="h-4 w-4 animate-spin" />
-                  <wand-icon v-else class="h-4 w-4" />
-                  {{ isUpdating ? 'Updating...' : 'Update Infographic' }}
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- Error State -->
