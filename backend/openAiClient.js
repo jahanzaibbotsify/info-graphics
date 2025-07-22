@@ -4,8 +4,8 @@ const fs = require('fs');
 const { generateVisualIntelligencePrompt, analyzeDataForVisuals } = require('./visualIntelligence');
 
 // Ollama API configuration
-const OLLAMA_API_URL = 'http://deepseek.saasbakers.com:11434/api/generate';
-const MODEL_NAME = 'deepseek-coder';
+const OLLAMA_API_URL = 'http://deepseek.saasbakers.com/api/generate';
+const MODEL_NAME = 'llama3:8b';
 
 // Function to call Ollama API
 async function callOllamaAPI(prompt, temperature = 0.7, maxTokens = null) {
