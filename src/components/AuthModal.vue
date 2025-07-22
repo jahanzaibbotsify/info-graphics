@@ -22,6 +22,16 @@
           </p>
         </div>
         <form @submit.prevent="isLogin ? handleLogin() : handleSignup()" class="space-y-4">
+          <div v-if="!isLogin">
+            <label class="block text-sm font-medium mb-1">Name</label>
+            <input
+              v-model="name"
+              type="text"
+              placeholder="Your name"
+              class="w-full h-10 px-4 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary text-gray-900"
+              required
+            />
+          </div>
           <div>
             <label class="block text-sm font-medium mb-1">Email</label>
             <input
@@ -38,16 +48,6 @@
               v-model="password"
               type="password"
               placeholder=""
-              class="w-full h-10 px-4 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary text-gray-900"
-              required
-            />
-          </div>
-          <div v-if="!isLogin">
-            <label class="block text-sm font-medium mb-1">Name</label>
-            <input
-              v-model="name"
-              type="text"
-              placeholder="Your name"
               class="w-full h-10 px-4 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary text-gray-900"
               required
             />

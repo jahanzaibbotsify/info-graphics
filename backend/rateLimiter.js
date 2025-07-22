@@ -48,7 +48,7 @@ const rateLimiter = async (req, res, next) => {
     const limit = req.user.subscription?.plan?.animations_allowed || 2;
 
     // Check if user has exceeded their lifetime limit
-    if (userData.count >= 200) {
+    if (userData.count >= limit) {
       return res.status(429).json({
         error: 'Generation limit reached',
         message: `You have reached your lifetime limit of ${limit} infographics. Upgrade to Pro for unlimited infographics and advanced features!`,
