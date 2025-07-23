@@ -10,9 +10,6 @@
     <div class="max-w-4xl mx-auto mb-12">
       <div class="space-y-4">
         <div class="space-y-3">
-          <label class="block text-sm font-medium text-foreground">
-            Infographic Information
-          </label>
           <textarea
             v-model="infographicInfo"
             placeholder="Describe the topic and data for your infographic. Include any statistics, key points, or information you want to visualize. For example: 'Climate change statistics showing temperature rise over the last 50 years, renewable energy adoption rates, and key environmental impacts.'"
@@ -38,7 +35,7 @@
         <button
             v-for="suggestion in infographicSuggestions"
           :key="suggestion"
-            @click="infographicInfo = suggestion"
+            @click="loadPreGeneratedSuggestion(suggestion)"
           class="text-sm px-3 py-1 rounded-full bg-muted hover:bg-primary/10 transition-colors"
         >
           {{ suggestion }}
@@ -65,10 +62,10 @@
                 v-if="currentInfographicImage"
                 @click="downloadCurrentImage"
                 class="p-2 rounded-lg hover:bg-muted flex items-center gap-2 transition-colors"
-                title="Download Image"
+                :title="isPregenerated ? 'Download Sample Image' : 'Download Image'"
               >
                 <download-icon class="h-5 w-5" />
-                <span class="text-sm">Image</span>
+                <span class="text-sm">{{ isPregenerated ? 'Sample' : 'Image' }}</span>
               </button>
               <!-- <button
                 @click="downloadInfographic"
@@ -299,17 +296,61 @@ export default {
         'Technology adoption rates and digital transformation',
         'Health and wellness statistics for modern lifestyle'
       ],
+      // Pre-generated infographics for suggestions
+      preGeneratedSuggestions: {
+        'Climate change statistics and environmental impact data': {
+          title: 'Climate Change Impact Infographic',
+          imageUrl: `${process.env.VUE_APP_BACKEND_URL}/generated-images/climate-change-sample.png`,
+          description: 'Climate change statistics and environmental impact data',
+          isPredefined: true
+        },
+        'Social media usage trends and demographics': {
+          title: 'Social Media Trends Infographic',
+          imageUrl: `${process.env.VUE_APP_BACKEND_URL}/generated-images/social-media-sample.png`,
+          description: 'Social media usage trends and demographics',
+          isPredefined: true
+        },
+        'Technology adoption rates and digital transformation': {
+          title: 'Digital Transformation Infographic',
+          imageUrl: `${process.env.VUE_APP_BACKEND_URL}/generated-images/tech-adoption-sample.png`,
+          description: 'Technology adoption rates and digital transformation',
+          isPredefined: true
+        },
+        'Health and wellness statistics for modern lifestyle': {
+          title: 'Health & Wellness Infographic',
+          imageUrl: `${process.env.VUE_APP_BACKEND_URL}/generated-images/health-wellness-sample.png`,
+          description: 'Health and wellness statistics for modern lifestyle',
+          isPredefined: true
+        }
+      },
       currentInfographicImage: null,
       currentInfographicImageFilename: null,
       isUpdating: false,
       updatePrompt: '',
-      currentInfographicId: null
+      currentInfographicId: null,
+      isPregenerated: false // Track if current infographic is pre-generated
     }
   },
   mounted() {
     this.fetchStoredInfographics()
   },
   methods: {
+    loadPreGeneratedSuggestion(suggestion) {
+      // Set the text in the input
+      this.infographicInfo = suggestion;
+      
+      // Load the pre-generated infographic
+      const preGenerated = this.preGeneratedSuggestions[suggestion];
+      if (preGenerated) {
+        this.error = null;
+        this.infographicHtml = null;
+        this.currentInfographicImage = preGenerated.imageUrl;
+        this.currentInfographicImageFilename = null; // No filename for pre-generated
+        this.currentInfographicId = null; // No ID for pre-generated
+        this.isPregenerated = true;
+      }
+    },
+
     async generateInfographic() {
       if (!this.infographicInfo || this.isGenerating) {
         return
@@ -321,6 +362,7 @@ export default {
       this.currentInfographicImage = null
       this.currentInfographicImageFilename = null
       this.currentInfographicId = null
+      this.isPregenerated = false
 
       try {
         // Make the API call to generate the infographic
@@ -499,11 +541,23 @@ export default {
 
     async downloadCurrentImage() {
       try {
+        if (this.isPregenerated) {
+          // For pre-generated images, download directly from the image URL
+          const link = document.createElement('a')
+          link.href = this.currentInfographicImage
+          link.download = `sample-infographic-${Date.now()}.png`
+          link.target = '_blank'
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          return
+        }
+
         if (!this.currentInfographicImageFilename) {
           throw new Error('Current infographic image not available')
         }
 
-        // Use the download endpoint
+        // Use the download endpoint for generated images
         const link = document.createElement('a')
         link.href = `${process.env.VUE_APP_BACKEND_URL}/download/${this.currentInfographicImageFilename}`
         link.download = `infographic-${Date.now()}.png`
